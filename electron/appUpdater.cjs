@@ -20,7 +20,7 @@ function repoSlug() {
   } catch {
     /* package.json */
   }
-  return "hexed-AAL1X/BocaSoft";
+  return "hexed-AAL1X/Bocasion-TPV";
 }
 
 function parseVersion(value) {

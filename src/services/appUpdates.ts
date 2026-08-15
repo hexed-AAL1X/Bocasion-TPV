@@ -14,7 +14,7 @@ export type UpdateCheckResult = {
   message: string;
 };
 
-const DEFAULT_REPO = "hexed-AAL1X/BocaSoft";
+const DEFAULT_REPO = "hexed-AAL1X/Bocasion-TPV";
 
 function repoSlug(): string {
   const fromEnv = String(import.meta.env.VITE_GITHUB_UPDATES_REPO ?? "").trim();

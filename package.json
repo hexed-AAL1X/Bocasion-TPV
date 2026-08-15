@@ -6,7 +6,7 @@
   "main": "electron/main.cjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hexed-AAL1X/BocaSoft.git"
+    "url": "https://github.com/hexed-AAL1X/Bocasion-TPV.git"
   },
   "scripts": {
     "dev": "env -u ELECTRON_RUN_AS_NODE vite",
@@ -82,7 +82,7 @@
     "publish": {
       "provider": "github",
       "owner": "hexed-AAL1X",
-      "repo": "BocaSoft",
+      "repo": "Bocasion-TPV",
       "releaseType": "release"
     },
     "nsis": {
