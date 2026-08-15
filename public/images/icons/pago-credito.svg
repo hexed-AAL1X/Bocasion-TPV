@@ -1,0 +1,45 @@
+<!-- Fluent Emoji Flat "bank" (MIT) — BocaSoft + profundidad -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" aria-hidden="true">
+  <defs>
+    <linearGradient id="side" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a3d72"/>
+      <stop offset="100%" stop-color="#0d4580"/>
+    </linearGradient>
+    <linearGradient id="front" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#3d94dc"/>
+      <stop offset="55%" stop-color="#1a5fb4"/>
+      <stop offset="100%" stop-color="#134a9e"/>
+    </linearGradient>
+    <linearGradient id="roof" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7eb8ef"/>
+      <stop offset="100%" stop-color="#4a9ae8"/>
+    </linearGradient>
+    <linearGradient id="steps" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1e6bb8"/>
+      <stop offset="100%" stop-color="#0f4a94"/>
+    </linearGradient>
+    <linearGradient id="door" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#134a9e"/>
+      <stop offset="100%" stop-color="#082d5c"/>
+    </linearGradient>
+    <filter id="buildingShadow" x="-15%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0.8" dy="1.4" stdDeviation="0.9" flood-color="#062849" flood-opacity="0.5"/>
+    </filter>
+    <filter id="groundBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="0.65"/>
+    </filter>
+  </defs>
+  <!-- Sombra en el suelo -->
+  <ellipse cx="16" cy="28.8" rx="11.5" ry="2.1" fill="#062849" opacity="0.22" filter="url(#groundBlur)"/>
+  <g filter="url(#buildingShadow)">
+    <path fill="url(#side)" d="M26 10.028H6v17h20z"/>
+    <path fill="url(#front)" d="M3 10.008v.97h1v15.76h3V13.69h1v13.047h3V13.69h10v13.337h3V13.69h1v13.307h3v-16.02h1v-.97l-13-8z"/>
+    <path fill="url(#roof)" d="m3.85 9.138l10.79-6.74c.84-.53 1.92-.53 2.76 0l10.79 6.74v1.89l-11.5-7.14c-.41-.25-.92-.25-1.33 0l-11.5 7.14v-1.89z"/>
+    <path fill="url(#steps)" d="M19.985 11.028a5 5 0 0 1-4.005 2 5 5 0 0 1-4.005-2H3c-.55 0-1-.45-1-1s.45-1 1-1h8.072a5.01 5.01 0 1 1 9.816 0H29c.55 0 1 .45 1 1s-.45 1-1 1zM2 14.028c0-.55.45-1 1-1h26c.55 0 1 .45 1 1s-.45 1-1 1H3c-.55 0-1-.45-1-1m0 15h27.99v-.93c0-.59-.48-1.07-1.07-1.07H29v-.93c0-.59-.48-1.07-1.07-1.07H4.04c-.59 0-1.07.48-1.07 1.07v.93h.1c-.59 0-1.07.48-1.07 1.07z"/>
+    <path fill="url(#door)" d="M13 25.028h6v-6.36c0-.35-.29-.64-.64-.64h-4.73c-.35 0-.63.28-.63.63z"/>
+    <!-- Brillo en el techo -->
+    <path fill="#fff" opacity="0.18" d="m5.2 8.4l9.2-5.6 9.5 5.9v0.8l-9.8-5.9-9-5.5z"/>
+    <!-- Borde lateral (profundidad) -->
+    <path fill="none" stroke="#062849" stroke-opacity="0.25" stroke-width="0.35" d="M26 10v17M6 10v17M6 10l13-8 13 8"/>
+  </g>
+</svg>

@@ -1,0 +1,113 @@
+.splash {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--login-bg);
+  color: var(--primary-dark);
+  font-family: "Poppins", system-ui, sans-serif;
+  opacity: 0;
+  transition: opacity 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+  -webkit-font-smoothing: antialiased;
+  pointer-events: auto;
+}
+
+.splashShown {
+  opacity: 1;
+}
+
+.splashExit {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logoWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 20px;
+}
+
+.logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  display: block;
+}
+
+.loadingText {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+}
+
+.loadingBrand {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary-dark);
+  letter-spacing: 0.04em;
+}
+
+.progressTrack {
+  position: relative;
+  width: 168px;
+  height: 3px;
+  margin-top: 28px;
+  border-radius: 999px;
+  background: rgba(var(--primary-rgb), 0.14);
+  overflow: hidden;
+}
+
+.progressBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(var(--primary-rgb), 0.35) 18%,
+    var(--primary) 50%,
+    rgba(var(--primary-rgb), 0.35) 82%,
+    transparent 100%
+  );
+  animation: psBarSweep 1.9s cubic-bezier(0.45, 0.05, 0.25, 1) infinite;
+  will-change: transform;
+}
+
+@keyframes psBarSweep {
+  0% {
+    transform: translateX(-105%);
+  }
+  100% {
+    transform: translateX(340%);
+  }
+}
+
+:global(html.efficient-mode) .progressBar {
+  animation: none !important;
+  width: 55%;
+  transform: none;
+  opacity: 0.7;
+}
+
+:global(html.efficient-mode) .splash {
+  transition-duration: 0.12s;
+}

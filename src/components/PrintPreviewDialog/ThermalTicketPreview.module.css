@@ -1,0 +1,216 @@
+.ticket {
+  margin: 0 auto;
+  box-sizing: border-box;
+  background: #fff;
+  color: #000;
+  user-select: text;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18);
+}
+
+.logoWrap {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  line-height: 0;
+}
+
+.logo {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.body {
+  width: 100%;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  color: #000;
+}
+
+.body :global(.tr-blank) {
+  height: 0.25em;
+}
+
+.body :global(.tr-rule) {
+  border: none;
+  border-top: 1px solid #000;
+  margin: 3px 0;
+  height: 0;
+  width: 100%;
+}
+
+.body :global(.tr-center) {
+  text-align: center;
+  width: 100%;
+  line-height: 1.2;
+}
+
+.body :global(.tr-title) {
+  font-weight: 700;
+  font-size: inherit;
+  letter-spacing: normal;
+  margin: 0.15em 0 0.25em;
+}
+
+.body :global(.tr-decor) {
+  width: 100%;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  margin: 1px 0;
+  font-size: 0.95em;
+}
+
+.body :global(.tr-decor-double) {
+  font-weight: 700;
+}
+
+.body :global(.tr-decor-single) {
+  opacity: 0.92;
+}
+
+.body :global(.tr-decor-dotted) {
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+}
+
+.body :global(.tr-meta-field) {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  column-gap: 0.35em;
+  align-items: baseline;
+  width: 100%;
+  margin: 0.12em 0;
+}
+
+.body :global(.tr-meta-field .tr-meta-label) {
+  font-weight: 600;
+  white-space: nowrap;
+  min-width: 10ch;
+  display: inline-block;
+}
+
+.body :global(.tr-meta-field .tr-value) {
+  display: flex;
+  align-items: baseline;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.body :global(.tr-meta-field .tr-value-text) {
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.body :global(.tr-meta-field .tr-time-sep) {
+  flex: 0 0 auto;
+}
+
+.body :global(.tr-meta-field .tr-time) {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  font-weight: 700;
+}
+
+.body :global(.tr-address) {
+  font-size: 1em;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+.body :global(.tr-wsp) {
+  background: rgba(0, 0, 0, 0.14);
+}
+
+.body :global(.tr-meta) {
+  text-align: left;
+  width: 100%;
+}
+
+.body :global(.tr-row) {
+  display: grid;
+  width: 100%;
+  column-gap: 4px;
+  align-items: baseline;
+}
+
+.body :global(.tr-row1) {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.body :global(.tr-row2) {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.body :global(.tr-meta.tr-total) {
+  color: #1a7a1a;
+  font-weight: 700;
+}
+
+.body :global(.tr-row3) {
+  grid-template-columns: minmax(0, 1.38fr) auto minmax(6.5em, 0.86fr);
+}
+
+.body :global(.tr-row3 > *) {
+  min-width: 0;
+}
+
+.body :global(.tr-row .tr-left) {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  justify-self: stretch;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.body :global(.tr-row2 .tr-right) {
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.body :global(.tr-row3 .tr-mid) {
+  grid-column: 2;
+  justify-self: center;
+  text-align: center;
+  white-space: nowrap;
+  padding-left: 0.5em;
+  padding-right: 0.2em;
+}
+
+.body :global(.tr-row3 .tr-right) {
+  grid-column: 3;
+  justify-self: end;
+  text-align: right;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: visible;
+}
+
+.body :global(.tr-section .tr-left),
+.body :global(.tr-section .tr-mid),
+.body :global(.tr-section .tr-right) {
+  font-weight: 700;
+}
+
+.body :global(.tr-section .tr-left) {
+  letter-spacing: -0.01em;
+}
+
+.body :global(.tr-total),
+.body :global(.tr-total .tr-left),
+.body :global(.tr-total .tr-mid),
+.body :global(.tr-total .tr-right) {
+  color: #1a7a1a;
+  font-weight: 700;
+}

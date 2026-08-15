@@ -1,0 +1,80 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.bodyTpv {
+  display: grid;
+  grid-template-columns: var(--side-tab-width) minmax(0, 1fr) var(--side-tab-width);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.sideColLeft {
+  grid-row: 1;
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sideColRight {
+  grid-row: 1;
+  grid-column: 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.otherFuncCol {
+  grid-row: 1;
+  grid-column: 2;
+  display: flex;
+  justify-content: flex-end;
+  align-self: stretch;
+  min-height: 0;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.otherFuncCol > * {
+  pointer-events: auto;
+}
+
+.bodyTpv .main {
+  grid-row: 1;
+  grid-column: 2;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+
+.workspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  background: var(--card);
+}
+
+.moduleWorkspace {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  background: var(--card);
+  color: var(--text-dim);
+  font-size: var(--fs-ui);
+}

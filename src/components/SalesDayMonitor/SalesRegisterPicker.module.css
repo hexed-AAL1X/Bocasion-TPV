@@ -1,0 +1,107 @@
+.triggerRegister {
+  min-width: 168px;
+  max-width: 240px;
+}
+
+.popupRegister {
+  width: 300px;
+}
+
+.listScroll {
+  max-height: 220px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+.listHead,
+.listRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px 46px;
+  align-items: center;
+  column-gap: 4px;
+  padding: 0 6px 0 11px;
+}
+
+.listHead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  min-height: 22px;
+  margin-bottom: 4px;
+  padding-top: 2px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid var(--win-table-border);
+  background: var(--win-picker-list-head-bg);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--win-picker-list-head-text);
+}
+
+.colCaja {
+  min-width: 0;
+  text-align: left;
+}
+
+.listRow {
+  width: 100%;
+  min-height: 26px;
+  margin-bottom: 2px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border: 0;
+  border-left: 3px solid transparent;
+  border-radius: 0 3px 3px 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  color: var(--win-text);
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease, border-color 0.12s ease;
+}
+
+.listRow:hover {
+  background: var(--win-picker-hover);
+}
+
+.listRowActive {
+  background: var(--win-picker-active);
+  border-left-color: var(--win-picker-active-border);
+}
+
+.listRowActive:hover {
+  background: var(--win-picker-active);
+  filter: brightness(1.06);
+}
+
+.colTime,
+.colStatus {
+  font-size: 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.rowLabel {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.listRowActive .rowLabel {
+  font-weight: 700;
+  color: #8b1f14;
+}
+
+.statusOpen {
+  color: #c42b1c;
+  font-weight: 700;
+}
+
+.statusClosed {
+  color: #1a4ea8;
+  font-weight: 700;
+}

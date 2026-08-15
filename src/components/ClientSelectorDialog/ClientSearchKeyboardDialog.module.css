@@ -1,0 +1,204 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dialog {
+  width: min(760px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+  box-shadow: var(--win-shadow);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.titleBar {
+  display: grid;
+  grid-template-columns: 1fr 22px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 5px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.titleClose {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.titleClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.body {
+  padding: 10px 12px 12px;
+  background: var(--win-surface);
+}
+
+.displayWrap {
+  margin-bottom: 8px;
+}
+
+.display {
+  width: 100%;
+  box-sizing: border-box;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--win-input-border);
+  border-radius: 2px;
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  font-size: 13px;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  outline: none;
+  caret-color: transparent;
+}
+
+.error {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  background: rgba(var(--danger-rgb, 192, 57, 43), 0.12);
+  border: 1px solid rgba(var(--danger-rgb, 192, 57, 43), 0.45);
+  border-radius: 2px;
+  font-size: 11px;
+  color: var(--win-status-open, #c00000);
+}
+
+:global([data-theme="dark"]) .error {
+  color: #f07060;
+}
+
+.keyboard {
+  composes: winGroupBox from global;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 12px 12px;
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+.rowSpace {
+  margin-top: 2px;
+}
+
+.key {
+  min-width: 42px;
+  height: 36px;
+  padding: 0 6px;
+  border: 1px solid var(--win-border);
+  border-radius: 2px;
+  background: var(--win-btn-bg);
+  color: var(--win-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  letter-spacing: 0.02em;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.25) inset;
+}
+
+.key:hover {
+  filter: brightness(1.06);
+  border-color: var(--win-border-dark);
+}
+
+.key:active {
+  filter: brightness(0.94);
+  transform: translateY(1px);
+}
+
+.keyWide {
+  min-width: 68px;
+  font-size: 12px;
+}
+
+.keySpace {
+  min-width: 220px;
+  letter-spacing: 0.14em;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.keyBackspace {
+  color: var(--win-text);
+}
+
+.keyClose {
+  color: #c03030;
+  font-weight: 700;
+}
+
+:global([data-theme="dark"]) .keyClose {
+  color: #f07060;
+}
+
+.keyEnter {
+  color: #1a7a4a;
+  font-weight: 700;
+}
+
+:global([data-theme="dark"]) .keyEnter {
+  color: #4cd4a0;
+}
+
+@media (max-width: 720px) {
+  .key {
+    min-width: 34px;
+    height: 32px;
+    font-size: 12px;
+    padding: 0 4px;
+  }
+
+  .keyWide {
+    min-width: 52px;
+  }
+
+  .keySpace {
+    min-width: 160px;
+  }
+
+  .row {
+    gap: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .key:active {
+    transform: none;
+  }
+}

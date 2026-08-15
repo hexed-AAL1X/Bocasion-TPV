@@ -1,0 +1,143 @@
+.panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 30px minmax(0, 1fr);
+  gap: 6px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.columnLabel {
+  font-size: 11px;
+  font-weight: 400;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  color: var(--win-text);
+}
+
+.listShell {
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  box-shadow:
+    inset 1px 1px 0 var(--win-border-dark),
+    inset -1px -1px 0 var(--win-border);
+  padding: 1px;
+  box-sizing: border-box;
+  min-height: 0;
+}
+
+.availableList,
+.exportList {
+  --win-listbox-row-h: 18px;
+  --win-listbox-rows: 7;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  height: calc(var(--win-listbox-rows) * var(--win-listbox-row-h));
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  box-sizing: border-box;
+}
+
+.availableItem,
+.exportItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  min-height: var(--win-listbox-row-h);
+  margin: 0;
+  padding: 0 4px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  line-height: calc(var(--win-listbox-row-h) - 2px);
+  color: var(--win-text);
+  text-align: left;
+  cursor: default;
+}
+
+.availableItem {
+  padding-left: 6px;
+}
+
+.availableItem:hover:not(.itemSelected),
+.exportRow:hover:not(.itemSelected) {
+  background: var(--win-picker-hover);
+}
+
+.itemSelected,
+.itemSelected:hover {
+  background: var(--win-list-selected-bg);
+  color: var(--win-list-selected-text);
+}
+
+.exportRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--win-listbox-row-h);
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.exportItem {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.exportItem input {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.exportCode {
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.transferCol {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+  padding-top: 16px;
+}
+
+.transferBtn {
+  width: 26px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--win-toolbar-btn-border);
+  background: linear-gradient(180deg, #ffffff 0%, #e8e4dc 100%);
+  color: #c42b1c;
+  font-size: 9px;
+  font-weight: 700;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  line-height: 1;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.transferBtn:hover:not(:disabled) {
+  filter: brightness(1.05);
+  border-color: var(--win-border-dark);
+}
+
+.transferBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}

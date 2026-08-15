@@ -1,0 +1,132 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.dialog {
+  width: min(360px, calc(100vw - 24px));
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+  box-shadow:
+    0 0 0 1px #fff inset,
+    0 8px 24px rgba(0, 0, 0, 0.35);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.titleBar {
+  display: grid;
+  grid-template-columns: 1fr 22px;
+  align-items: center;
+  padding: 4px 6px 5px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.titleClose {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.titleClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.body {
+  padding: 14px 12px 8px;
+}
+
+.hint {
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: var(--win-text-muted);
+}
+
+.clientList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.clientBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--win-border);
+  background: var(--win-btn-bg);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.08s;
+}
+
+.clientBtn:hover {
+  background: linear-gradient(180deg, #ddeeff 0%, #c8ddf0 100%);
+  border-color: #7f9db9;
+}
+
+.clientBtn:focus-visible {
+  outline: 2px solid #0078d4;
+  outline-offset: -2px;
+}
+
+.clientIcon {
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.clientInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.clientLabel {
+  font-weight: 600;
+  color: var(--win-text);
+}
+
+.clientSub {
+  font-size: 10px;
+  color: var(--win-text-dim);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 8px 12px 10px;
+  border-top: 1px solid var(--win-border);
+  margin-top: 4px;
+}
+
+.btn {
+  composes: winDialogBtn from global;
+}

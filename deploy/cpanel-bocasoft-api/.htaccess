@@ -1,0 +1,20 @@
+RewriteEngine On
+
+# Carpeta en public_html (ej. /cole/dni-api → URL https://bocasion.com/dni-api/)
+RewriteBase /dni-api/
+
+<IfModule mod_authz_core.c>
+  <FilesMatch "^(config\.php|config\.example\.php)$">
+    Require all denied
+  </FilesMatch>
+</IfModule>
+<IfModule !mod_authz_core.c>
+  <FilesMatch "^(config\.php|config\.example\.php)$">
+    Order deny,allow
+    Deny from all
+  </FilesMatch>
+</IfModule>
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L,QSA]

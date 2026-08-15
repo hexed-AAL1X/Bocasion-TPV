@@ -1,0 +1,132 @@
+.frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 96px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--color-bg);
+}
+
+.modeTag {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 5px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.45);
+  color: #fff;
+  line-height: 1.2;
+}
+
+.mock {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 96px;
+  min-height: 96px;
+}
+
+.ribbonTabs {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  flex-shrink: 0;
+  height: 14px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.ribbonTab,
+.ribbonTabActive {
+  font-size: 7px;
+  font-weight: 600;
+  padding: 0 5px;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-dim);
+}
+
+.ribbonTabActive {
+  color: var(--primary-dark);
+  border-bottom: 1px solid var(--color-card);
+  margin-bottom: -1px;
+}
+
+.ribbonToolbar {
+  flex-shrink: 0;
+  height: 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.bodyRow {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.sideTab {
+  width: 8px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--color-border);
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.docTabs {
+  display: flex;
+  align-items: flex-end;
+  flex-shrink: 0;
+  height: 12px;
+  padding: 0 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.docTabActive {
+  font-size: 6px;
+  font-weight: 600;
+  padding: 1px 4px;
+  border-radius: 3px 3px 0 0;
+  border: 1px solid var(--color-border);
+  border-bottom: none;
+  color: var(--primary-dark);
+}
+
+.content {
+  flex: 1;
+  padding: 4px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-height: 0;
+}
+
+.contentLine {
+  height: 6px;
+  border-radius: 2px;
+  width: 70%;
+}
+
+.contentLineShort {
+  height: 4px;
+  border-radius: 2px;
+  width: 45%;
+}
+
+.statusBar {
+  flex-shrink: 0;
+  height: 6px;
+  border-top: 1px solid var(--color-border);
+}

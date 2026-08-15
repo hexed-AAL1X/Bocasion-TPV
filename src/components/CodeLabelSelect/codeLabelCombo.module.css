@@ -1,0 +1,261 @@
+.root {
+  --code-col-width: 30px;
+  --drop-btn-width: 17px;
+  --picker-gap: 2px;
+  --picker-border-total: 2px;
+  --picker-shell-width: calc(var(--code-col-width) + var(--drop-btn-width) + var(--picker-border-total));
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: var(--picker-gap);
+  min-width: 0;
+  width: 100%;
+}
+
+.codeNarrow {
+  --code-col-width: 26px;
+}
+
+.codeWide {
+  --code-col-width: 38px;
+}
+
+.pickerShell {
+  display: flex;
+  flex-shrink: 0;
+  align-items: stretch;
+  height: 22px;
+  box-sizing: border-box;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  overflow: hidden;
+}
+
+.pickerShellOpen {
+  border-color: #316ac5;
+  outline: 1px solid #b8d4f5;
+  outline-offset: 0;
+}
+
+:global([data-theme="dark"]) .pickerShellOpen {
+  outline-color: var(--win-focus-outline);
+}
+
+.codeField {
+  width: var(--code-col-width);
+  min-width: var(--code-col-width);
+  height: 100%;
+  margin: 0;
+  padding: 0 4px;
+  border: none;
+  border-right: 1px solid var(--win-border);
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  text-align: left;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+  outline: none;
+}
+
+:global([data-win-classic]) .codeField {
+  border: none !important;
+  border-right: 1px solid var(--win-border) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.codeFieldOpen {
+  background: var(--win-field-bg);
+  color: var(--win-text);
+}
+
+.dropBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--drop-btn-width);
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: linear-gradient(180deg, var(--win-btn-bg) 0%, var(--win-surface) 100%);
+  color: var(--win-text);
+  cursor: default;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.dropBtn:hover {
+  filter: brightness(1.04);
+}
+
+.descField {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  margin: 0;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  padding: 0 5px;
+  box-sizing: border-box;
+  box-shadow: none;
+  outline: none;
+}
+
+:global([data-win-classic]) .descField {
+  border: 1px solid var(--win-input-border) !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.descFieldUpper {
+  text-transform: uppercase;
+}
+
+.popup {
+  padding: 0;
+  background: var(--win-picker-bg);
+  overflow: hidden;
+  border: 1px solid var(--win-border-dark);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 6px 18px rgba(0, 0, 0, 0.22);
+}
+
+.list {
+  --win-scrollbar-width: 0px;
+  --code-col-width: 30px;
+  --drop-btn-width: 17px;
+  --picker-gap: 2px;
+  --picker-border-total: 2px;
+  --picker-shell-width: calc(var(--code-col-width) + var(--drop-btn-width) + var(--picker-border-total));
+  --desc-start: calc(var(--picker-shell-width) + var(--picker-gap));
+  max-height: 220px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  width: 100%;
+  box-sizing: border-box;
+  scrollbar-gutter: stable;
+}
+
+.listNarrow {
+  --code-col-width: 26px;
+}
+
+.listWide {
+  --code-col-width: 38px;
+}
+
+.option {
+  display: grid;
+  grid-template-columns: var(--desc-start) 1px minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  min-height: 22px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.2;
+  color: var(--win-text);
+  text-align: left;
+  cursor: default;
+}
+
+.optionPicker {
+  display: grid;
+  grid-template-columns: var(--code-col-width) var(--drop-btn-width) minmax(0, 1fr);
+  align-items: stretch;
+  width: 100%;
+  min-height: 22px;
+  background: #ece9d8;
+}
+
+.optionCode {
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  font-variant-numeric: tabular-nums;
+  text-align: left;
+  background: transparent;
+}
+
+.optionBtnSpacer {
+  background: transparent;
+}
+
+.optionLeadFill {
+  background: transparent;
+}
+
+.optionDivider {
+  display: block;
+  width: 1px;
+  min-height: 100%;
+  align-self: stretch;
+  margin: 0;
+  padding: 0;
+  background: #1a1a1a;
+}
+
+:global([data-theme="dark"]) .optionDivider {
+  background: var(--win-border-dark);
+}
+
+:global([data-theme="dark"]) .optionPicker {
+  background: var(--win-panel-bg);
+}
+
+.optionDesc {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 2px 6px;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  background: var(--win-field-bg);
+}
+
+.option:hover .optionPicker,
+.option:focus-visible .optionPicker {
+  background: var(--win-picker-hover);
+}
+
+.option:hover .optionDesc,
+.option:focus-visible .optionDesc {
+  background: var(--win-picker-hover);
+}
+
+.optionSelected .optionPicker,
+.optionSelected .optionDesc,
+.optionSelected:hover .optionPicker,
+.optionSelected:hover .optionDesc,
+.optionSelected:focus-visible .optionPicker,
+.optionSelected:focus-visible .optionDesc {
+  background: var(--win-list-selected-bg);
+  color: var(--win-list-selected-text);
+}
+
+.optionSelected .optionDesc {
+  font-weight: 600;
+}
+
+.option:hover,
+.option:focus-visible,
+.optionSelected,
+.optionSelected:hover,
+.optionSelected:focus-visible {
+  box-shadow: var(--win-scrollbar-width) 0 0 0 transparent;
+  outline: none;
+}

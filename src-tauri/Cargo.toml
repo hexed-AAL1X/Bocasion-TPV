@@ -1,0 +1,33 @@
+[package]
+name = "intranet-ventas"
+version = "0.1.0"
+description = "Intranet Ventas — Bocasión S.A.C."
+authors = ["Bocasión"]
+edition = "2021"
+
+[lib]
+name = "intranet_ventas_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["macros", "rt", "net", "time"] }
+tokio-util = { version = "0.7", features = ["compat"] }
+tiberius = { version = "0.12", default-features = false, features = ["chrono", "rustls", "tds73"] }
+url = "2"
+regex = "1"
+dotenvy = "0.15"
+
+[profile.release]
+panic = "abort"
+codegen-units = 1
+lto = true
+opt-level = "s"
+strip = true

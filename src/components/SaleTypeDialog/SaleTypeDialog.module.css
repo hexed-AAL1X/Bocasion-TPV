@@ -1,0 +1,294 @@
+:root {
+  --sale-status-normal-bg: #edf6ed;
+  --sale-status-normal-border: #6a9f6a;
+  --sale-status-normal-title: #1f5f1f;
+  --sale-status-normal-hint: #4a6a4a;
+
+  --sale-status-special-bg: #fff4e8;
+  --sale-status-special-border: #d4842a;
+  --sale-status-special-title: #9a4b00;
+  --sale-status-special-hint: #7a5a30;
+
+  --sale-card-normal-active-bg: #e8f4e8;
+  --sale-card-normal-active-border: #4f8f4f;
+  --sale-card-normal-active-text: #4a6a4a;
+  --sale-card-normal-mark: #2d7a2d;
+  --sale-card-normal-badge-text: #1f5f1f;
+  --sale-card-normal-badge-border: #6a9f6a;
+  --sale-card-normal-badge-bg: #ffffff;
+
+  --sale-card-special-active-bg: #fff0df;
+  --sale-card-special-active-border: #d4842a;
+  --sale-card-special-active-text: #7a4a18;
+  --sale-card-special-mark: #c45f00;
+  --sale-card-special-badge-text: #9a4b00;
+  --sale-card-special-badge-border: #d4842a;
+  --sale-card-special-badge-bg: #ffffff;
+
+  --sale-card-idle-bg: #f5f3ea;
+  --sale-card-idle-border: #848078;
+  --sale-card-idle-hover-border: #6a8caf;
+  --sale-card-idle-hover-bg: #ffffff;
+}
+
+:global([data-theme="dark"]) {
+  --sale-status-normal-bg: #1e3d2e;
+  --sale-status-normal-border: #3d8a58;
+  --sale-status-normal-title: #9ee0b0;
+  --sale-status-normal-hint: #7ab892;
+
+  --sale-status-special-bg: #3d3020;
+  --sale-status-special-border: #c48838;
+  --sale-status-special-title: #f0c070;
+  --sale-status-special-hint: #b89868;
+
+  --sale-card-normal-active-bg: #243830;
+  --sale-card-normal-active-border: #4a9a62;
+  --sale-card-normal-active-text: #8ab898;
+  --sale-card-normal-mark: #6fcf8a;
+  --sale-card-normal-badge-text: #6fcf8a;
+  --sale-card-normal-badge-border: #4a9a62;
+  --sale-card-normal-badge-bg: #1a232c;
+
+  --sale-card-special-active-bg: #3d3020;
+  --sale-card-special-active-border: #c48838;
+  --sale-card-special-active-text: #e8c090;
+  --sale-card-special-mark: #f0a040;
+  --sale-card-special-badge-text: #f0b060;
+  --sale-card-special-badge-border: #c48838;
+  --sale-card-special-badge-bg: #1a232c;
+
+  --sale-card-idle-bg: #1a232c;
+  --sale-card-idle-border: #4a6070;
+  --sale-card-idle-hover-border: #6a8caf;
+  --sale-card-idle-hover-bg: #243038;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dialog {
+  width: min(340px, 100%);
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+  box-shadow: var(--win-shadow);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.titleBar {
+  display: grid;
+  grid-template-columns: 1fr 22px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 5px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.titleClose {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.titleClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 8px;
+}
+
+.statusGroup,
+.optionGroup {
+  composes: winGroupBox from global;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.statusGroupNormal {
+  background: var(--sale-status-normal-bg);
+  border-color: var(--sale-status-normal-border);
+}
+
+.statusGroupSpecial {
+  background: var(--sale-status-special-bg);
+  border-color: var(--sale-status-special-border);
+}
+
+.groupLegend {
+  composes: winGroupLegend from global;
+}
+
+.statusValue {
+  font-size: 13px;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+.statusGroupNormal .statusValue {
+  color: var(--sale-status-normal-title);
+}
+
+.statusGroupSpecial .statusValue {
+  color: var(--sale-status-special-title);
+}
+
+.statusHint {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.statusGroupNormal .statusHint {
+  color: var(--sale-status-normal-hint);
+}
+
+.statusGroupSpecial .statusHint {
+  color: var(--sale-status-special-hint);
+}
+
+.optionList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.optionCard {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--sale-card-idle-border);
+  border-radius: 2px;
+  background: var(--sale-card-idle-bg);
+  text-align: left;
+  cursor: pointer;
+  color: var(--win-text);
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.optionCard:hover {
+  background: var(--sale-card-idle-hover-bg);
+  border-color: var(--sale-card-idle-hover-border);
+}
+
+.optionCardActiveNormal {
+  background: var(--sale-card-normal-active-bg);
+  border-color: var(--sale-card-normal-active-border);
+}
+
+.optionCardActiveSpecial {
+  background: var(--sale-card-special-active-bg);
+  border-color: var(--sale-card-special-active-border);
+}
+
+.optionMark {
+  font-size: 14px;
+  line-height: 1;
+  color: var(--win-text-dim);
+  text-align: center;
+}
+
+.optionCardActiveNormal .optionMark {
+  color: var(--sale-card-normal-mark);
+}
+
+.optionCardActiveSpecial .optionMark {
+  color: var(--sale-card-special-mark);
+}
+
+.optionText {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.optionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--win-text);
+  line-height: 1.3;
+}
+
+.optionCardActiveNormal .optionTitle {
+  font-weight: 600;
+  color: var(--sale-card-normal-active-text);
+}
+
+.optionCardActiveSpecial .optionTitle {
+  color: var(--sale-card-special-active-text);
+}
+
+.optionHint {
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--win-text-dim);
+}
+
+.optionBadge {
+  padding: 2px 6px;
+  border: 1px solid;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.optionCardActiveNormal .optionBadge {
+  color: var(--sale-card-normal-badge-text);
+  border-color: var(--sale-card-normal-badge-border);
+  background: var(--sale-card-normal-badge-bg);
+}
+
+.optionCardActiveSpecial .optionBadge {
+  color: var(--sale-card-special-badge-text);
+  border-color: var(--sale-card-special-badge-border);
+  background: var(--sale-card-special-badge-bg);
+}
+
+.footer {
+  composes: winShadeStrip winDialogFooter from global;
+}
+
+.footerBtn {
+  composes: winDialogBtn from global;
+}

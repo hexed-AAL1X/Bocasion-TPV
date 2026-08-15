@@ -1,0 +1,1452 @@
+/* Diálogos estilo Windows XP: paleta y componentes unificados.
+   Los colores (--win-*) se sincronizan con la paleta activa vía applyPaletteTokens().
+   Los valores en :root / [data-theme="dark"] son fallback antes de cargar JS. */
+:root {
+  --win-font: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  --win-font-size: 11px;
+  --win-surface: #ece9d8;
+  --win-border: #aca899;
+  --win-border-dark: #848078;
+  --win-group-bg: #f5f3ea;
+  --win-panel-bg: #fff;
+  --win-shade-bg: linear-gradient(180deg, #eceae2 0%, #d4d0c8 52%, #c8c4be 100%);
+  --win-shade-bar-padding: 4px 8px;
+  --win-shade-bar-font-size: 11px;
+  --win-shade-bar-font-weight: 700;
+  --win-shade-bar-line-height: 1.3;
+  --win-shade-bar-border-bottom: 1px solid var(--win-border);
+  --win-group-padding: 8px 10px 10px;
+  --win-group-legend-font-size: 11px;
+  --win-group-legend-font-weight: 700;
+  --win-title-bg: linear-gradient(180deg, #1e4e8c 0%, #3a6ea5 45%, #5b8ec7 100%);
+  --win-title-border: 1px solid #1a3d72;
+  --win-title-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.22);
+  --win-shadow: 0 0 0 1px #fff inset, 0 8px 24px rgba(0, 0, 0, 0.28);
+  --win-input-border: #7f9db9;
+  --win-btn-bg: linear-gradient(180deg, #fff 0%, #e8e4dc 100%);
+  --win-text: #000;
+  --win-text-dim: #666;
+  --win-text-muted: #444;
+  --win-select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4' viewBox='0 0 6 4'%3E%3Cpath fill='%23666666' d='M0 0h6L3 4z'/%3E%3C/svg%3E");
+  --win-picker-caret-color: #666666;
+  --win-table-border: #e0ddd4;
+  --win-table-border-soft: #e8e5dc;
+  --win-table-row-even: #fff;
+  --win-table-row-odd: #f5f4ef;
+  --win-table-row-hover: #cce4ff;
+  --win-table-total-bg: #f5f3ea;
+  --win-table-subheader-bg: #faf9f6;
+  --win-table-totals-row-bg: #e8e4d8;
+  --win-table-highlight: #dce8f5;
+  --win-table-highlight-soft: #e8f0fa;
+  --win-link: #0000cc;
+  --win-link-hover: #0000ff;
+  --win-status-open: #c00000;
+  --win-status-closed: #0000c0;
+  --win-toolbar-btn-border: #999;
+  --win-separator: #8a8678;
+  --win-picker-bg: #fff;
+  --win-picker-border: #7f9db9;
+  --win-picker-body-bg: #faf9f6;
+  --win-picker-footer-bg: #f0eee8;
+  --win-picker-list-head-bg: #faf9f6;
+  --win-picker-list-head-text: #5a5a5a;
+  --win-picker-hover: #dce9f8;
+  --win-picker-active: #fde8e6;
+  --win-picker-active-border: #c42b1c;
+  --win-hint-bg: #fff8dc;
+  --win-hint-border: #c8b878;
+  --win-hint-text: #333;
+  --win-menu-bar-bg: #f5f3ea;
+  --win-preview-bg: #808080;
+  --win-preview-paper: #fff;
+  --win-receipt-text: #000;
+  --win-receipt-highlight: #1a7a1a;
+  --win-field-bg: #fff;
+  --win-page-paper: #fff;
+  --win-page-paper-shadow-in: #fff;
+  --win-page-paper-shadow-out: #404040;
+  --win-page-margin-line: #d8d8d8;
+  --win-page-margin-text: #555;
+  --win-focus-outline: #000;
+  --win-dialog-btn-border: #848078;
+  --win-dialog-btn-border-hover: #6a6860;
+  --win-dialog-btn-bg: linear-gradient(180deg, #ffffff 0%, #f3f0ea 42%, #e3dfd6 50%, #d6d1c8 52%, #ebe8e2 100%);
+  --win-dialog-btn-bg-hover: linear-gradient(180deg, #ffffff 0%, #f8f6f2 42%, #eae6de 50%, #ded9d0 52%, #f2efe9 100%);
+  --win-dialog-btn-bg-active: linear-gradient(180deg, #ccc8c0 0%, #ddd9d2 100%);
+  --win-dialog-btn-primary-border: #1a5a9a;
+  --win-dialog-btn-primary-border-hover: #134880;
+  --win-dialog-btn-primary-bg: linear-gradient(180deg, #7eb8f5 0%, #4694e0 46%, #2d7fd4 50%, #4694e0 100%);
+  --win-dialog-btn-primary-bg-hover: linear-gradient(180deg, #8ec4ff 0%, #52a0ea 46%, #388de0 50%, #52a0ea 100%);
+  --win-dialog-btn-primary-bg-active: linear-gradient(180deg, #2a6fc0 0%, #3a82d4 100%);
+  --win-dialog-btn-primary-text: #fff;
+  --win-dialog-btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.92), 0 1px 0 rgba(255, 255, 255, 0.28);
+  --win-dialog-btn-primary-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 1px 2px rgba(0, 0, 0, 0.18);
+  --win-list-selected-bg: #1a5080;
+  --win-list-selected-text: #ffffff;
+  --win-list-selected-outline: #5b8ec7;
+}
+
+[data-theme="dark"] {
+  --win-surface: #1c242c;
+  --win-border: #3d4f5c;
+  --win-border-dark: #556878;
+  --win-group-bg: #243038;
+  --win-panel-bg: #1a232c;
+  --win-shade-bg: linear-gradient(180deg, #2e3a46 0%, #243038 52%, #1a232c 100%);
+  --win-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset, 0 8px 24px rgba(0, 0, 0, 0.55);
+  --win-input-border: #4a6070;
+  --win-btn-bg: linear-gradient(180deg, #3a4a58 0%, #2a3844 100%);
+  --win-text: #e8f0f5;
+  --win-text-dim: #8fa8b8;
+  --win-text-muted: #6a8494;
+  --win-table-border: #2d3a47;
+  --win-table-border-soft: #253038;
+  --win-table-row-even: #1a232c;
+  --win-table-row-odd: #1e2830;
+  --win-table-row-hover: #264058;
+  --win-table-total-bg: #243038;
+  --win-table-subheader-bg: #1e2830;
+  --win-table-totals-row-bg: #2a3540;
+  --win-table-highlight: #2a4560;
+  --win-table-highlight-soft: #243850;
+  --win-link: #6eb5f0;
+  --win-link-hover: #9ecfff;
+  --win-status-open: #f07060;
+  --win-status-closed: #6eb5f0;
+  --win-toolbar-btn-border: #4a6070;
+  --win-separator: #4a6070;
+  --win-picker-bg: #1a232c;
+  --win-picker-border: #4a6070;
+  --win-picker-body-bg: #1e2830;
+  --win-picker-footer-bg: #243038;
+  --win-picker-list-head-bg: #243038;
+  --win-picker-list-head-text: #8fa8b8;
+  --win-picker-hover: #264058;
+  --win-picker-active: #3d2828;
+  --win-picker-active-border: #c42b1c;
+  --win-hint-bg: #3d3520;
+  --win-hint-border: #6a5830;
+  --win-hint-text: #f0d890;
+  --win-menu-bar-bg: #243038;
+  --win-preview-bg: #0f1419;
+  --win-preview-paper: #1a232c;
+  --win-receipt-text: #e8f0f5;
+  --win-receipt-highlight: #4cd4a0;
+  --win-field-bg: #1a232c;
+  --win-page-paper: #ffffff;
+  --win-page-paper-shadow-in: #f8fafc;
+  --win-page-paper-shadow-out: #6a7a88;
+  --win-page-margin-line: #9aacbc;
+  --win-page-margin-text: #334155;
+  --win-focus-outline: #e8f0f5;
+  --win-dialog-btn-border: #5a7080;
+  --win-dialog-btn-border-hover: #6a8494;
+  --win-dialog-btn-bg: linear-gradient(180deg, #4a5c6a 0%, #3a4854 46%, #323e48 50%, #3e4c58 100%);
+  --win-dialog-btn-bg-hover: linear-gradient(180deg, #556878 0%, #445560 46%, #3c4854 50%, #485664 100%);
+  --win-dialog-btn-bg-active: linear-gradient(180deg, #2e3a46 0%, #3a4854 100%);
+  --win-dialog-btn-primary-border: #4a90d0;
+  --win-dialog-btn-primary-border-hover: #6ab0f0;
+  --win-dialog-btn-primary-bg: linear-gradient(180deg, #5a9ee8 0%, #3a78c8 46%, #2a68b8 50%, #3a78c8 100%);
+  --win-dialog-btn-primary-bg-hover: linear-gradient(180deg, #6aaff8 0%, #4888d8 46%, #3878c8 50%, #4888d8 100%);
+  --win-dialog-btn-primary-bg-active: linear-gradient(180deg, #2868b0 0%, #3878c0 100%);
+  --win-dialog-btn-primary-text: #fff;
+  --win-dialog-btn-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 0 rgba(255, 255, 255, 0.04);
+  --win-dialog-btn-primary-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 1px 2px rgba(0, 0, 0, 0.35);
+  --win-select-caret: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4' viewBox='0 0 6 4'%3E%3Cpath fill='%23c8d8e8' d='M0 0h6L3 4z'/%3E%3C/svg%3E");
+  --win-picker-caret-color: #c8d8e8;
+  --win-list-selected-bg: #2a68b8;
+  --win-list-selected-text: #ffffff;
+  --win-list-selected-outline: #6ab0f0;
+}
+
+[data-win-classic] {
+  color-scheme: light;
+  color: var(--win-text);
+  background: var(--win-surface) !important;
+  border: 1px solid var(--win-border) !important;
+  box-shadow: var(--win-shadow) !important;
+  font-family: var(--win-font) !important;
+  font-size: var(--win-font-size) !important;
+}
+
+[data-theme="dark"] [data-win-classic] {
+  color-scheme: dark;
+  color: var(--win-text);
+}
+
+/* ─── Barra de título (azul XP en TODOS los diálogos) ─── */
+[data-win-classic] [class*="titleBar"],
+[data-win-classic] [class*="TitleBar"],
+[data-win-classic] [class*="pageSetupTitleBar"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 6px !important;
+  position: relative !important;
+  flex-shrink: 0 !important;
+  min-height: 28px !important;
+  padding: 4px 6px 5px !important;
+  background: var(--win-title-bg) !important;
+  border-bottom: var(--win-title-border) !important;
+  box-shadow: var(--win-title-highlight) !important;
+  color: #fff !important;
+  user-select: none !important;
+  touch-action: none;
+}
+
+[data-win-classic] [class*="titleBar"] [class*="titleIcon"],
+[data-win-classic] [class*="titleBar"] > img:first-child {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-right: auto;
+  object-fit: contain;
+}
+
+[data-win-classic] [class*="titleBar"] [class*="titleBtns"] {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  gap: 2px;
+}
+
+/* Botones de sistema XP: maximizar / restaurar */
+[data-win-classic] [class*="titleSysBtn"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative !important;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 21px;
+  height: 19px;
+  padding: 0;
+  border: 1px solid #fff;
+  background: linear-gradient(180deg, #c8d8f0 0%, #88b0d8 45%, #6898c0 100%);
+  color: #000;
+  cursor: pointer;
+  line-height: 1;
+  pointer-events: auto !important;
+  transform: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+[data-win-classic] [class*="titleSysBtn"]:hover {
+  background: linear-gradient(180deg, #dce8f8 0%, #a0c8e8 45%, #78a8d0 100%);
+}
+
+[data-win-classic] [class*="titleSysBtn"]:active {
+  background: linear-gradient(180deg, #6888a8 0%, #486878 100%);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Casilla roja clásica para cerrar */
+[data-win-classic] [class*="titleClose"],
+[data-win-classic] [class*="titleBar"] [class*="closeBtn"],
+[data-win-classic] [class*="titleBar"] button[class*="close"],
+[data-win-classic] [class*="titleBar"] [class*="close"]:not(h1):not(h2) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative !important;
+  z-index: 1;
+  flex-shrink: 0;
+  width: 21px;
+  height: 19px;
+  padding: 0;
+  border: 1px solid #fff !important;
+  background: linear-gradient(180deg, #e88080 0%, #c03030 45%, #980808 100%) !important;
+  color: #fff !important;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto !important;
+  transform: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+
+[data-win-classic] [class*="titleClose"]:hover,
+[data-win-classic] [class*="titleBar"] [class*="closeBtn"]:hover {
+  background: linear-gradient(180deg, #ff9898 0%, #d84848 45%, #b01818 100%) !important;
+  border-color: #fff !important;
+}
+
+[data-win-classic] [class*="titleClose"]:active,
+[data-win-classic] [class*="titleBar"] [class*="closeBtn"]:active {
+  background: linear-gradient(180deg, #a02828 0%, #780808 100%) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+[data-win-classic] [class*="titleBar"] > h1,
+[data-win-classic] [class*="titleBar"] > h2,
+[data-win-classic] [class*="titleText"] {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  margin: 0 !important;
+  padding: 0 56px !important;
+  font-family: var(--win-font) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-align: center !important;
+  color: #fff !important;
+  min-width: 0;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  white-space: nowrap !important;
+}
+
+/* ─── Cuadros sombreados unificados ─── */
+.winShadeBar {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: var(--win-shade-bar-padding);
+  font-family: var(--win-font);
+  font-size: var(--win-shade-bar-font-size);
+  font-weight: var(--win-shade-bar-font-weight);
+  letter-spacing: 0.02em;
+  line-height: var(--win-shade-bar-line-height);
+  color: var(--win-text);
+  background: var(--win-shade-bg);
+  border-bottom: var(--win-shade-bar-border-bottom);
+}
+
+.winShadeStrip {
+  background: var(--win-shade-bg);
+  border-bottom: var(--win-shade-bar-border-bottom);
+}
+
+/* ─── Botones de pie de diálogo (todos los cuadros win-classic) ─── */
+.winDialogFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  flex-shrink: 0;
+}
+
+/* Acción secundaria a la izquierda; Cancelar/Aceptar a la derecha */
+.winDialogFooterSplit {
+  justify-content: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.winDialogFooterSplit > :last-child {
+  margin-left: auto;
+}
+
+.winDialogBtn {
+  box-sizing: border-box;
+  min-width: 82px;
+  height: 26px;
+  padding: 0 14px;
+  border-radius: 3px;
+  border: 1px solid var(--win-dialog-btn-border);
+  background: var(--win-dialog-btn-bg);
+  box-shadow: var(--win-dialog-btn-shadow);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--win-text);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.winDialogBtn:hover:not(:disabled) {
+  background: var(--win-dialog-btn-bg-hover);
+  border-color: var(--win-dialog-btn-border-hover);
+}
+
+.winDialogBtn:active:not(:disabled) {
+  background: var(--win-dialog-btn-bg-active);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.winDialogBtn:disabled {
+  opacity: 0.52;
+  cursor: default;
+  color: var(--win-text-dim);
+}
+
+.winDialogBtn:focus-visible {
+  outline: 2px solid var(--win-focus-outline);
+  outline-offset: 1px;
+}
+
+.winDialogBtnPrimary {
+  box-sizing: border-box;
+  min-width: 82px;
+  height: 26px;
+  padding: 0 14px;
+  border-radius: 3px;
+  border: 1px solid var(--win-dialog-btn-primary-border);
+  background: var(--win-dialog-btn-primary-bg);
+  box-shadow: var(--win-dialog-btn-primary-shadow);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--win-dialog-btn-primary-text);
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.winDialogBtnPrimary:hover:not(:disabled) {
+  background: var(--win-dialog-btn-primary-bg-hover);
+  border-color: var(--win-dialog-btn-primary-border-hover);
+  color: var(--win-dialog-btn-primary-text);
+}
+
+.winDialogBtnPrimary:active:not(:disabled) {
+  background: var(--win-dialog-btn-primary-bg-active);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.winDialogBtnPrimary:disabled {
+  opacity: 0.52;
+  cursor: default;
+}
+
+.winDialogBtnPrimary:focus-visible {
+  outline: 2px solid var(--win-focus-outline);
+  outline-offset: 1px;
+}
+
+/* Botones de panel lateral (icono + texto, ancho completo) */
+.winPanelBtn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  width: 100%;
+  min-height: 28px;
+  height: auto;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--win-dialog-btn-border);
+  background: var(--win-dialog-btn-bg);
+  box-shadow: var(--win-dialog-btn-shadow);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--win-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.winPanelBtn:hover:not(:disabled) {
+  background: var(--win-dialog-btn-bg-hover);
+  border-color: var(--win-dialog-btn-border-hover);
+}
+
+.winPanelBtn:active:not(:disabled) {
+  background: var(--win-dialog-btn-bg-active);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.16);
+}
+
+.winPanelBtn:disabled {
+  opacity: 0.52;
+  cursor: default;
+  color: var(--win-text-dim);
+}
+
+.winPanelBtnPrimary {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 32px;
+  height: auto;
+  padding: 4px 10px;
+  border-radius: 3px;
+  border: 1px solid var(--win-dialog-btn-primary-border);
+  background: var(--win-dialog-btn-primary-bg);
+  box-shadow: var(--win-dialog-btn-primary-shadow);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--win-dialog-btn-primary-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.winPanelBtnPrimary:hover:not(:disabled) {
+  background: var(--win-dialog-btn-primary-bg-hover);
+  border-color: var(--win-dialog-btn-primary-border-hover);
+  color: var(--win-dialog-btn-primary-text);
+}
+
+.winPanelBtnPrimary:active:not(:disabled) {
+  background: var(--win-dialog-btn-primary-bg-active);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.28);
+}
+
+.winPanelBtnPrimary:disabled {
+  opacity: 0.52;
+  cursor: default;
+}
+
+.winShadePanel {
+  border: 1px solid var(--win-border);
+  background: var(--win-panel-bg);
+  overflow: hidden;
+}
+
+/* Grillas: ocultar solo scroll vertical; el horizontal se mantiene visible */
+[data-win-classic] [class*="tableWrap"],
+[data-win-classic] [class*="_body_"] {
+  scrollbar-gutter: auto;
+}
+
+[data-win-classic] [class*="tableWrap"]::-webkit-scrollbar:vertical,
+[data-win-classic] [class*="_body_"]::-webkit-scrollbar:vertical {
+  width: 0;
+  display: none;
+}
+
+[data-win-classic] [class*="tableWrap"]::-webkit-scrollbar:horizontal,
+[data-win-classic] [class*="_body_"]::-webkit-scrollbar:horizontal {
+  height: 12px;
+  display: block;
+}
+
+[data-win-classic] [class*="tableWrap"]::-webkit-scrollbar-thumb:horizontal,
+[data-win-classic] [class*="_body_"]::-webkit-scrollbar-thumb:horizontal {
+  background: #a0a0a0;
+  border-radius: 2px;
+}
+
+[data-win-classic] [class*="tableWrap"]::-webkit-scrollbar-track:horizontal,
+[data-win-classic] [class*="_body_"]::-webkit-scrollbar-track:horizontal {
+  background: #e8e8e8;
+}
+
+.winGroupBox {
+  margin: 0;
+  border: 1px solid var(--win-border);
+  background: var(--win-group-bg);
+  padding: var(--win-group-padding);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  color: var(--win-text);
+}
+
+.winGroupLegend {
+  padding: 0 4px;
+  margin-left: 2px;
+  font-size: var(--win-group-legend-font-size);
+  font-weight: var(--win-group-legend-font-weight);
+  color: var(--win-text);
+  background: var(--win-group-bg);
+}
+
+[data-win-classic] fieldset {
+  border: 1px solid var(--win-border) !important;
+  background: var(--win-group-bg) !important;
+  padding: var(--win-group-padding) !important;
+  margin: 0 !important;
+}
+
+[data-win-classic] fieldset > legend {
+  padding: 0 4px !important;
+  margin-left: 2px !important;
+  font-family: var(--win-font) !important;
+  font-size: var(--win-group-legend-font-size) !important;
+  font-weight: var(--win-group-legend-font-weight) !important;
+  color: var(--win-text) !important;
+  background: var(--win-group-bg) !important;
+  border: none !important;
+  width: auto !important;
+}
+
+[data-theme="dark"] [data-win-classic] fieldset,
+[data-theme="dark"] [data-win-classic] .winGroupBox,
+[data-theme="dark"] [data-win-classic] .winShadePanel {
+  border-color: var(--win-border-dark) !important;
+}
+
+[data-theme="dark"] [data-win-classic] fieldset > legend,
+[data-theme="dark"] [data-win-classic] .winGroupLegend {
+  background: var(--win-group-bg) !important;
+  color: var(--win-text) !important;
+}
+
+.winTableHeadCell {
+  position: relative;
+  padding: 4px 8px;
+  font-size: var(--win-shade-bar-font-size);
+  font-weight: var(--win-shade-bar-font-weight);
+  line-height: var(--win-shade-bar-line-height);
+  color: var(--win-text);
+  background: var(--win-shade-bg);
+  border-bottom: var(--win-shade-bar-border-bottom);
+}
+
+[data-win-classic] th[class*="tableHeadCell"],
+[data-win-classic] [class*="tableHeadCell"] {
+  position: relative;
+}
+
+[data-win-classic] [class*="colResizeHandle"] {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 30;
+  touch-action: none;
+}
+
+[data-win-classic] [class*="colResizeHandle"]:hover,
+[data-win-classic] [class*="colResizeHandle"]:active {
+  background: rgba(10, 36, 106, 0.22);
+}
+
+[data-win-classic] [class*="tableWrap"] > table {
+  table-layout: fixed;
+  max-width: none;
+}
+
+[data-win-classic] [class*="tableWrap"][data-col-resizing],
+[data-win-classic] [class*="tableWrap"][data-col-resizing] table,
+[data-win-classic] [class*="tableWrap"][data-col-resizing] col,
+[data-win-classic] [class*="tableWrap"][data-col-resizing] th,
+[data-win-classic] [class*="tableWrap"][data-col-resizing] td {
+  transition: none !important;
+}
+
+[data-win-classic] [class*="tableWrap"][data-col-resizing] * {
+  user-select: none !important;
+}
+
+/* Flecha ▼ unificada en triggers y selects tipo acordeón */
+.winPickerCaret {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 4px solid var(--win-picker-caret-color, var(--win-text-dim));
+  pointer-events: none;
+}
+
+/* ─── Controles estándar ─── */
+[data-win-classic] input:not([type="checkbox"]):not([type="radio"]):not([data-win-combo-part]),
+[data-win-classic] select,
+[data-win-classic] textarea {
+  border: 1px solid var(--win-input-border) !important;
+  background: var(--win-field-bg) !important;
+  font-family: var(--win-font) !important;
+  font-size: var(--win-font-size) !important;
+  color: var(--win-text) !important;
+}
+
+[data-win-classic] footer button:not([class*="title"]):not([class*="close"]):not([class*="Close"]):not([class*="toolbar"]):not([class*="Toolbar"]):not([class*="picker"]):not([class*="Picker"]):not([class*="nav"]):not([class*="Nav"]):not([class*="client"]):not([class*="Client"]):not([class*="choice"]):not([class*="Choice"]):not([class*="edit"]):not([class*="Edit"]):not([class*="mini"]):not([class*="Mini"]):not([class*="Primary"]),
+[data-win-classic] .winDialogBtn,
+[data-win-classic] [class*="footerBtn"]:not([class*="picker"]):not([class*="Icon"]):not([class*="Primary"]),
+[data-win-classic] [class*="propsBtn"]:not([class*="Primary"]),
+[data-win-classic] [class*="browseBtn"],
+[data-win-classic] [class*="pageSetupBtn"]:not([class*="Primary"]),
+[data-win-classic] [class*="fontBtn"]:not([class*="Primary"]),
+[data-win-classic] [class*="goToLineBtn"]:not([class*="Primary"]),
+[data-win-classic] footer [class*="btnCancel"],
+[data-win-classic] [class*="editActions"] [class*="btnCancel"],
+[data-win-classic] footer .btn:not([class*="Primary"]):not([class*="browse"]):not([class*="Browse"]),
+[data-win-classic] [class*="footer"] .btn:not([class*="Primary"]):not([class*="browse"]):not([class*="Browse"]),
+[data-win-classic] [class*="actions"] [class*="actionBtn"]:not([class*="Primary"]):not([class*="Icon"]) {
+  box-sizing: border-box;
+  min-width: 82px;
+  height: 26px;
+  padding: 0 14px;
+  border-radius: 3px;
+  border: 1px solid var(--win-dialog-btn-border);
+  background: var(--win-dialog-btn-bg);
+  box-shadow: var(--win-dialog-btn-shadow);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  font-weight: 400;
+  line-height: 24px;
+  color: var(--win-text);
+  cursor: pointer;
+}
+
+[data-win-classic] footer button:not([class*="title"]):not([class*="close"]):not([class*="Close"]):not([disabled]):not([class*="Primary"]):hover,
+[data-win-classic] .winDialogBtn:hover:not(:disabled),
+[data-win-classic] [class*="footerBtn"]:not([class*="picker"]):not([class*="Primary"]):hover:not(:disabled),
+[data-win-classic] [class*="propsBtn"]:not([class*="Primary"]):hover,
+[data-win-classic] [class*="browseBtn"]:hover,
+[data-win-classic] [class*="pageSetupBtn"]:not([class*="Primary"]):hover,
+[data-win-classic] [class*="fontBtn"]:not([class*="Primary"]):hover,
+[data-win-classic] [class*="goToLineBtn"]:not([class*="Primary"]):hover,
+[data-win-classic] footer [class*="btnCancel"]:hover,
+[data-win-classic] [class*="editActions"] [class*="btnCancel"]:hover,
+[data-win-classic] footer .btn:not([class*="Primary"]):hover,
+[data-win-classic] [class*="actions"] [class*="actionBtn"]:not([class*="Primary"]):not([class*="Icon"]):hover {
+  background: var(--win-dialog-btn-bg-hover);
+  border-color: var(--win-dialog-btn-border-hover);
+}
+
+[data-win-classic] .winDialogBtnPrimary,
+[data-win-classic] [class*="footerBtnPrimary"],
+[data-win-classic] [class*="propsBtnPrimary"],
+[data-win-classic] [class*="pageSetupBtnPrimary"],
+[data-win-classic] [class*="fontBtnPrimary"],
+[data-win-classic] [class*="goToLineBtnPrimary"],
+[data-win-classic] footer [class*="btnPrimary"],
+[data-win-classic] [class*="editActions"] [class*="btnPrimary"],
+[data-win-classic] footer .btnPrimary,
+[data-win-classic] [class*="footer"] .btnPrimary,
+[data-win-classic] [class*="actions"] [class*="actionBtnPrimary"]:not([class*="Icon"]),
+[data-win-classic] [class*="acceptBtn"] {
+  box-sizing: border-box;
+  min-width: 82px;
+  height: 26px;
+  padding: 0 14px;
+  border-radius: 3px;
+  border-color: var(--win-dialog-btn-primary-border);
+  background: var(--win-dialog-btn-primary-bg);
+  box-shadow: var(--win-dialog-btn-primary-shadow);
+  font-family: var(--win-font);
+  font-size: var(--win-font-size);
+  font-weight: 600;
+  line-height: 24px;
+  color: var(--win-dialog-btn-primary-text);
+  cursor: pointer;
+}
+
+[data-win-classic] .winDialogBtnPrimary:hover:not(:disabled),
+[data-win-classic] [class*="footerBtnPrimary"]:hover:not(:disabled),
+[data-win-classic] [class*="propsBtnPrimary"]:hover,
+[data-win-classic] [class*="pageSetupBtnPrimary"]:hover,
+[data-win-classic] [class*="fontBtnPrimary"]:hover,
+[data-win-classic] [class*="goToLineBtnPrimary"]:hover,
+[data-win-classic] footer [class*="btnPrimary"]:hover:not(:disabled),
+[data-win-classic] [class*="editActions"] [class*="btnPrimary"]:hover:not(:disabled),
+[data-win-classic] footer .btnPrimary:hover,
+[data-win-classic] [class*="actions"] [class*="actionBtnPrimary"]:not([class*="Icon"]):hover,
+[data-win-classic] [class*="acceptBtn"]:hover {
+  background: var(--win-dialog-btn-primary-bg-hover);
+  border-color: var(--win-dialog-btn-primary-border-hover);
+  color: var(--win-dialog-btn-primary-text);
+}
+
+[data-win-classic] footer button,
+[data-win-classic] [class*="footer"] button,
+[data-win-classic] [class*="Footer"] button {
+  min-width: 82px;
+  min-height: 26px;
+}
+
+[data-theme="dark"] [data-win-classic] footer button:not([class*="Primary"]),
+[data-theme="dark"] [data-win-classic] [class*="footer"] button:not([class*="Primary"]),
+[data-theme="dark"] [data-win-classic] [class*="Footer"] button:not([class*="Primary"]),
+[data-theme="dark"] [data-win-classic] [class*="btn"]:not([class*="title"]):not([class*="toolbar"]):not([class*="menu"]):not([class*="Menu"]):not([class*="info"]):not([class*="find"]):not([class*="Primary"]) {
+  color: var(--win-text);
+}
+
+[data-theme="dark"] [data-win-classic] input:not([type="checkbox"]):not([type="radio"]),
+[data-theme="dark"] [data-win-classic] textarea {
+  color: var(--win-text);
+  background: var(--win-panel-bg) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="titleBar"] button,
+[data-theme="dark"] [data-win-classic] [class*="titleClose"] {
+  color: #fff;
+}
+
+/* ─── Modo oscuro: anula colores fijos en todos los diálogos clásicos ─── */
+[data-theme="dark"] [data-win-classic] [class*="dialog"],
+[data-theme="dark"] [data-win-classic] [class*="window"]:not([class*="windowMax"]) {
+  background: var(--win-surface) !important;
+  color: var(--win-text) !important;
+  border-color: var(--win-border) !important;
+  box-shadow: var(--win-shadow) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuBar"] {
+  background: var(--win-menu-bar-bg) !important;
+  border-bottom-color: var(--win-border) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuTrigger"] {
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuTrigger"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="menuTriggerActive"] {
+  background: var(--win-table-row-hover) !important;
+  border-color: var(--win-border-dark) !important;
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuTriggerActive"] {
+  background: var(--win-panel-bg) !important;
+  border-bottom-color: var(--win-panel-bg) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuDropdown"] {
+  background: var(--win-panel-bg) !important;
+  border-color: var(--win-border-dark) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuItem"]:not(:hover):not(:focus-visible) {
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuShortcut"] {
+  color: var(--win-text-dim);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuItem"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="menuItem"]:focus-visible {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuItem"]:hover [class*="menuShortcut"],
+[data-theme="dark"] [data-win-classic] [class*="menuItem"]:focus-visible [class*="menuShortcut"] {
+  color: var(--win-list-selected-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="actionBtn"]:not([class*="Icon"]):not([class*="Primary"]),
+[data-theme="dark"] [data-win-classic] [class*="exportBtn"]:not([class*="Icon"]):not([class*="Label"]):not([class*="Action"]),
+[data-theme="dark"] [data-win-classic] [class*="exportSplit"]:not([class*="Icon"]):not([class*="Label"]):not([class*="Action"]),
+[data-theme="dark"] [data-win-classic] [class*="exitBtn"],
+[data-theme="dark"] [data-win-classic] [class*="choiceBtn"],
+[data-theme="dark"] [data-win-classic] [class*="infoBtn"],
+[data-theme="dark"] [data-win-classic] [class*="payEditBtn"],
+[data-theme="dark"] [data-win-classic] [class*="toolbarBtn"] {
+  background: var(--win-btn-bg) !important;
+  color: var(--win-text) !important;
+  border-color: var(--win-border) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="actionBtn"]:hover:not([class*="Icon"]):not([class*="Primary"]),
+[data-theme="dark"] [data-win-classic] [class*="exportBtn"]:hover:not([class*="Icon"]):not([class*="Label"]):not([class*="Action"]),
+[data-theme="dark"] [data-win-classic] [class*="exportSplit"]:hover:not([class*="Icon"]):not([class*="Label"]):not([class*="Action"]),
+[data-theme="dark"] [data-win-classic] [class*="exitBtn"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="choiceBtn"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="infoBtn"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="payEditBtn"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="toolbarBtn"]:hover {
+  filter: brightness(1.12);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="exportSplitMain"],
+[data-theme="dark"] [data-win-classic] [class*="exportSplitCaret"] {
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="exportSplitMain"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="exportSplitCaret"]:hover {
+  background: var(--win-table-row-hover) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="exportMenuList"] {
+  background: var(--win-panel-bg) !important;
+  border-color: var(--win-border) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="exportMenuItem"]:not(:hover):not(:focus-visible) {
+  background: transparent !important;
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="previewWrap"] {
+  background: var(--win-preview-bg) !important;
+  border-color: var(--win-border-dark) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="previewPaper"] {
+  background: var(--win-preview-paper) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="goToLineDialog"] {
+  background: var(--win-surface) !important;
+  border-color: var(--win-border) !important;
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="tableWrap"],
+[data-theme="dark"] [data-win-classic] [class*="scrollArea"] {
+  background: var(--win-panel-bg);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="copiesIcon"],
+[data-theme="dark"] [data-win-classic] [class*="logoFrame"] {
+  background: var(--win-panel-bg) !important;
+  border-color: var(--win-border) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="body"],
+[data-theme="dark"] [data-win-classic] [class*="main"],
+[data-theme="dark"] [data-win-classic] [class*="footer"]:not([class*="title"]) {
+  background: transparent;
+  color: var(--win-text);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="note"],
+[data-theme="dark"] [data-win-classic] [class*="progress"],
+[data-theme="dark"] [data-win-classic] [class*="emptyMsg"],
+[data-theme="dark"] [data-win-classic] [class*="emptyHint"],
+[data-theme="dark"] [data-win-classic] [class*="warning"] {
+  color: var(--win-text-dim) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="updateLink"],
+[data-theme="dark"] [data-win-classic] [class*="docLink"] {
+  color: var(--win-link) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="sideLabel"] {
+  color: var(--win-link) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="rowEven"] {
+  background: var(--win-table-row-even) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="rowOdd"] {
+  background: var(--win-table-row-odd) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="rowEven"]:hover,
+[data-theme="dark"] [data-win-classic] [class*="rowOdd"]:hover {
+  background: var(--win-table-row-hover) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="totalsRow"] td,
+[data-theme="dark"] [data-win-classic] tr[class*="total"] td {
+  background: var(--win-table-totals-row-bg) !important;
+  border-color: var(--win-border) !important;
+  color: var(--win-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] th,
+[data-theme="dark"] [data-win-classic] td {
+  border-color: var(--win-table-border) !important;
+  color: var(--win-text);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="menuSeparator"] {
+  background: var(--win-border) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="select"]:not(select),
+[data-theme="dark"] [data-win-classic] [class*="input"],
+[data-theme="dark"] [data-win-classic] [class*="findInput"] {
+  background-color: var(--win-field-bg) !important;
+  color: var(--win-text) !important;
+  border-color: var(--win-input-border) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="propsDialog"],
+[data-theme="dark"] [data-win-classic] [class*="fontDialog"],
+[data-theme="dark"] [data-win-classic] [class*="pageSetupDialog"],
+[data-theme="dark"] [data-win-classic] [class*="goToLineDialog"] {
+  color: var(--win-text);
+  box-shadow: var(--win-shadow) !important;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="propsCheck"],
+[data-theme="dark"] [data-win-classic] [class*="pageSetupRadio"],
+[data-theme="dark"] [data-win-classic] [class*="propsRadio"],
+[data-theme="dark"] [data-win-classic] [class*="pageSetupFieldRow"],
+[data-theme="dark"] [data-win-classic] [class*="pageSetupMarginField"],
+[data-theme="dark"] [data-win-classic] [class*="fontListLabel"],
+[data-theme="dark"] [data-win-classic] [class*="fontSampleLabel"],
+[data-theme="dark"] [data-win-classic] [class*="fontScriptRow"] {
+  color: var(--win-text);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="propsCheckDisabled"] {
+  color: var(--win-text-dim) !important;
+  opacity: 0.85;
+}
+
+[data-theme="dark"] [data-win-classic] .winDialogBtnPrimary,
+[data-theme="dark"] [data-win-classic] [class*="BtnPrimary"],
+[data-theme="dark"] [data-win-classic] [class*="btnPrimary"],
+[data-theme="dark"] [data-win-classic] [class*="acceptBtn"],
+[data-theme="dark"] [data-win-classic] [class*="actionBtnPrimary"]:not([class*="Icon"]) {
+  border-color: var(--win-dialog-btn-primary-border) !important;
+  background: var(--win-dialog-btn-primary-bg) !important;
+  box-shadow: var(--win-dialog-btn-primary-shadow) !important;
+  color: var(--win-dialog-btn-primary-text) !important;
+  font-weight: 600;
+  outline-color: var(--win-focus-outline) !important;
+}
+
+[data-theme="dark"] [data-win-classic] .winDialogBtnPrimary:hover:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="BtnPrimary"]:hover:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="btnPrimary"]:hover:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="acceptBtn"]:hover:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="actionBtnPrimary"]:not([class*="Icon"]):hover:not(:disabled) {
+  background: var(--win-dialog-btn-primary-bg-hover) !important;
+  border-color: var(--win-dialog-btn-primary-border-hover) !important;
+  color: var(--win-dialog-btn-primary-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] .winDialogBtnPrimary:active:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="BtnPrimary"]:active:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="btnPrimary"]:active:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="acceptBtn"]:active:not(:disabled),
+[data-theme="dark"] [data-win-classic] [class*="actionBtnPrimary"]:not([class*="Icon"]):active:not(:disabled) {
+  background: var(--win-dialog-btn-primary-bg-active) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-win-classic] select[size]:not([size="1"]) option:checked {
+  background: var(--win-list-selected-bg);
+  color: var(--win-list-selected-text);
+}
+
+[data-win-classic] select[size]:not([size="1"]) option:hover:not(:checked) {
+  background: var(--win-picker-hover);
+  color: var(--win-text);
+}
+
+[data-theme="dark"] [data-win-classic] [class*="pageSetupPreviewPage"] {
+  box-shadow:
+    0 2px 10px rgba(0, 0, 0, 0.55),
+    1px 1px 0 var(--win-page-paper-shadow-in) inset,
+    -1px -1px 0 var(--win-page-paper-shadow-out) inset;
+}
+
+[data-theme="dark"] [data-win-classic] [class*="propsActions"] {
+  border-top-color: var(--win-border) !important;
+}
+
+/* ─── Entrada / salida de cuadros (rápida y ligera) ─── */
+:root {
+  --app-dialog-ease: cubic-bezier(0.25, 0.9, 0.35, 1);
+  --app-dialog-dur: 0.12s;
+  --app-dialog-overlay-dur: 0.08s;
+}
+
+@keyframes appDialogOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes appDialogPanelIn {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes appDialogPartIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Barras de chrome: menú, meta, toolbar — sin animación ni recorte */
+[data-win-classic] [class*="toolbar"],
+[data-win-classic] [class*="meta"],
+[data-win-classic] [class*="infoBar"],
+[data-win-classic] [class*="titleBar"],
+[data-win-classic] [class*="TitleBar"] {
+  flex-shrink: 0 !important;
+  position: relative;
+  z-index: 4;
+  overflow: visible !important;
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+[data-win-classic] [class*="menuBar"] {
+  flex-shrink: 0 !important;
+  position: relative;
+  z-index: 6;
+  overflow: visible !important;
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+[data-win-classic] [class*="menuBar"],
+[data-win-classic] [class*="toolbar"] {
+  display: flex !important;
+  align-items: center !important;
+}
+
+[data-win-classic] [class*="menuBar"] [class*="menuTrigger"] {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 0;
+  border: 1px solid transparent;
+  background: transparent;
+}
+
+[data-win-classic] [class*="menuBar"] [class*="menuTrigger"]:hover,
+[data-win-classic] [class*="menuBar"] [class*="menuTriggerActive"] {
+  border-color: var(--win-border-dark) !important;
+  background: var(--win-table-row-hover) !important;
+  color: var(--win-text) !important;
+}
+
+[data-win-classic] [class*="menuBar"] [class*="menuTriggerActive"] {
+  background: var(--win-panel-bg) !important;
+  border-bottom-color: var(--win-panel-bg) !important;
+  position: relative;
+  z-index: 12;
+}
+
+[data-win-classic] [class*="menuDropdown"] [class*="menuItem"] {
+  display: grid;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: var(--win-text);
+  cursor: default;
+  text-align: left;
+}
+
+[data-win-classic] [class*="menuDropdown"] [class*="menuItem"]:hover,
+[data-win-classic] [class*="menuDropdown"] [class*="menuItem"]:focus-visible {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text) !important;
+}
+
+[data-win-classic] [class*="menuDropdown"] [class*="menuItem"]:hover [class*="menuShortcut"],
+[data-win-classic] [class*="menuDropdown"] [class*="menuItem"]:focus-visible [class*="menuShortcut"] {
+  color: var(--win-list-selected-text) !important;
+}
+
+/* ─── Filas / ítems seleccionados (tablas y listas en todos los cuadros) ─── */
+[data-win-classic] tbody tr[class*="rowSelected"],
+[data-win-classic] tbody tr[class*="rowSelectedPayment"],
+[data-win-classic] [class*="listRowSelected"] {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text) !important;
+  outline: 2px solid var(--win-list-selected-outline) !important;
+  outline-offset: -2px;
+}
+
+[data-win-classic] tbody tr[class*="rowSelected"] td,
+[data-win-classic] tbody tr[class*="rowSelectedPayment"] td {
+  background: transparent !important;
+  color: inherit !important;
+  font-weight: 600;
+}
+
+[data-win-classic] tbody tr[class*="rowSelected"]:hover,
+[data-win-classic] tbody tr[class*="rowEven"][class*="rowSelected"],
+[data-win-classic] tbody tr[class*="rowOdd"][class*="rowSelected"],
+[data-win-classic] tbody tr[class*="rowSelectedPayment"]:hover,
+[data-win-classic] [class*="listRowSelected"]:hover {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text) !important;
+}
+
+[data-theme="dark"] [data-win-classic] tbody tr[class*="rowSelected"],
+[data-theme="dark"] [data-win-classic] tbody tr[class*="rowSelectedPayment"],
+[data-theme="dark"] [data-win-classic] tbody tr[class*="rowEven"][class*="rowSelected"]:hover,
+[data-theme="dark"] [data-win-classic] tbody tr[class*="rowOdd"][class*="rowSelected"]:hover,
+[data-theme="dark"] [data-win-classic] tbody tr[class*="rowSelectedPayment"]:hover {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text) !important;
+}
+
+[data-win-classic] [class*="menuBar"] [class*="menuDropdown"] {
+  position: absolute !important;
+  top: 100% !important;
+  z-index: 30 !important;
+}
+
+/* Popups flotantes (caja, calendario, etc.) por encima del toolbar */
+[data-win-classic] [class*="popup"],
+[data-win-classic] [class*="Popup"] {
+  z-index: 120 !important;
+}
+
+[data-win-classic] [class*="shell"],
+[data-win-classic] [class*="Shell"] {
+  position: relative;
+  z-index: 6;
+  overflow: visible !important;
+}
+
+[data-win-classic] [class*="meta"],
+[data-win-classic] [class*="metaRow"] {
+  overflow: visible !important;
+}
+
+@keyframes appDialogActionIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes appDialogOverlayOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes appDialogPanelOut {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.97) translateY(8px);
+  }
+}
+
+/* Maximizar / restaurar: sin animación de apertura ni transiciones CSS en conflicto */
+[data-win-classic][data-window-size-toggle] {
+  animation: none !important;
+  transition: none !important;
+}
+
+[data-win-classic][data-window-size-toggle] > * {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Evita crossfade de toda la página si el navegador usa View Transitions */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+[data-app-dialog-overlay] {
+  animation: appDialogOverlayIn var(--app-dialog-overlay-dur) var(--app-dialog-ease) both;
+}
+
+/* Anexo precargado offscreen; al pasar a open se reproduce la animación de entrada. */
+[data-app-dialog-gate="warm"] {
+  position: fixed !important;
+  left: -140vw !important;
+  top: 0 !important;
+  width: 100vw;
+  height: 100vh;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+  content-visibility: hidden;
+}
+
+[data-app-dialog-gate="warm"] [data-app-dialog-overlay],
+[data-app-dialog-gate="warm"] [data-win-classic] {
+  animation: none !important;
+}
+
+[data-app-dialog-gate="open"] [data-app-dialog-overlay] {
+  animation: appDialogOverlayIn var(--app-dialog-overlay-dur) var(--app-dialog-ease) both;
+}
+
+[data-app-dialog-gate="open"] [data-win-classic] {
+  animation: appDialogPanelIn var(--app-dialog-dur) var(--app-dialog-ease) both;
+}
+
+[data-app-dialog-overlay][data-app-dialog-closing] {
+  animation: appDialogOverlayOut 0.22s var(--app-dialog-ease) both;
+  pointer-events: none;
+}
+
+[data-win-classic] {
+  transform-origin: center center;
+  animation: appDialogPanelIn var(--app-dialog-dur) var(--app-dialog-ease) both;
+}
+
+[data-win-classic][data-app-dialog-closing] {
+  animation: appDialogPanelOut var(--app-dialog-dur) var(--app-dialog-ease) both;
+  pointer-events: none;
+}
+
+[data-win-classic][data-app-dialog-closing] > *,
+[data-win-classic][data-app-dialog-closing] footer button,
+[data-win-classic][data-app-dialog-closing] [class*="choiceBtn"],
+[data-win-classic][data-app-dialog-closing] [class*="editActions"] button {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* Sin cascada al abrir: el panel entra como un solo bloque */
+[data-win-classic] > *:not([class*="searchBarShell"]):not([class*="findBarShell"]) {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+[data-win-classic] footer button,
+[data-win-classic] [class*="choiceBtn"],
+[data-win-classic] [class*="editActions"] button {
+  animation: none !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+/* ─── Barra de búsqueda (una sola transición max-height, sin parpadeos) ─── */
+[data-win-classic] [class*="searchBarShell"],
+[data-win-classic] [class*="findBarShell"] {
+  --search-bar-max: 2.25rem;
+  --search-bar-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --search-bar-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --search-bar-dur-open: 0.24s;
+  --search-bar-dur-close: 0.26s;
+  flex-shrink: 0 !important;
+  position: relative;
+  z-index: 3;
+  display: block !important;
+  max-height: 0;
+  overflow: hidden !important;
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  transition: max-height var(--search-bar-dur-close) var(--search-bar-ease-in);
+  will-change: max-height;
+}
+
+[data-win-classic] [class*="searchBarShell"][data-open="true"],
+[data-win-classic] [class*="findBarShell"][data-open="true"] {
+  max-height: var(--search-bar-max);
+  pointer-events: auto;
+  transition: max-height var(--search-bar-dur-open) var(--search-bar-ease-out);
+}
+
+[data-win-classic] [class*="searchBarShell"][data-open="false"],
+[data-win-classic] [class*="findBarShell"][data-open="false"] {
+  max-height: 0;
+  pointer-events: none;
+  transition: max-height var(--search-bar-dur-close) var(--search-bar-ease-in);
+}
+
+[data-win-classic] [class*="searchBarShell"] [class*="searchBar"],
+[data-win-classic] [class*="findBarShell"] [class*="findBar"] {
+  box-sizing: border-box;
+  width: 100%;
+  height: var(--search-bar-max);
+  min-height: var(--search-bar-max);
+  overflow: hidden;
+  align-items: center;
+  padding-block: 0;
+  padding-inline: 8px;
+}
+
+[data-win-classic] [class*="searchBarShell"] [class*="searchLabel"],
+[data-win-classic] [class*="findBarShell"] [class*="findBar"] label {
+  display: flex;
+  align-items: center;
+  height: 26px;
+  line-height: 26px;
+}
+
+[data-win-classic] [class*="searchBarShell"] [class*="searchInput"],
+[data-win-classic] [class*="findBarShell"] [class*="findInput"] {
+  height: 22px;
+  margin: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-win-classic] [class*="searchBarShell"],
+  [data-win-classic] [class*="findBarShell"] {
+    transition: none !important;
+    will-change: auto;
+  }
+
+  [data-win-classic] [class*="searchBarShell"][data-open="false"],
+  [data-win-classic] [class*="findBarShell"][data-open="false"] {
+    display: none;
+  }
+
+  [data-win-classic] [class*="searchBarShell"][data-open="true"],
+  [data-win-classic] [class*="findBarShell"][data-open="true"] {
+    max-height: var(--search-bar-max);
+    pointer-events: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-app-dialog-overlay],
+  [data-app-dialog-overlay][data-app-dialog-closing],
+  [data-win-classic],
+  [data-win-classic][data-app-dialog-closing],
+  [data-win-classic] > *,
+  [data-win-classic] footer button,
+  [data-win-classic] [class*="choiceBtn"],
+  [data-win-classic] [class*="editActions"] button {
+    animation: none;
+    filter: none;
+    transform: none;
+  }
+}
+
+/* Flecha ▼ unificada: todos los select win-classic (prioridad final) */
+[data-win-classic] select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  padding: 0 18px 0 4px !important;
+  background-color: var(--win-field-bg) !important;
+  background-image: var(--win-select-caret) !important;
+  background-repeat: no-repeat !important;
+  background-position: right 6px center !important;
+  background-size: 6px 4px !important;
+}
+
+[data-theme="dark"] [data-win-classic] select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  padding: 0 18px 0 4px !important;
+  background-color: var(--win-field-bg) !important;
+  background-image: var(--win-select-caret) !important;
+  background-repeat: no-repeat !important;
+  background-position: right 6px center !important;
+  background-size: 6px 4px !important;
+  color: var(--win-text) !important;
+  border-color: var(--win-input-border) !important;
+}

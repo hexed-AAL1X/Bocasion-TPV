@@ -1,0 +1,204 @@
+/* Contenedor y trigger compartidos: calendario + selector de caja */
+.shell {
+  position: relative;
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  vertical-align: middle;
+  flex: 0 0 auto;
+}
+
+.trigger {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  min-width: 108px;
+  height: 22px;
+  padding: 0 18px 0 4px;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  font: inherit;
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  line-height: 20px;
+  color: var(--win-text);
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.trigger:hover {
+  border-color: var(--win-border-dark);
+  filter: brightness(1.04);
+}
+
+.triggerOpen {
+  border-color: #316ac5;
+  outline: 1px solid #b8d4f5;
+  outline-offset: 0;
+}
+
+:global([data-theme="dark"]) .triggerOpen {
+  outline-color: var(--win-focus-outline);
+}
+
+.triggerText {
+  display: block;
+  overflow: hidden;
+  text-overflow: clip;
+  font-variant-numeric: tabular-nums;
+}
+
+.triggerCaret {
+  composes: winPickerCaret from global;
+}
+
+.popup {
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  z-index: 120;
+  min-width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--win-border-dark);
+  background: var(--win-picker-bg);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 6px 18px rgba(0, 0, 0, 0.22);
+  color: var(--win-text);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  transform-origin: top left;
+  animation: pickerPopIn 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.popupFloating {
+  /* top/left/width se aplican inline vía portal */
+  min-width: unset;
+}
+
+@keyframes pickerPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 8px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+}
+
+.headerNav {
+  display: grid;
+  grid-template-columns: 28px 1fr 28px;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 4px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.headerTitle {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 22px;
+  margin: 0 auto;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: #fff;
+  font-size: 10px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.navBtn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.body {
+  padding: 6px 8px 4px;
+  background: var(--win-picker-body-bg);
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 6px 10px 7px;
+  border: 0;
+  border-top: 1px solid var(--win-border);
+  background: var(--win-picker-footer-bg);
+  font: inherit;
+  font-size: 10px;
+  color: var(--win-text-muted);
+  text-align: left;
+  cursor: default;
+}
+
+.footerBtn {
+  cursor: pointer;
+}
+
+.footerBtn:hover {
+  background: var(--win-table-row-hover);
+}
+
+.footerMark {
+  display: block;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.footerMarkRing {
+  box-shadow: inset 0 0 0 1.5px #d44a3a;
+  background: transparent;
+}
+
+.footerMarkSolid {
+  background: linear-gradient(180deg, #e04a3a 0%, #c42b1c 100%);
+}
+
+.footerLabel {
+  color: var(--win-text-dim);
+  flex-shrink: 0;
+}
+
+.footerValue {
+  min-width: 0;
+  font-weight: 600;
+  color: var(--win-text);
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}

@@ -1,0 +1,759 @@
+.terminal {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--bg);
+}
+
+/* Fila única: Lectura de código | RUC/DNI | Nombre */
+.entryBand {
+  display: flex;
+  margin: 16px 20px 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.entryExtraCols {
+  display: flex;
+  flex: 0 0 auto;
+  max-width: 700px;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    max-width 0.52s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.52s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.entryExtraColsOpen {
+  max-width: 700px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.entryExtraColsHidden {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-12px);
+  pointer-events: none;
+}
+
+.entryInputLocked,
+.entryInputLocked:read-only {
+  cursor: not-allowed;
+  opacity: 0.55;
+  background: var(--bg);
+}
+
+.entryInputLocked::placeholder {
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.entryInput:disabled {
+  cursor: not-allowed;
+}
+
+.entryCol {
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+.entryBand > .entryCol {
+  flex: 1;
+}
+
+.entryCol:last-child {
+  border-right: none;
+}
+
+.entryColNombre .entryHeader {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.entryHeader {
+  font-size: var(--fs-col-header);
+  font-weight: 600;
+  color: var(--text-dim);
+  padding: 8px 12px 4px;
+  background-color: var(--entry-header-bg);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+
+.reniecMark {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--on-primary);
+  background-color: var(--reniec-bg);
+  padding: 3px 6px;
+  border-radius: 3px;
+  line-height: 1;
+  transition:
+    transform 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.38s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reniecMarkActive {
+  animation: reniecPulse 1.15s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.reniecMarkDone {
+  background-color: var(--primary);
+  box-shadow: 0 0 0 1px rgba(var(--primary-rgb), 0.35), 0 0 14px rgba(var(--primary-rgb), 0.35);
+  transform: translateY(-50%) scale(1.04);
+}
+
+@keyframes reniecPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(var(--primary-rgb), 0.35);
+    transform: translateY(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(var(--primary-rgb), 0.12);
+    transform: translateY(-50%) scale(1.06);
+  }
+}
+
+.entryColNombreLoading .entryHeader {
+  color: var(--primary-dark);
+}
+
+.entryColNombreVerified .entryHeader {
+  color: var(--text);
+}
+
+.nombreFieldShell {
+  position: relative;
+  flex: 1;
+  display: flex;
+  min-height: 44px;
+  overflow: hidden;
+}
+
+.nombreFieldShell .entryInput {
+  width: 100%;
+}
+
+.nombreLoadingOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: var(--card);
+  animation: nombreOverlayIn 0.34s cubic-bezier(0.16, 1, 0.3, 1) both;
+  overflow: hidden;
+}
+
+.lookupSweep {
+  position: absolute;
+  inset: -20% -40%;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    rgba(var(--primary-rgb), 0.08) 46%,
+    rgba(var(--primary-rgb), 0.24) 50%,
+    rgba(var(--primary-rgb), 0.08) 54%,
+    transparent 62%
+  );
+  animation: lookupSweepMove 1.35s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+  pointer-events: none;
+}
+
+.lookupLabel {
+  position: relative;
+  z-index: 1;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-dark);
+  animation: lookupLabelPulse 1.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.lookupDots {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 12px;
+  margin-left: 1px;
+}
+
+.lookupDots span {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: lookupDotBounce 0.9s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.lookupDots span:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.lookupDots span:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+@keyframes nombreOverlayIn {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: scale(1);
+  }
+}
+
+@keyframes lookupSweepMove {
+  from {
+    transform: translateX(-55%);
+  }
+  to {
+    transform: translateX(55%);
+  }
+}
+
+@keyframes lookupLabelPulse {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes lookupDotBounce {
+  0%,
+  70%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  35% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+.entryInputLookup {
+  animation: docFieldPulse 1.25s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.entryInputVerified {
+  animation: docFieldSuccess 0.62s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes docFieldPulse {
+  0%,
+  100% {
+    box-shadow: inset 0 0 0 2px rgba(var(--primary-rgb), 0.28);
+    background: var(--card);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 2px rgba(var(--primary-rgb), 0.72),
+      0 0 16px rgba(var(--primary-rgb), 0.18);
+    background: rgba(var(--primary-rgb), 0.04);
+  }
+}
+
+@keyframes docFieldSuccess {
+  from {
+    box-shadow: inset 0 0 0 2px rgba(var(--primary-rgb), 0.75);
+    filter: brightness(1.06);
+  }
+  to {
+    box-shadow: inset 0 0 0 2px rgba(var(--primary-rgb), 0.35);
+    filter: brightness(1);
+  }
+}
+
+.entryInputNombreReveal {
+  animation: identityNameReveal 0.68s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes identityNameReveal {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(8px) scale(0.985);
+    letter-spacing: 0.12em;
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+    letter-spacing: 0.03em;
+  }
+}
+
+.entryInputUnlock {
+  animation: codeFieldUnlock 0.58s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes codeFieldUnlock {
+  from {
+    opacity: 0.55;
+    filter: blur(3px);
+    transform: translateX(-4px);
+    box-shadow: inset 0 0 0 2px rgba(var(--primary-rgb), 0.15);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateX(0);
+    box-shadow: inset 0 0 0 2px var(--primary-light);
+  }
+}
+
+.entryInput {
+  flex: 1;
+  min-height: 44px;
+  border: none;
+  background: var(--card);
+  color: var(--text);
+  font-size: var(--fs-ui);
+  font-weight: 600;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.entryInput:focus {
+  background: var(--input-focus-bg);
+  box-shadow: inset 0 0 0 2px var(--primary-light);
+}
+
+.entryInputDoc {
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+
+.entryInputNombre {
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--text);
+}
+
+.lookupError {
+  margin: 8px 20px 0;
+  padding: 8px 12px;
+  font-size: var(--fs-ui);
+  color: var(--warning-text);
+  background: rgba(var(--accent-rgb), 0.12);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border-radius: 4px;
+}
+
+/* ─── Product search dropdown ─── */
+
+.searchDrop {
+  margin: 4px 20px 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  animation: sdFadeIn 0.18s ease-out;
+}
+
+.searchDropHint {
+  margin: 0;
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--entry-header-bg);
+  border-bottom: 1px solid var(--border);
+}
+
+@keyframes sdFadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.sdHighlight {
+  background: transparent;
+  color: var(--primary-dark);
+  text-decoration: underline;
+  text-decoration-color: var(--primary);
+  text-underline-offset: 2px;
+}
+
+.searchDropScroll {
+  max-height: 240px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-gutter: stable;
+}
+
+.searchDropTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.searchDropTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 7px 12px;
+  font: inherit;
+  color: var(--primary-dark);
+  border-bottom: 1px solid var(--border);
+  background: var(--entry-header-bg);
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  box-sizing: border-box;
+}
+
+.sdRow {
+  cursor: pointer;
+}
+
+.sdRow:hover:not(.sdRowActive) {
+  background: rgba(var(--primary-rgb), 0.1);
+}
+
+.searchDropScroll[data-keyboard-nav="true"] .sdRow:hover:not(.sdRowActive) {
+  background: transparent;
+}
+
+.sdRowActive {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text);
+  outline: 2px solid var(--win-list-selected-outline);
+  outline-offset: -2px;
+}
+
+.sdRowActive td {
+  color: inherit !important;
+  font-weight: 600;
+}
+
+.sdRow td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border);
+  font: inherit;
+  color: inherit;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
+
+.sdColDesc {
+  width: 50%;
+  text-align: left;
+}
+
+.sdColCode {
+  width: 18%;
+  text-align: center;
+}
+
+.sdColUm {
+  width: 12%;
+  text-align: center;
+}
+
+.sdColPrice {
+  width: 20%;
+  text-align: right;
+}
+
+/* ─── End search dropdown ─── */
+
+.gridWrap {
+  flex: 1;
+  margin: 8px 20px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.gridWrapCatalog {
+  margin: 16px 20px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.emptyMsg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin: 0;
+  color: var(--text-dim);
+  font-size: var(--fs-ui);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-cell);
+  table-layout: fixed;
+}
+
+.table th {
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  font-size: var(--fs-col-header);
+  font-weight: 600;
+  color: var(--text-dim);
+  text-align: left;
+  padding: 7px 10px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 5px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-size: 11px;
+}
+
+.colCode { width: 80px; }
+.colDesc { overflow: hidden; text-overflow: clip; white-space: nowrap; }
+.colNum { width: 80px; text-align: right !important; }
+.colUm { width: 50px; text-align: center !important; }
+.colTotal { width: 90px; text-align: right !important; }
+
+.cellRight { text-align: right; font-family: "Geist Mono", ui-monospace, monospace; }
+.cellCenter { text-align: center; }
+.cellBold { font-weight: 700; }
+
+@keyframes saleLineEnter {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+    background-color: rgba(var(--primary-rgb), 0.18);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    background-color: transparent;
+  }
+}
+
+@keyframes saleLineExit {
+  0% {
+    opacity: 1;
+    background-color: transparent;
+  }
+  18% {
+    background-color: rgba(var(--danger-rgb), 0.22);
+  }
+  100% {
+    opacity: 0;
+    background-color: rgba(var(--danger-rgb), 0);
+  }
+}
+
+@keyframes saleLineExitCell {
+  0% {
+    opacity: 1;
+    transform: scaleY(1);
+    max-height: 2.5em;
+  }
+  100% {
+    opacity: 0;
+    transform: scaleY(0);
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom-width: 0;
+    line-height: 0;
+  }
+}
+
+@keyframes footerSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.table tbody tr.rowExit {
+  animation: saleLineExit 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
+  transform-origin: top center;
+}
+
+.table tbody tr.rowExit td {
+  animation: saleLineExitCell 0.38s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: top center;
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entryExtraCols,
+  .entryExtraColsOpen,
+  .entryExtraColsHidden {
+    transition: none;
+  }
+
+  .reniecMarkActive,
+  .entryInputLookup,
+  .nombreLoadingOverlay,
+  .lookupSweep,
+  .lookupLabel,
+  .lookupDots span,
+  .entryInputVerified,
+  .entryInputNombreReveal,
+  .entryInputUnlock {
+    animation: none !important;
+  }
+
+  .table tbody tr {
+    animation: none;
+  }
+
+  .table tbody tr.rowExit,
+  .table tbody tr.rowExit td {
+    animation: none;
+    opacity: 0;
+    transform: none;
+    max-height: 0;
+  }
+
+  .footerEnter {
+    animation: none;
+  }
+}
+
+.table tbody tr:hover {
+  background: rgba(var(--primary-rgb), 0.08);
+}
+
+.rowSelected {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text);
+  box-shadow: inset 3px 0 0 var(--win-list-selected-outline);
+}
+
+.rowSelected td {
+  color: inherit !important;
+  font-weight: 600;
+}
+
+/* ─── Footer: Navasoft-style totals ─── */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: -12px 20px 12px;
+  padding: 6px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  flex-shrink: 0;
+}
+
+.footerEnter {
+  animation: footerSlideIn 0.28s ease-out;
+}
+
+.footerHidden {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.footerMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.footerLabel {
+  font-weight: 600;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.footerValBlue {
+  font-weight: 700;
+  color: var(--link);
+  font-family: "Geist Mono", ui-monospace, monospace;
+  margin-right: 6px;
+}
+
+.footerTotal {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.footerTotalLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+}
+
+.footerTotalCurrency {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--link);
+}
+
+.footerTotalValue {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--link);
+  font-family: "Geist Mono", ui-monospace, monospace;
+}

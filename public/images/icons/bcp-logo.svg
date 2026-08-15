@@ -1,0 +1,5 @@
+<!-- Placeholder logo BCP (estilo marca) -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 32" aria-hidden="true">
+  <rect width="48" height="32" rx="4" fill="#ff6b00"/>
+  <text x="24" y="21" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="11" font-weight="bold">BCP</text>
+</svg>

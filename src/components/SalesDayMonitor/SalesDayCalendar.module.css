@@ -1,0 +1,119 @@
+.popupCalendar {
+  width: 212px;
+}
+
+.triggerCalendar {
+  min-width: 108px;
+}
+
+.weekdays,
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+}
+
+.weekdays {
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--win-picker-list-head-text);
+  text-align: center;
+}
+
+.weekday {
+  height: 16px;
+  line-height: 16px;
+}
+
+.grid {
+  gap: 2px 0;
+}
+
+.dayCell,
+.dayEmpty {
+  width: 28px;
+  height: 28px;
+  margin: 0 auto;
+}
+
+.dayCell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dayInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--win-text);
+  transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
+}
+
+.dayCell:hover:not(:disabled) .dayInner {
+  background: var(--win-picker-hover);
+}
+
+.daySelected .dayInner {
+  background: linear-gradient(180deg, #e04a3a 0%, #c42b1c 100%);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(160, 30, 20, 0.45);
+}
+
+.dayToday:not(.daySelected) .dayInner {
+  color: #c42b1c;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1.5px #d44a3a;
+}
+
+:global([data-theme="dark"]) .dayToday:not(.daySelected) .dayInner {
+  color: #f07060;
+}
+
+.dayDisabled {
+  cursor: default;
+}
+
+.dayDisabled .dayInner {
+  color: var(--win-text-dim);
+  opacity: 0.45;
+  font-weight: 400;
+}
+
+.dayDisabled:hover .dayInner {
+  background: transparent;
+}
+
+.salesDot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #2a7a3f;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+:global([data-theme="dark"]) .salesDot {
+  background: #4cd4a0;
+}
+
+.daySelected .salesDot {
+  background: #fff;
+}

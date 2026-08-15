@@ -1,0 +1,44 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Intranet Ventas",
+  "version": "0.1.0",
+  "identifier": "com.bocasion.bocasoft",
+  "build": {
+    "beforeDevCommand": "npm run gen:boot-theme && env -u ELECTRON_RUN_AS_NODE vite",
+    "devUrl": "http://localhost:5173",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Intranet Ventas — Bocasión S.A.C.",
+        "width": 1366,
+        "height": 768,
+        "minWidth": 1024,
+        "minHeight": 600,
+        "resizable": true,
+        "additionalBrowserArgs": "--disable-features=msSmartScreenProtection,ElasticOverscroll --renderer-process-limit=2 --disable-background-networking"
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["deb", "nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "category": "Business",
+    "shortDescription": "Punto de venta Bocasión",
+    "longDescription": "Intranet Ventas — sistema de punto de venta Bocasión S.A.C."
+  }
+}

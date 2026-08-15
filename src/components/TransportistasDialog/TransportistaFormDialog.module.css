@@ -1,0 +1,206 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dialog {
+  width: min(580px, 100%);
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border-dark);
+  box-shadow: var(--win-shadow);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+  overflow: hidden;
+}
+
+.titleBar {
+  flex-shrink: 0;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.closeBtn {
+  /* Estilo XP en winClassicDialog.css */
+}
+
+.body {
+  padding: 8px 12px 0;
+  overflow-y: auto;
+}
+
+.section {
+  composes: winShadePanel from global;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  composes: winShadeBar from global;
+  margin: 0;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+
+.formRow,
+.codigoRow {
+  display: grid;
+  grid-template-columns: 130px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.formLabel {
+  font-size: 11px;
+  color: var(--win-text);
+  text-align: left;
+}
+
+.formControl {
+  min-width: 0;
+}
+
+.codigoControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.field,
+.select,
+.inputCodigo,
+.fieldThird,
+.ubigeoCod,
+.ubigeoNom {
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.field,
+.select {
+  width: 100%;
+}
+
+.inputCodigo {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.tripleRow {
+  display: grid;
+  grid-template-columns: 130px 1fr auto 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+}
+
+.inlineLabel {
+  font-size: 11px;
+  color: var(--win-text);
+  white-space: nowrap;
+}
+
+.fieldThird {
+  min-width: 0;
+  width: 100%;
+}
+
+.ubicacionRow {
+  display: grid;
+  grid-template-columns: 130px 72px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+}
+
+.ubigeoCod {
+  width: 72px;
+}
+
+.ubigeoNom {
+  min-width: 0;
+  width: 100%;
+}
+
+.ubigeoHint {
+  font-size: 11px;
+  color: var(--win-text-muted);
+  white-space: nowrap;
+}
+
+.checkInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--win-text);
+  white-space: nowrap;
+}
+
+.radioRow {
+  display: flex;
+  gap: 16px;
+}
+
+.radioLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.footer {
+  composes: winShadeStrip winDialogFooter from global;
+}
+
+.footerBtn {
+  composes: winDialogBtn from global;
+}
+
+.footerBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+@media (max-width: 520px) {
+  .tripleRow {
+    grid-template-columns: 130px minmax(0, 1fr);
+  }
+
+  .inlineLabel {
+    grid-column: 1;
+  }
+
+  .fieldThird {
+    grid-column: 2;
+  }
+}

@@ -1,0 +1,281 @@
+:root {
+  --cash-count-row-highlight: #c8c878;
+  --cash-count-edit-col-bg: #d8d4c8;
+  --cash-count-edit-col-border: #c0bcb0;
+  --cash-count-coupon-text: #1a5fb4;
+}
+
+:global([data-theme="dark"]) {
+  --cash-count-row-highlight: #3d4828;
+  --cash-count-edit-col-bg: #243038;
+  --cash-count-edit-col-border: #3d4f5c;
+  --cash-count-coupon-text: #6eb5f0;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dialog {
+  width: 520px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border-dark);
+  box-shadow: var(--win-shadow);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+  overflow: hidden;
+}
+
+.titleBar {
+  flex-shrink: 0;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.closeBtn {
+  /* Estilo XP en winClassicDialog.css */
+}
+
+.intro {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 10px 12px 8px;
+  padding: 8px 10px;
+  background: var(--win-panel-bg);
+  border: 1px solid var(--win-border);
+}
+
+.introIcon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  object-fit: contain;
+}
+
+.introText {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--win-text);
+}
+
+.tableWrap {
+  margin: 0 12px;
+  border: 1px solid var(--win-border);
+  background: var(--win-panel-bg);
+  overflow: hidden;
+}
+
+.tableHead {
+  composes: winShadeStrip from global;
+  display: grid;
+  grid-template-columns: 1fr 120px 72px;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 0;
+  border-bottom: none;
+}
+
+.tableHeadSpacer {
+  grid-column: 1;
+}
+
+.tableHeadLabel {
+  grid-column: 2;
+  text-align: center;
+  font-size: var(--win-shade-bar-font-size);
+  font-weight: var(--win-shade-bar-font-weight);
+  letter-spacing: 0.04em;
+  color: var(--win-text);
+}
+
+.tableHeadEdit {
+  grid-column: 3;
+  background: var(--win-shade-bg);
+  min-height: 24px;
+}
+
+.list {
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 44px 1fr 120px 72px;
+  align-items: center;
+  min-height: 40px;
+  border-bottom: 1px solid var(--win-border);
+  background: var(--win-panel-bg);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.rowHighlight {
+  background: var(--cash-count-row-highlight);
+}
+
+.rowMain {
+  display: contents;
+}
+
+.rowIcon {
+  grid-column: 1;
+  width: 40px;
+  height: 36px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rowIcon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.couponIcon {
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--cash-count-coupon-text);
+  letter-spacing: 0.02em;
+}
+
+.rowLabel {
+  grid-column: 2;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--win-text);
+  padding-right: 8px;
+}
+
+.rowAmount {
+  grid-column: 3;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  color: var(--win-text);
+  text-align: right;
+  padding-right: 8px;
+}
+
+.rowAmountEmpty {
+  color: transparent;
+  user-select: none;
+}
+
+.editCell {
+  grid-column: 4;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  background: var(--cash-count-edit-col-bg);
+  border-left: 1px solid var(--cash-count-edit-col-border);
+  min-height: 40px;
+}
+
+.editBtn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--win-text-muted);
+  font-size: 11px;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.editBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
+  color: var(--win-text);
+}
+
+:global([data-theme="dark"]) .editBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.footer {
+  composes: winShadeStrip winDialogFooter from global;
+}
+
+.footerBtn {
+  composes: winDialogBtn from global;
+}
+
+.footerBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+.editOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  pointer-events: auto;
+}
+
+.editBox {
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border-dark);
+  box-shadow: var(--win-shadow);
+  overflow: hidden;
+}
+
+.editTitle {
+  composes: winShadeBar from global;
+  margin: 0;
+}
+
+.editInput {
+  width: calc(100% - 28px);
+  height: 24px;
+  margin: 12px 14px 0;
+  border: 1px solid var(--win-input-border);
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  text-align: right;
+  box-sizing: border-box;
+  background: var(--win-field-bg);
+  color: var(--win-text);
+}
+
+.editInput:focus {
+  outline: 1px dotted var(--win-focus-outline);
+  outline-offset: -2px;
+}
+
+.editFooter {
+  composes: winShadeStrip winDialogFooter from global;
+  margin-top: 12px;
+}

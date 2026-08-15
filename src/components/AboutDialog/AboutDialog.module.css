@@ -1,0 +1,218 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--overlay);
+}
+
+.dialog {
+  width: min(520px, calc(100vw - 32px));
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+  box-shadow:
+    0 0 0 1px #fff inset,
+    0 8px 24px rgba(0, 0, 0, 0.28);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--win-text);
+}
+
+.titleBar {
+  display: grid;
+  grid-template-columns: 20px 1fr 22px;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px 5px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+}
+
+.titleIcon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.titleClose {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.titleClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.body {
+  display: flex;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  background: var(--win-surface);
+}
+
+.brandCol {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.sideLabel {
+  margin: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a3a6e;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+  align-self: center;
+}
+
+.logoFrame {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 148px;
+  min-height: 72px;
+  padding: 10px 8px;
+  background: var(--win-panel-bg);
+  border: 1px solid var(--win-border);
+  box-shadow: 0 0 0 1px #fff inset;
+}
+
+.logo {
+  width: 100%;
+  max-width: 132px;
+  height: auto;
+  object-fit: contain;
+}
+
+.infoCol {
+  flex: 1;
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.company {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.copyright,
+.rights {
+  margin: 0 0 2px;
+}
+
+.updateLink {
+  display: inline-block;
+  margin: 8px 0 10px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--win-link);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+  text-align: left;
+}
+
+.updateLink:hover:not(:disabled) {
+  color: #551a8b;
+}
+
+.updateLink:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+
+.updateStatus {
+  margin: 0 0 8px;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.updateLatest {
+  color: #0b6b2b;
+}
+
+.updateAvailable {
+  color: #0b4ea2;
+}
+
+.updateError {
+  color: #a1260d;
+}
+
+.updateAction {
+  composes: winDialogBtnPrimary from global;
+  display: inline-block;
+  margin: 0 0 10px;
+}
+
+.meta {
+  margin: 0;
+}
+
+.metaRow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 8px;
+  margin-bottom: 4px;
+}
+
+.metaRow dt {
+  margin: 0;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.metaRow dd {
+  margin: 0;
+  word-break: break-all;
+}
+
+.metaRow dd strong {
+  font-weight: 700;
+}
+
+.footer {
+  padding: 10px 14px 12px;
+  border-top: 1px solid var(--win-border);
+  background: var(--win-surface);
+}
+
+.warning {
+  margin: 0 0 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--win-text);
+}
+
+.acceptBtn {
+  composes: winDialogBtnPrimary from global;
+  display: block;
+  margin-left: auto;
+}

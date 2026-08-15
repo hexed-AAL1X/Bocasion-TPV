@@ -1,0 +1,1 @@
+{"default":{"identifier":"default","description":"Capability default para Intranet Ventas","local":true,"windows":["main"],"permissions":["core:default","opener:default","allow-get-platform","allow-fetch-json-url","allow-lookup-identity","allow-warmup-http","allow-list-nava-docs"]}}

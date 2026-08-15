@@ -1,0 +1,541 @@
+/* Solo latin: evita empaquetar Devanagari/latin-ext/etc. (~120 KB woff2 inútiles). */
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/geist-mono/latin-400.css";
+@import "./winClassicDialog.css";
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  --bg: var(--color-bg);
+  --card: var(--color-card);
+  --text: var(--color-text);
+  --text-dim: var(--color-text-dim);
+  --border: var(--color-border);
+  --ribbon-tabs-bg: var(--color-ribbon-tabs);
+  --entry-header-bg: var(--color-entry-header);
+  --accent: #f5a623;
+  --accent-rgb: 245, 166, 35;
+  --danger: #c0392b;
+  --danger-rgb: 192, 57, 43;
+  --on-primary: #ffffff;
+  --link: #1565c0;
+  --shadow-sm: 0 1px 2px rgba(31, 45, 61, 0.05);
+  --shadow-bar: 0 -1px 4px rgba(31, 45, 61, 0.04);
+  --shadow-card: 0 8px 32px rgba(31, 164, 131, 0.1), 0 2px 8px rgba(0, 0, 0, 0.06);
+  --overlay: rgba(0, 0, 0, 0.32);
+  --reniec-top: #1a5f9e;
+  --reniec-bottom: #0d3d6b;
+  --reniec-bg: #1565a0;
+  --warning-text: #a04000;
+  --btn-warn-bg: #fff3e0;
+  --btn-warn-hover: #ffe8c8;
+  --btn-warn-text: #e6890d;
+  --btn-danger-bg: #ffeaea;
+  --btn-danger-hover: #ffd4d4;
+  --btn-danger-text: #d63031;
+  --highlight-panel: #fef9ed;
+  --welcome-icon-ring: rgba(var(--primary-rgb), 0.28);
+  --status-orange: #e67e22;
+  --status-blue: #2980b9;
+  --status-green: #27ae60;
+
+  --fs-table-title: 26px;
+  --fs-col-header: 12px;
+  --fs-chip: 11px;
+  --fs-cell: 12px;
+  --fs-ui: 13px;
+  --fs-date: 12px;
+
+  --ribbon-height: 118px;
+  --tab-bar-height: 36px;
+  --status-height: 32px;
+  --admin-width: 280px;
+  --side-tab-width: 28px;
+
+  /* Fallback hasta que applyPaletteTokens() corre (tema predeterminado claro) */
+  --color-bg: #e0e0e0;
+  --color-card: #f2f2f2;
+  --color-sidebar: #e8e8e8;
+  --color-text: #1a1a1a;
+  --color-text-dim: #4a4a4a;
+  --color-border: #b0b0b0;
+  --color-ribbon-tabs: #d4d4d4;
+  --color-entry-header: #e6e6e6;
+  --ribbon-tab-top: #e8e8e8;
+  --ribbon-tab-bottom: #d0d0d0;
+  --ribbon-toolbar-top: #f0f0f0;
+  --ribbon-toolbar-bottom: #dcdcdc;
+  --color-status-bg: #d4d4d4;
+  --color-status-border: #a8a8a8;
+  --input-focus-bg: #fafafa;
+  --login-bg: #ececec;
+  --btn-secondary-bg: #e4e4e4;
+  --btn-secondary-hover: #d4d4d4;
+  --scrollbar: #c0c0c0;
+  --tab-divider: rgba(0, 0, 0, 0.1);
+  --tab-hover-bg: rgba(37, 104, 168, 0.08);
+  --primary: #2568a8;
+  --primary-dark: #1a5080;
+  --primary-light: #4080c0;
+  --primary-rgb: 37, 104, 168;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: var(--color-bg);
+  --card: var(--color-card);
+  --text: var(--color-text);
+  --text-dim: var(--color-text-dim);
+  --border: var(--color-border);
+  --ribbon-tabs-bg: var(--color-ribbon-tabs);
+  --entry-header-bg: var(--color-entry-header);
+  --accent: #f5b84a;
+  --accent-rgb: 245, 184, 74;
+  --danger: #f07060;
+  --danger-rgb: 240, 112, 96;
+  --on-primary: #0f1419;
+  --link: #6eb5f0;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --shadow-bar: 0 -1px 4px rgba(0, 0, 0, 0.25);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--border);
+  --overlay: rgba(0, 0, 0, 0.62);
+  --reniec-top: #2a7ab8;
+  --reniec-bottom: #1a5080;
+  --reniec-bg: #226ea8;
+  --warning-text: #f0b060;
+  --btn-warn-bg: #3d3020;
+  --btn-warn-hover: #524028;
+  --btn-warn-text: #f0b060;
+  --btn-danger-bg: #3d2222;
+  --btn-danger-hover: #522e2e;
+  --btn-danger-text: #f08080;
+  --highlight-panel: #242018;
+  --welcome-icon-ring: transparent;
+  --status-orange: #f0a040;
+  --status-blue: #6eb5f0;
+  --status-green: #4cd4a0;
+}
+
+/* Colores animables entre temas (fallback sin View Transitions) */
+@property --color-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e0e0e0;
+}
+
+@property --color-card {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f2f2f2;
+}
+
+@property --color-text {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a1a1a;
+}
+
+@property --color-text-dim {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4a4a4a;
+}
+
+@property --color-border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #b0b0b0;
+}
+
+@property --color-ribbon-tabs {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d4d4d4;
+}
+
+@property --color-entry-header {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e6e6e6;
+}
+
+@property --color-sidebar {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e8e8e8;
+}
+
+@property --ribbon-tab-top {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e8e8e8;
+}
+
+@property --ribbon-tab-bottom {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d0d0d0;
+}
+
+@property --ribbon-toolbar-top {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f0f0f0;
+}
+
+@property --ribbon-toolbar-bottom {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #dcdcdc;
+}
+
+@property --color-status-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d4d4d4;
+}
+
+@property --color-status-border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #a8a8a8;
+}
+
+@property --input-focus-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #fafafa;
+}
+
+@property --login-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ececec;
+}
+
+@property --btn-secondary-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #e4e4e4;
+}
+
+@property --btn-secondary-hover {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #d4d4d4;
+}
+
+@property --scrollbar {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #c0c0c0;
+}
+
+@property --primary {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #2568a8;
+}
+
+@property --primary-dark {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1a5080;
+}
+
+@property --primary-light {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #4080c0;
+}
+
+@property --tab-divider {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgba(0, 0, 0, 0.1);
+}
+
+@property --tab-hover-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgba(37, 104, 168, 0.08);
+}
+
+@property --win-surface {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ece9d8;
+}
+
+@property --win-border {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #aca899;
+}
+
+@property --win-group-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f5f3ea;
+}
+
+@property --win-panel-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --win-text {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #000000;
+}
+
+@property --win-text-dim {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #666666;
+}
+
+@property --win-table-row-even {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --win-table-row-odd {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f5f4ef;
+}
+
+@property --win-table-row-hover {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #cce4ff;
+}
+
+@property --win-table-total-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f5f3ea;
+}
+
+@property --win-field-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #ffffff;
+}
+
+@property --win-menu-bar-bg {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #f5f3ea;
+}
+
+/* Transición suave al cambiar paleta de color */
+html.palette-transitioning {
+  --palette-transition-duration: 480ms;
+  --palette-transition-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    --color-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-card var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-sidebar var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-text var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-text-dim var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-border var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-ribbon-tabs var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-entry-header var(--palette-transition-duration) var(--palette-transition-ease),
+    --ribbon-tab-top var(--palette-transition-duration) var(--palette-transition-ease),
+    --ribbon-tab-bottom var(--palette-transition-duration) var(--palette-transition-ease),
+    --ribbon-toolbar-top var(--palette-transition-duration) var(--palette-transition-ease),
+    --ribbon-toolbar-bottom var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-status-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --color-status-border var(--palette-transition-duration) var(--palette-transition-ease),
+    --input-focus-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --login-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --btn-secondary-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --btn-secondary-hover var(--palette-transition-duration) var(--palette-transition-ease),
+    --scrollbar var(--palette-transition-duration) var(--palette-transition-ease),
+    --primary var(--palette-transition-duration) var(--palette-transition-ease),
+    --primary-dark var(--palette-transition-duration) var(--palette-transition-ease),
+    --primary-light var(--palette-transition-duration) var(--palette-transition-ease),
+    --tab-divider var(--palette-transition-duration) var(--palette-transition-ease),
+    --tab-hover-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-surface var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-border var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-group-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-panel-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-text var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-text-dim var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-table-row-even var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-table-row-odd var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-table-row-hover var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-table-total-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-field-bg var(--palette-transition-duration) var(--palette-transition-ease),
+    --win-menu-bar-bg var(--palette-transition-duration) var(--palette-transition-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.palette-transitioning {
+    transition: none;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Carga inicial: sin animación */
+html.theme-no-transition,
+html.theme-no-transition *,
+html.theme-no-transition *::before,
+html.theme-no-transition *::after,
+html.palette-transitioning.theme-no-transition {
+  transition: none !important;
+}
+
+/* Revelado circular: una capa fija, sin View Transitions ni blur */
+:root {
+  --theme-duration: 420ms;
+  --theme-ease-reveal: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.theme-circle-reveal::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  pointer-events: none;
+  background: var(--theme-from-bg, #f4fbf9);
+  clip-path: circle(var(--theme-origin-radius, 150vmax) at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  animation: theme-mask-shrink var(--theme-duration) var(--theme-ease-reveal) forwards;
+  will-change: clip-path;
+  contain: strict;
+}
+
+@keyframes theme-mask-shrink {
+  to {
+    clip-path: circle(0 at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+}
+
+/* View Transitions (solo ventanas modales u otros usos; no cambio de tema) */
+::view-transition-group(root) {
+  animation-duration: var(--theme-duration);
+  animation-timing-function: var(--theme-ease-reveal);
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  animation: theme-old-fade var(--theme-duration) var(--theme-ease-reveal) forwards;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+  clip-path: circle(0 at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  animation: theme-circle-reveal var(--theme-duration) var(--theme-ease-reveal) forwards;
+}
+
+@keyframes theme-circle-reveal {
+  to {
+    clip-path: circle(var(--theme-origin-radius, 150vmax) at var(--theme-origin-x, 50%) var(--theme-origin-y, 50%));
+  }
+}
+
+@keyframes theme-old-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.01ms;
+  }
+
+  ::view-transition-new(root) {
+    clip-path: none;
+  }
+
+  html.theme-circle-reveal::after {
+    animation-duration: 0.01ms;
+    display: none;
+  }
+}
+
+html {
+  background: var(--bg);
+  color: var(--text);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Poppins", system-ui, sans-serif;
+  font-size: var(--fs-ui);
+  font-weight: 400;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input {
+  font-family: inherit;
+}
+
+.mono {
+  font-family: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", monospace;
+}
+
+/* Scrollbars en áreas con overflow */
+.gridWrap,
+.toolbar {
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+/* ═══════════════════════════════════════════════
+   Modo eficiente: elimina animaciones, transiciones,
+   filtros GPU y will-change para reducir RAM/CPU.
+   ═══════════════════════════════════════════════ */
+html.efficient-mode *,
+html.efficient-mode *::before,
+html.efficient-mode *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  will-change: auto !important;
+}
+
+html.efficient-mode .theme-circle-reveal::after,
+html.efficient-mode ::view-transition-old(root),
+html.efficient-mode ::view-transition-new(root) {
+  animation-duration: 0.001ms !important;
+  display: none !important;
+}
+
+html.efficient-mode.palette-transitioning {
+  transition: none !important;
+}

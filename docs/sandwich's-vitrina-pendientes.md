@@ -1,0 +1,125 @@
+# Sandwich's Vitrina — estado del catálogo
+
+Códigos con grupo asignado: **33**
+
+## En paloteo con grupo
+
+- `1023` — Combo Sandwich + Pepsi
+- `2275` — Choripan
+- `3015` — Pita Con Pollo
+- `3016` — Pita Con Palta
+- `3017` — Pita Con Pollo y Palta
+- `3018` — Pita Capresse
+- `3022` — Pita Mixto
+- `3038` — Hamburguesa
+- `3041` — Hamburguesa Royal
+- `3043` — Triple Clasico
+- `3044` — Triple Jamon, Queso y Pollo
+- `3045` — Triple Vegetariano
+- `3046` — Triple de Jamon+ Huevo y Pollo
+- `3049` — Croissant de Pollo
+- `3050-1` — Croissant Mixto Completo
+- `3050` — Croissant Mixto
+- `3051` — Croissant de Pollo Con Durazno
+- `3052` — Croissant de Pollo Con Apio
+- `3054` — Sandwich Con Milanesa
+- `3059` — Sandwich Butifarra
+- `3061` — Sandwich de Pollo en Pan Hamburguesa
+- `3062` — Sandwich Poderoso
+- `3063` — Sandwich Proteico
+- `3068` — Sandwich de Hot Dog
+- `3069` — Sandwich Frankfurter
+- `3073` — Sandwich de Filete de Pollo
+- `3075` — Mixto Caliente
+- `3076` — Mixto Completo
+- `3079` — Sandwich Panini Con Pollo
+- `3081` — Sandwich de Pollo Ciabatta
+- `3125` — Triple Pollo, Jamon y Durazno
+- `3132` — Sandwich Tres Jamones
+- `3200` — Croissant Huevo Tocino
+
+## Capturas ERP emparejadas
+
+- **CROISANT DE POLLO** → `3049` (Croissant de Pollo)
+- **CROISANT DE POLLO CON PECANAS** → `3052` (Croissant de Pollo Con Apio)
+- **CROISSANT MIXTO** → `3050` (Croissant Mixto)
+- **CROISSANT DE POLLO CON DURAZNO** → `3051` (Croissant de Pollo Con Durazno)
+- **HAMBURGUESA** → `3038` (Hamburguesa)
+- **HAMBURGUESA ROYAL** → `3041` (Hamburguesa Royal)
+- **MIXTO CALIENTE** → `3075` (Mixto Caliente)
+- **MIXTO COMPLETO** → `3076` (Mixto Completo)
+- **PITA CAPRESSE** → `3018` (Pita Capresse)
+- **PITA CON PALTA** → `3016` (Pita Con Palta)
+- **PITA CON POLLO** → `3015` (Pita Con Pollo)
+- **PITA CON POLLO Y PALTA** → `3017` (Pita Con Pollo y Palta)
+- **PITA MIXTO** → `3022` (Pita Mixto)
+- **SANDWICH BUTIFARRA** → `3059` (Sandwich Butifarra)
+- **SANDWICH CON MILANESA JUNIOR** → `3054` (Sandwich Con Milanesa)
+- **SANDWICH DE CHORIZO** → `2275` (Choripan)
+- **SANDWICH DE FILETE** → `3073` (Sandwich de Filete de Pollo)
+- **SANDWICH DE HOT DOG** → `3068` (Sandwich de Hot Dog)
+- **SANDWICH DE MILANESA** → `3054` (Sandwich Con Milanesa)
+- **SANDWICH DE POLLO CIABATTA** → `3081` (Sandwich de Pollo Ciabatta)
+- **SANDWICH DE POLLO EN PAN HAMBURGUESA** → `3061` (Sandwich de Pollo en Pan Hamburguesa)
+- **SANDWICH FRANKFURTER** → `3069` (Sandwich Frankfurter)
+- **SANDWICH PANINI CON POLLO** → `3079` (Sandwich Panini Con Pollo)
+- **SANDWICH PODEROSO** → `3062` (Sandwich Poderoso)
+- **SANDWICH PROTEICO** → `3063` (Sandwich Proteico)
+- **TRIPLE CLASICO** → `3043` (Triple Clasico)
+- **TRIPLE DE JAMON+ HUEVO Y POLLO** → `3046` (Triple de Jamon+ Huevo y Pollo)
+- **TRIPLE VEGETARIANO** → `3045` (Triple Vegetariano)
+- **SANDWICH PARRILLERO DE CHORIZO** → `2275` (Choripan)
+- **COMBO SANDWICH + EPIC** → `1023` (Combo Sandwich + Pepsi)
+- **CROISSANT HUEVO TOCINO** → `3200` (Croissant Huevo Tocino)
+- **TRIPLE POLLO, JAMON Y DURAZNO** → `3125` (Triple Pollo, Jamon y Durazno)
+- **SANDWICH TRES JAMONES** → `3132` (Sandwich Tres Jamones)
+- **CROISSANT MIXTO COMPLETO** → `3050-1` (Croissant Mixto Completo)
+
+## En capturas ERP pero NO en paloteo.xls
+
+- CROISSAN DE POLLO CON PINA
+- CROISSAN DE POLLO CON JAMON Y QUESO
+- HAMBURGUESA CON HUEVO
+- HAMBURGUESA CON QUESO
+- HAMBURGUESA DE LA CASA
+- PITA CON JAMON DE PAVO
+- PITA CON POLLO Y DURAZNO
+- PITA CON POLLO Y PECANAS
+- PITA CON POLLO Y QUESO EDAM
+- PITA CON QUESO FRESCO
+- PITA DE QUESO FRESCO Y JAMON DE PAVO
+- PITA INTEGRAL CAPRESSE
+- PITA INTEGRAL CON JAMON DE PAVO
+- PITA INTEGRAL CON PALTA
+- PITA INTEGRAL CON POLLO
+- PITA INTEGRAL CON POLLO Y DURAZNO
+- PITA INTEGRAL CON POLLO Y PALTA
+- PITA INTEGRAL CON POLLO Y PECANAS
+- PITA INTEGRAL CON POLLO Y QUESO EDAM
+- PITA INTEGRAL CON QUESO FRESCO
+- PITA INTEGRAL DE QUESO FRESCO Y JAMON DE
+- PITA INTEGRAL MIXTO
+- PITA INTEGRAL MIXTO COMPLETO
+- PITA MIXTO COMPLETO
+- SANDWICH ALEMAN
+- SANDWICH DE CHICHARRON
+- SANDWICH DE FILETE CON PALTA
+- SANDWICH DE JAMON+ QUESO Y SALAME
+- SANDWICH DE LOMITO
+- SANDWICH DE LOMO CON CHAMPINONES
+- SANDWICH DE OMELETTE DE JAMON
+- SANDWICH DE POLLO CON CHAMPINONES
+- SANDWICH FRANKFURTER CON QUESO
+- SANDWICH FRANKFURTER QUESO TOCINO
+- SANDWICH PANINI CON POLLO Y PECANAS
+- SANDWICH PARRILLERO DE CARNE
+- SANDWICH PARRILLERO DE POLLO
+- SANDWICH ROYAL
+- TRIPLE DE ACEITUNA
+- TRIPLE ESPECIAL
+- SANDWICH PANINI CON POLLO Y DURAZNO
+- COMBO (AVENA + PAN CON HUEVO)
+- COMBO 2: CANCHITA POPCORN + REFRESCO
+- COMBO 3: SNACK + GASEOSA
+- SANDWICH DE POLLO JUNIOR
+- SANDWICH QUESO BURGUER

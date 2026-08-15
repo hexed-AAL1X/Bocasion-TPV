@@ -1,0 +1,184 @@
+.bar {
+  display: flex;
+  align-items: flex-end;
+  height: var(--tab-bar-height);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 6px;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.tabStrip {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--primary-rgb), 0.35) transparent;
+}
+
+.tabStrip::-webkit-scrollbar {
+  height: 3px;
+}
+
+.tabStrip::-webkit-scrollbar-thumb {
+  background: rgba(var(--primary-rgb), 0.35);
+  border-radius: 2px;
+}
+
+.tab,
+.tabActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0 10px;
+  border-radius: 6px 6px 0 0;
+  border: 1px solid rgba(var(--primary-rgb), 0.24);
+  border-bottom: none;
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+  position: relative;
+  flex: 1 1 72px;
+  min-width: 72px;
+  max-width: 220px;
+  overflow: hidden;
+}
+
+.tab {
+  background: rgba(255, 255, 255, 0.72);
+  color: var(--text);
+  box-shadow: 0 1px 0 rgba(var(--primary-rgb), 0.06);
+}
+
+.tab:hover {
+  background: var(--card);
+  border-color: rgba(var(--primary-rgb), 0.38);
+  color: var(--primary-dark);
+}
+
+.tabActive {
+  background: var(--card);
+  color: var(--primary-dark);
+  border-color: var(--border);
+  border-bottom: 1px solid var(--card);
+  margin-bottom: -1px;
+  z-index: 1;
+  flex-shrink: 0;
+  min-width: 96px;
+  max-width: 260px;
+}
+
+.tabActive::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 6px;
+  right: 6px;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--primary);
+}
+
+.tabSmall {
+  padding: 0 8px;
+  min-width: 36px;
+  max-width: 36px;
+  flex: 0 0 36px;
+  justify-content: center;
+}
+
+.tabSmall.tabActive {
+  min-width: 36px;
+  max-width: 36px;
+  flex: 0 0 36px;
+}
+
+.tabLabel {
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.tabSvg {
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.tabLogo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  margin-left: 2px;
+  opacity: 0.55;
+  flex-shrink: 0;
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+}
+
+.closeBtn:hover {
+  opacity: 1;
+  background: rgba(var(--danger-rgb), 0.15);
+  color: var(--danger);
+}
+
+.closeSvg {
+  width: 10px;
+  height: 10px;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 30px;
+  border: 1px dashed rgba(var(--primary-rgb), 0.35);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: rgba(255, 255, 255, 0.55);
+  color: var(--text-dim);
+  flex-shrink: 0;
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease, opacity 0.12s ease;
+}
+
+.addBtn:hover {
+  background: var(--card);
+  color: var(--primary);
+  border-color: var(--primary-light);
+}
+
+[data-theme="dark"] .tab {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(var(--primary-rgb), 0.22);
+  box-shadow: none;
+}
+
+[data-theme="dark"] .tab:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(var(--primary-rgb), 0.38);
+}
+
+[data-theme="dark"] .addBtn {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(var(--primary-rgb), 0.28);
+}

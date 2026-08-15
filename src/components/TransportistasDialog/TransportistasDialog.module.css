@@ -1,0 +1,308 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.window {
+  width: min(980px, calc(100vw - 24px));
+  height: min(480px, calc(100vh - 24px));
+  max-height: calc(100vh - 24px);
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 2px solid var(--win-border-dark);
+  box-shadow: var(--win-shadow);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+  view-transition-name: transportistas-window;
+}
+
+.overlayMax {
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
+
+.windowMax {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+:global(::view-transition-old(transportistas-window)),
+:global(::view-transition-new(transportistas-window)) {
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: normal;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window {
+    view-transition-name: none;
+  }
+
+  :global(::view-transition-old(transportistas-window)),
+  :global(::view-transition-new(transportistas-window)) {
+    animation-duration: 0.01ms;
+  }
+}
+
+.titleBar {
+  display: flex;
+  align-items: center;
+  padding: 3px 4px 4px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.titleText {
+  flex: 1;
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.titleBtns {
+  display: flex;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.titleSysBtn,
+.titleClose {
+  /* Estilos XP en winClassicDialog.css */
+}
+
+.toolbar {
+  composes: winShadeStrip from global;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+.navGroup {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-right: 6px;
+}
+
+.toolbarBtn {
+  width: 26px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid var(--win-toolbar-btn-border);
+  background: var(--win-btn-bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbarBtn:hover:not(:disabled) {
+  border-color: var(--win-border-dark);
+  filter: brightness(1.08);
+}
+
+.toolbarBtn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.toolbarBtnActive {
+  border-color: var(--win-border-dark);
+  background: var(--win-table-row-hover);
+  outline: 1px solid var(--win-border-dark);
+  outline-offset: -1px;
+}
+
+.toolbarSep {
+  width: 1px;
+  height: 22px;
+  background: var(--win-separator);
+  margin: 0 4px;
+}
+
+.toolbarSpacer {
+  flex: 1;
+}
+
+.filterLabel {
+  font-size: 11px;
+  margin-right: 4px;
+  color: var(--win-text);
+}
+
+.filterSelect {
+  height: 22px;
+  font-size: 11px;
+}
+
+.searchBarShell {
+  flex-shrink: 0;
+}
+
+.searchBar {
+  composes: winShadeStrip from global;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--win-border);
+  border-bottom: 1px solid var(--win-border);
+}
+
+.searchLabel {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  padding: 0 6px;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  font-size: 11px;
+}
+
+.searchActionBtn {
+  composes: winDialogBtn from global;
+  flex-shrink: 0;
+}
+
+.searchActionBtn:disabled {
+  opacity: 0.52;
+  cursor: default;
+}
+
+.tableWrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  background: var(--win-panel-bg);
+  border-top: 1px solid var(--win-border);
+}
+
+.table {
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 11px;
+}
+
+.tableHeadCell {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 4px 8px;
+  font-size: var(--win-shade-bar-font-size);
+  font-weight: var(--win-shade-bar-font-weight);
+  color: var(--win-text);
+  background: var(--win-shade-bg);
+  border-bottom: 2px solid var(--win-border-dark);
+  border-right: 1px solid var(--win-border);
+  white-space: nowrap;
+  text-align: center;
+  overflow: visible;
+  box-sizing: border-box;
+}
+
+.scrollTh {
+  z-index: 20;
+  background: var(--win-shade-bg);
+}
+
+.thLabel {
+  display: block;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.colResizeHandle {
+  position: absolute;
+  top: 0;
+  right: -3px;
+  width: 6px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 4;
+  touch-action: none;
+}
+
+.colResizeHandle:hover,
+.colResizeHandle:active {
+  background: rgba(10, 36, 106, 0.22);
+}
+
+.table td {
+  padding: 2px 5px;
+  border-right: 1px solid var(--win-table-border);
+  border-bottom: 1px solid var(--win-table-border-soft);
+  vertical-align: middle;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
+.colCenter {
+  text-align: center;
+}
+
+.countLink {
+  color: #316ac5;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+  padding: 0;
+}
+
+.emptyCell {
+  padding: 12px;
+  text-align: center;
+  color: var(--win-text-muted);
+}
+
+.rowEven {
+  background: var(--win-table-row-even);
+}
+
+.rowOdd {
+  background: var(--win-table-row-odd);
+}
+
+.rowSelected {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text);
+  outline: 2px solid var(--win-list-selected-outline);
+  outline-offset: -2px;
+}
+
+.statusBar {
+  composes: winShadeStrip from global;
+  padding: 3px 8px;
+  border-top: 1px solid var(--win-border);
+  font-size: 10px;
+  color: var(--win-text-muted);
+  flex-shrink: 0;
+}

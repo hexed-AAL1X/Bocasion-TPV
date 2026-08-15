@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <script>
+      (function () {
+        try {
+          var t = localStorage.getItem("bocasoft-theme");
+          if (t !== "dark" && t !== "light") {
+            t = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+          }
+          document.documentElement.setAttribute("data-theme", t);
+          var p = localStorage.getItem("bocasoft-color-palette");
+          if (p) document.documentElement.setAttribute("data-palette", p);
+        } catch (e) {
+          document.documentElement.setAttribute("data-theme", "light");
+        }
+      })();
+    </script>
+    <script src="/boot-theme.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="./images/apicon.png" />
+    <link rel="preload" as="image" href="./images/apicon.png" />
+    <title>Intranet Ventas — Bocasión S.A.C.</title>
+    <style>
+      html, body {
+        margin: 0;
+        height: 100%;
+        background: var(--login-bg, #ececec);
+      }
+      html:not(.app-ready) #root {
+        opacity: 0;
+      }
+      html.app-ready #root {
+        opacity: 1;
+        transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

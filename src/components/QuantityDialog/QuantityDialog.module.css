@@ -1,0 +1,160 @@
+/* ─── Overlay ─── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8000;
+  animation: fadeIn 0.06s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── Dialog ─── */
+.dialog {
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: 0 8px 36px rgba(0, 0, 0, 0.14), 0 0 0 1px var(--border);
+  width: 320px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.08s ease-out;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.closeBtn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+.closeBtn:hover {
+  background: rgba(192, 57, 43, 0.08);
+  border-color: #e74c3c;
+  color: #c0392b;
+}
+
+/* ─── Product name ─── */
+.productName {
+  margin: 0;
+  padding: 8px 16px 0;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* ─── Display ─── */
+.display {
+  margin: 8px 16px;
+  height: 42px;
+  border: 2px solid var(--primary);
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  color: var(--primary-dark);
+  text-align: left;
+  outline: none;
+  background: var(--bg);
+}
+.display:focus {
+  border-color: var(--primary-dark);
+  box-shadow: 0 0 0 3px rgba(31, 164, 131, 0.12);
+}
+
+/* ─── Numpad ─── */
+.numpad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  padding: 12px 16px 16px;
+}
+
+.numBtn {
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.numBtn:hover {
+  background: var(--btn-secondary-bg);
+  border-color: var(--primary-light);
+}
+.numBtn:active {
+  background: var(--btn-secondary-hover);
+  transform: scale(0.96);
+}
+
+.numBtnAction {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--btn-warn-text);
+  background: var(--btn-warn-bg);
+}
+.numBtnAction:hover {
+  background: var(--btn-warn-hover);
+}
+
+.numBtnEnter {
+  font-size: 12px;
+  font-weight: 700;
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.numBtnEnter:hover {
+  background: var(--primary-dark);
+}
+
+.numBtnCancel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--btn-danger-text);
+  background: var(--btn-danger-bg);
+}
+.numBtnCancel:hover {
+  background: var(--btn-danger-hover);
+}

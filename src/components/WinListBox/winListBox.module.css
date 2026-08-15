@@ -1,0 +1,74 @@
+.root {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.shell {
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  box-shadow:
+    inset 1px 1px 0 var(--win-border-dark),
+    inset -1px -1px 0 var(--win-border);
+  padding: 1px;
+  box-sizing: border-box;
+}
+
+.list {
+  --win-listbox-row-h: 18px;
+  --win-listbox-rows: 7;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  height: calc(var(--win-listbox-rows) * var(--win-listbox-row-h));
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.listScroll {
+  overflow-y: auto;
+  scrollbar-color: var(--scrollbar) transparent;
+  scrollbar-width: thin;
+}
+
+.listNoScroll {
+  overflow-y: hidden;
+}
+
+.item {
+  display: block;
+  width: 100%;
+  min-height: var(--win-listbox-row-h);
+  margin: 0;
+  padding: 1px 4px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  line-height: calc(var(--win-listbox-row-h) - 2px);
+  color: var(--win-text);
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  cursor: default;
+  user-select: none;
+}
+
+.item:hover:not(.itemSelected) {
+  background: var(--win-picker-hover);
+}
+
+.itemSelected,
+.itemSelected:hover {
+  background: var(--win-list-selected-bg);
+  color: var(--win-list-selected-text);
+}
+
+.item:focus-visible {
+  outline: 1px dotted var(--win-focus-outline);
+  outline-offset: -1px;
+}

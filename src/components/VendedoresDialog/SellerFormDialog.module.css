@@ -1,0 +1,268 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dialog {
+  width: min(620px, 100%);
+  max-height: calc(100vh - 40px);
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border-dark);
+  box-shadow: var(--win-shadow);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+  overflow: hidden;
+}
+
+.titleBar {
+  flex-shrink: 0;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.closeBtn {
+  /* Estilo XP en winClassicDialog.css */
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  padding: 8px 12px 0;
+  overflow-y: auto;
+}
+
+.section {
+  composes: winShadePanel from global;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionHeader {
+  composes: winShadeBar from global;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 6px;
+}
+
+.sectionHeaderSpacer {
+  flex: 1;
+}
+
+.sectionBody {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+
+.splitRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.splitRow .section {
+  margin-bottom: 0;
+  height: 100%;
+}
+
+.formRow,
+.codigoRow {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.formLabel {
+  font-size: 11px;
+  color: var(--win-text);
+  text-align: left;
+}
+
+.formControl {
+  min-width: 0;
+}
+
+.codigoControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.field,
+.select,
+.inputCodigo,
+.fieldShort,
+.fieldPct {
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  font-size: 11px;
+  font-family: Tahoma, "Segoe UI", sans-serif;
+  padding: 0 4px;
+  box-sizing: border-box;
+}
+
+.fieldRequired {
+  composes: field;
+  background: #fff8dc;
+}
+
+.field,
+.select {
+  width: 100%;
+}
+
+.inputCodigo {
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.fieldShort {
+  width: 140px;
+}
+
+.fieldPct {
+  width: 72px;
+  text-align: right;
+}
+
+.celularRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.checkInline {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--win-text);
+  white-space: nowrap;
+}
+
+.radioRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.radioLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--win-text);
+  cursor: pointer;
+}
+
+.commissionGrid {
+  display: grid;
+  grid-template-columns: auto 72px auto 72px;
+  gap: 6px 8px;
+  align-items: center;
+}
+
+.categoryPicker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.categorySelect {
+  flex: 1;
+  min-width: 0;
+}
+
+.categoryGridBtn {
+  composes: winDialogBtn from global;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.categoryCommissionBtn {
+  composes: winDialogBtn from global;
+  flex-shrink: 0;
+  height: 20px;
+  padding: 0 8px;
+  font-size: 10px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.affiliationList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.affiliationItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.affiliationExtras {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.ubicacionSelect {
+  width: 120px;
+}
+
+.footer {
+  composes: winShadeStrip winDialogFooter from global;
+}
+
+.footerBtn {
+  composes: winDialogBtn from global;
+}
+
+.footerBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+@media (max-width: 640px) {
+  .splitRow {
+    grid-template-columns: 1fr;
+  }
+}

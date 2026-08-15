@@ -1,0 +1,923 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.window {
+  width: min(520px, calc(100vw - 32px));
+  height: min(620px, calc(100vh - 32px));
+  display: flex;
+  flex-direction: column;
+  background: var(--win-surface);
+  border: 1px solid var(--win-border);
+  box-shadow:
+    0 0 0 1px #fff inset,
+    0 8px 24px rgba(0, 0, 0, 0.32);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.windowWide {
+  width: min(920px, calc(100vw - 40px));
+  height: min(680px, calc(100vh - 40px));
+  min-height: 0;
+  overflow: hidden;
+}
+
+.titleBar {
+  display: grid;
+  grid-template-columns: 1fr 22px;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px 5px;
+  background: var(--win-title-bg);
+  border-bottom: var(--win-title-border);
+  box-shadow: var(--win-title-highlight);
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.titleText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.titleClose {
+  width: 22px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.titleClose:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.menuBar {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 0;
+  padding: 2px 4px;
+  background: var(--win-menu-bar-bg);
+  border-bottom: 1px solid var(--win-border);
+  position: relative;
+  overflow: visible;
+}
+
+.menuSlot {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.menuTrigger {
+  padding: 2px 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-size: 11px;
+  cursor: default;
+  font-family: inherit;
+  color: var(--win-text);
+}
+
+.menuTrigger:hover,
+.menuTriggerActive {
+  border-color: var(--win-border-dark);
+  background: var(--win-table-row-hover);
+}
+
+.menuTriggerActive {
+  background: var(--win-panel-bg);
+  border-bottom-color: var(--win-panel-bg);
+  position: relative;
+  z-index: 12;
+}
+
+.menuDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 10;
+  min-width: 200px;
+  padding: 2px;
+  background: var(--win-panel-bg);
+  border: 1px solid var(--win-border-dark);
+  box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.menuDropdownWide {
+  min-width: 220px;
+}
+
+.menuItem {
+  display: grid;
+  grid-template-columns: 22px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 3px 8px 3px 4px;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  font-family: inherit;
+  text-align: left;
+  cursor: default;
+  color: var(--win-text);
+}
+
+.menuItem:hover,
+.menuItem:focus-visible {
+  background: var(--win-list-selected-bg);
+  color: var(--win-list-selected-text);
+}
+
+.menuItem:hover .menuShortcut,
+.menuItem:focus-visible .menuShortcut {
+  color: var(--win-list-selected-text);
+}
+
+.menuItemIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.menuItemIcon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.menuShortcut {
+  color: var(--win-text-dim);
+  font-size: 10px;
+  padding-left: 16px;
+}
+
+.menuCheck {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.menuSeparator {
+  height: 1px;
+  margin: 3px 2px;
+  background: var(--win-border);
+}
+
+.mnemonic {
+  text-decoration: underline;
+}
+
+.findBarShell {
+  flex-shrink: 0;
+}
+
+.findBar {
+  composes: winShadeStrip from global;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.findBar label {
+  flex-shrink: 0;
+  font-size: 11px;
+}
+
+.findInput {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  padding: 0 6px;
+  font-size: 11px;
+}
+
+.findBtn {
+  composes: winDialogBtn from global;
+  flex-shrink: 0;
+}
+
+.previewWrap {
+  flex: 1;
+  min-height: 0;
+  margin: 8px;
+  border: 1px solid var(--win-border-dark);
+  background: var(--win-preview-bg);
+  overflow: auto;
+}
+
+.previewWrapFit {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+}
+
+.previewPaper {
+  width: 100%;
+  min-width: 0;
+  padding: 12px 16px 20px;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  background: var(--win-preview-paper);
+}
+
+.previewPaperThermal {
+  padding: 8px 12px 16px;
+  background: #e8e8e8;
+}
+
+.previewPaperWide {
+  width: fit-content;
+  max-width: none;
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 12px 16px 8px;
+}
+
+.previewScaleOuter {
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.previewScaleInner {
+  transform-origin: top left;
+}
+
+.htmlPreviewFrame {
+  width: 100%;
+  min-height: 480px;
+  border: none;
+  background: #fff;
+}
+
+.scrollbarHint {
+  composes: winShadeStrip from global;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.goToLineOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.goToLineDialog {
+  width: min(320px, 100%);
+  box-sizing: border-box;
+}
+
+.goToLineBody {
+  padding: 12px 14px 10px;
+  color: var(--win-text);
+}
+
+.goToLineRow {
+  display: grid;
+  grid-template-columns: 108px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.goToLineRow label {
+  text-align: right;
+}
+
+.goToLineInput {
+  width: 100%;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  padding: 0 6px;
+  font-size: 11px;
+  background: var(--win-field-bg);
+  color: var(--win-text);
+  box-sizing: border-box;
+  -moz-appearance: textfield;
+}
+
+.goToLineInput::-webkit-outer-spin-button,
+.goToLineInput::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.goToLineActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px 12px;
+}
+
+.goToLineBtn {
+  composes: winDialogBtn from global;
+}
+
+.goToLineBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+.propsOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.propsDialog {
+  width: min(560px, 100%);
+  max-height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+
+.propsBody {
+  padding: 8px 10px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--win-text);
+}
+
+.propsTopGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.propsMidGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.propsGroup {
+  composes: winGroupBox from global;
+  min-width: 0;
+}
+
+.propsLegend {
+  composes: winGroupLegend from global;
+}
+
+.propsCheck {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--win-text);
+}
+
+.propsCheck:last-child {
+  margin-bottom: 0;
+}
+
+.propsCheckDisabled {
+  color: var(--win-text-dim);
+  cursor: default;
+  opacity: 0.85;
+}
+
+.propsCheck input {
+  margin: 0;
+  width: 13px;
+  height: 13px;
+}
+
+.propsFieldRow {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  min-width: 0;
+  color: var(--win-text);
+}
+
+.propsFieldRow label {
+  text-align: right;
+}
+
+.propsSelect {
+  width: 100%;
+  min-width: 0;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  font-size: 11px;
+  background: var(--win-panel-bg);
+  box-sizing: border-box;
+}
+
+.propsFontRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px;
+  gap: 4px;
+  min-width: 0;
+}
+
+.propsFontInput {
+  width: 100%;
+  min-width: 0;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  padding: 0 4px;
+  font-size: 11px;
+  background: var(--win-panel-bg);
+  box-sizing: border-box;
+}
+
+.propsEllipsisBtn {
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--win-border);
+  background: var(--win-btn-bg);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.propsIndentBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 16px;
+  align-items: start;
+}
+
+.propsIndentFields {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.propsIndentField {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 48px;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.propsIndentField label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.propsSpin {
+  width: 48px;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  padding: 0 4px;
+  font-size: 11px;
+  background: var(--win-field-bg);
+  color: var(--win-text);
+}
+
+.propsRadioCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 2px;
+}
+
+.propsRadio {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--win-text);
+}
+
+.propsRadio input {
+  margin: 0;
+}
+
+.propsFileRow {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.propsFileRow:last-child {
+  margin-bottom: 0;
+}
+
+.propsFileLabel {
+  text-align: right;
+}
+
+.propsFileValue {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.propsFilePath {
+  width: 100%;
+  min-width: 0;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  padding: 0 4px;
+  font-size: 10px;
+  font-family: "Geist Mono", "Courier New", monospace;
+  background: var(--win-panel-bg);
+  box-sizing: border-box;
+}
+
+.propsActions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px 12px;
+  border-top: 1px solid var(--win-border);
+}
+
+.fontScriptSelect {
+  width: min(220px, 100%);
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  font-size: 11px;
+  background: var(--win-panel-bg);
+  color: var(--win-text);
+}
+
+.propsBtn {
+  composes: winDialogBtn from global;
+}
+
+.propsBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+@media (max-width: 480px) {
+  .propsTopGrid,
+  .propsMidGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .fontLists {
+    grid-template-columns: 1fr;
+  }
+
+  .fontMainRow {
+    grid-template-columns: 1fr;
+  }
+
+  .fontSideActions {
+    flex-direction: row;
+    justify-content: flex-end;
+    padding-top: 0;
+  }
+}
+
+.pageSetupOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.pageSetupDialog {
+  width: min(400px, 100%);
+  box-sizing: border-box;
+}
+
+.pageSetupBody {
+  padding: 10px 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: var(--win-text);
+}
+
+.pageSetupPreviewWrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 140px;
+  padding: 12px 8px;
+  background: var(--win-preview-bg);
+  border: 1px solid var(--win-border-dark);
+  border-radius: 1px;
+}
+
+.pageSetupPreviewPage {
+  position: relative;
+  width: 92px;
+  height: 118px;
+  background: var(--win-page-paper);
+  border: 1px solid var(--win-border-dark);
+  box-shadow:
+    0 1px 4px rgba(0, 0, 0, 0.22),
+    1px 1px 0 var(--win-page-paper-shadow-in) inset,
+    -1px -1px 0 var(--win-page-paper-shadow-out) inset;
+}
+
+.pageSetupPreviewLandscape {
+  width: 118px;
+  height: 92px;
+}
+
+.pageSetupPreviewContent {
+  position: absolute;
+  border: 1px dashed var(--win-border-dark);
+  background: repeating-linear-gradient(
+    180deg,
+    transparent,
+    transparent 5px,
+    var(--win-page-margin-line) 5px,
+    var(--win-page-margin-line) 6px
+  );
+  overflow: hidden;
+  font-size: 6px;
+  line-height: 1.2;
+  color: var(--win-page-margin-text);
+  padding: 2px;
+}
+
+.pageSetupOptionsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+}
+
+.pageSetupGroup {
+  composes: winGroupBox from global;
+  min-width: 0;
+}
+
+.pageSetupLegend {
+  composes: winGroupLegend from global;
+}
+
+.pageSetupFieldRow {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  min-width: 0;
+  color: var(--win-text);
+}
+
+.pageSetupFieldRow:last-child {
+  margin-bottom: 0;
+}
+
+.pageSetupSelect {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  font-size: 11px;
+  background: var(--win-panel-bg);
+  box-sizing: border-box;
+}
+
+.pageSetupSelect:disabled {
+  color: var(--win-text-dim);
+  background: var(--win-surface);
+}
+
+.pageSetupRadio {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 11px;
+  cursor: pointer;
+  color: var(--win-text);
+}
+
+.pageSetupRadio:last-child {
+  margin-bottom: 0;
+}
+
+.pageSetupRadio input {
+  margin: 0;
+}
+
+.pageSetupMarginsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 16px;
+}
+
+.pageSetupMarginField {
+  display: grid;
+  grid-template-columns: 72px 52px;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.pageSetupSpin {
+  width: 52px;
+  height: 22px;
+  border: 1px solid var(--win-input-border);
+  padding: 0 4px;
+  font-size: 11px;
+  text-align: right;
+  background: var(--win-field-bg);
+  color: var(--win-text);
+}
+
+.pageSetupActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 8px 12px 12px;
+}
+
+.pageSetupBtn {
+  composes: winDialogBtn from global;
+}
+
+.pageSetupBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+.fontOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.fontDialog {
+  width: min(480px, 100%);
+  box-sizing: border-box;
+}
+
+.fontBody {
+  padding: 10px 12px 12px;
+  color: var(--win-text);
+}
+
+.fontMainRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.fontLists {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 0.65fr);
+  gap: 8px;
+  min-width: 0;
+}
+
+.fontListCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.fontListLabel {
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.fontSideActions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 18px;
+}
+
+.fontBtn {
+  composes: winDialogBtn from global;
+}
+
+.fontBtnPrimary {
+  composes: winDialogBtnPrimary from global;
+}
+
+.fontSampleRow {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.fontSampleLabel {
+  font-size: 11px;
+  text-align: right;
+  color: var(--win-text);
+}
+
+.fontSampleBox {
+  min-height: 52px;
+  border: 1px solid var(--win-input-border);
+  background: var(--win-panel-bg);
+  color: var(--win-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.fontScriptRow {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--win-text);
+}
+
+.fontScriptRow label {
+  text-align: right;
+}
+
+.fontFootnote {
+  margin: 10px 0 0;
+  font-size: 10px;
+  color: var(--win-text-muted);
+  line-height: 1.35;
+}
+
+@media print {
+  .overlay,
+  .titleBar,
+  .menuBar,
+  .findBar,
+  .scrollbarHint,
+  .goToLineOverlay,
+  .propsOverlay,
+  .pageSetupOverlay,
+  .fontOverlay {
+    display: none !important;
+  }
+
+  .window {
+    width: 100%;
+    height: auto;
+    border: none;
+    box-shadow: none;
+  }
+
+  .previewWrap {
+    margin: 0;
+    border: none;
+    overflow: visible;
+  }
+}

@@ -1,0 +1,317 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 8100;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.dialog {
+  width: 420px;
+  max-height: 88vh;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUp 0.18s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 10px 36px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.closeBtn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--card);
+  color: var(--text-dim);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.closeBtn:hover {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.closeBtn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.listWrap {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  border-bottom: 1px solid var(--border);
+}
+
+.list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 280px;
+  max-height: 360px;
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--scrollbar) transparent;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 44px 1fr auto 72px;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border);
+  min-height: 44px;
+  cursor: default;
+  transition: background-color 0.1s;
+}
+
+.row:hover {
+  background: rgba(var(--primary-rgb), 0.04);
+}
+
+.rowSelected {
+  background: var(--win-list-selected-bg) !important;
+  color: var(--win-list-selected-text);
+  outline: 2px solid var(--win-list-selected-outline);
+  outline-offset: -2px;
+}
+
+.rowIcon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.rowIcon img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+}
+
+.rowIcon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--text-dim);
+}
+
+.couponIcon {
+  font-size: 7px;
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+.rowLabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.rowAmount {
+  font-size: 12px;
+  font-weight: 700;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  color: var(--text);
+  text-align: right;
+  min-width: 72px;
+}
+
+.rowAmountEmpty {
+  color: transparent;
+  user-select: none;
+}
+
+.editBtn {
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.1s, border-color 0.1s;
+}
+
+.editBtn:hover {
+  border-color: var(--primary-light);
+  background: var(--btn-secondary-bg);
+  color: var(--text);
+}
+
+.summary {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card);
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.summaryLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.summaryValue {
+  font-size: 13px;
+  font-weight: 700;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  color: var(--text);
+}
+
+.summarySaldo {
+  color: var(--accent);
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg);
+}
+
+.btnCancel {
+  min-width: 88px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btnCancel:hover {
+  background: var(--btn-secondary-bg);
+}
+
+.btnAccept {
+  min-width: 88px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  background: var(--link);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btnAccept:hover {
+  filter: brightness(1.08);
+}
+
+.btnAccept:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Editor flotante */
+.editOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 8200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.editBox {
+  width: 280px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+}
+
+.editTitle {
+  margin: 0 0 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.editInput {
+  width: 100%;
+  height: 36px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: "Geist Mono", ui-monospace, monospace;
+  text-align: right;
+  box-sizing: border-box;
+}
+
+.editInput:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.editActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+}

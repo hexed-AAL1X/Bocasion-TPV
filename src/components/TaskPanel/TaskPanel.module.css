@@ -1,0 +1,195 @@
+.panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  overflow: auto;
+  padding: 20px 24px;
+}
+
+/* ─── Top: company + modules ─── */
+.top {
+  display: grid;
+  grid-template-columns: 240px 1fr 1fr 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* ─── Company card ─── */
+.company {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.companyHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.companyHeader svg {
+  width: 14px;
+  height: 14px;
+  color: var(--primary);
+}
+
+.companyName {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+
+.companyLogo {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.companyLogoImg {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.companyDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--text-dim);
+  min-width: 0;
+}
+
+.companyDetails strong {
+  font-weight: 600;
+  color: var(--text);
+  margin-left: auto;
+  text-align: right;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+/* ─── Module column ─── */
+.moduleCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.moduleItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: none;
+  background: transparent;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 500;
+  border-radius: 6px;
+  transition: background-color 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.moduleItem:hover {
+  background: rgba(var(--primary-rgb), 0.1);
+  color: var(--primary-dark);
+}
+
+.moduleIcon {
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-dim);
+}
+
+.moduleIcon svg {
+  width: 10px;
+  height: 10px;
+}
+
+.moduleIconColor {
+  color: var(--status-orange);
+}
+
+.moduleIconBlue {
+  color: var(--status-blue);
+}
+
+.moduleIconGreen {
+  color: var(--status-green);
+}
+
+.moduleArrow {
+  width: 10px;
+  height: 10px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+/* ─── Right panels column ─── */
+.rightPanelItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.rightPanelItem svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.panelIconYellow { color: var(--accent); }
+.panelIconGreen  { color: var(--primary); }
+.panelIconBlue   { color: var(--link); }
+
+/* ─── Activities ─── */
+.activities {
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.activitiesHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+
+.activitiesHeader svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+
+.activitiesEmpty {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-style: italic;
+}
