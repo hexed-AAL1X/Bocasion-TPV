@@ -11,8 +11,11 @@ const { checkForUpdates, downloadAndInstall, autoCheckOnStartup } = require("./a
 const { mapPrinterInfo } = require("./printerInfo.cjs");
 const { resolvePrinterStatus } = require("./printerStatus.cjs");
 
-// Estabilidad Chromium en Linux/AppImage.
+// Estabilidad Chromium en Linux/AppImage (sandbox y GPU suelen tumbar Network Service).
 if (process.platform === "linux") {
+  app.commandLine.appendSwitch("no-sandbox");
+  app.commandLine.appendSwitch("disable-setuid-sandbox");
+  app.commandLine.appendSwitch("disable-gpu-sandbox");
   app.commandLine.appendSwitch("disable-dev-shm-usage");
 }
 
@@ -1906,14 +1909,79 @@ async function fetchJsonHttps(url, headers, timeoutMs = 8000) {
   return { ok: response.ok, status: response.status, body, text };
 }
 
-/** Primera promesa que resuelve con ok:true; si todas fallan, la última. */
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isNotFoundIdentity(status, message) {
+  if (status === 404) return true;
+  const lower = String(message ?? "").toLowerCase();
+  if (!lower) return false;
+  if (/token|api key|autentic|rate|timeout|conect|network|429|500|502|503/.test(lower)) {
+    return false;
+  }
+  return /no encontr|not found|no existe|inválido|invalido/.test(lower);
+}
+
+function identityFromPayload(body, type, value, provider) {
+  const name = pickIdentityName(body?.data ?? body);
+  if (!name) return null;
+  const docRaw = body?.data ?? body ?? {};
+  const fromApi = String(docRaw.dni ?? docRaw.ruc ?? docRaw.document_number ?? value).replace(/\D/g, "");
+  return {
+    ok: true,
+    provider,
+    result: { document: fromApi || value, type, name },
+  };
+}
+
+function identityFail(status, message) {
+  const text = String(message || "").trim() || "Sin datos";
+  return {
+    ok: false,
+    retryable: !isNotFoundIdentity(status, text),
+    message: text,
+  };
+}
+
+async function lookupJsonIdentity(url, headers, timeoutMs, type, value, provider) {
+  try {
+    const { ok, status, body } = await fetchJsonHttps(url, headers, timeoutMs);
+    const hit = identityFromPayload(body, type, value, provider);
+    if (hit) return hit;
+    if (status === 429 || status >= 500) {
+      return identityFail(status, `Servicio ocupado (${provider})`);
+    }
+    const msg =
+      (body && (body.message || body.detail || body.error)) ||
+      (!ok ? `HTTP ${status}` : "Sin nombre");
+    if (!ok || body?.success === false) {
+      return identityFail(status, msg);
+    }
+    return identityFail(status, msg);
+  } catch (err) {
+    return identityFail(0, err instanceof Error ? err.message : "Error de red");
+  }
+}
+
+async function withRetry(fn, attempts = 2) {
+  let last = identityFail(0, "Sin respuesta");
+  for (let i = 0; i < attempts; i += 1) {
+    last = await fn();
+    if (last.ok || last.retryable === false) return last;
+    if (i + 1 < attempts) await delay(400);
+  }
+  return last;
+}
+
+/** Primera promesa que resuelve con ok:true; si todas fallan, unifica el mensaje. */
 async function raceFirstOk(tasks) {
   return await new Promise((resolve) => {
     let pending = tasks.length;
     let settled = false;
-    let lastFail = { ok: false, message: "Sin respuesta" };
+    const fails = [];
     if (pending === 0) {
-      resolve(lastFail);
+      resolve({ ok: false, message: "Sin proveedores de consulta" });
       return;
     }
     const finish = (res) => {
@@ -1929,21 +1997,85 @@ async function raceFirstOk(tasks) {
             finish(res);
             return;
           }
-          if (res) lastFail = res;
+          if (res) fails.push(res);
           pending -= 1;
-          if (pending === 0) finish(lastFail);
+          if (pending === 0) {
+            const allMissing = fails.length > 0 && fails.every((row) => row.retryable === false);
+            finish({
+              ok: false,
+              message: allMissing
+                ? "Documento no encontrado en el padrón."
+                : "No se pudo consultar el documento. Intente de nuevo.",
+            });
+          }
         })
         .catch((err) => {
-          lastFail = {
+          fails.push({
             ok: false,
+            retryable: true,
             message: err instanceof Error ? err.message : "Error de red",
-          };
+          });
           pending -= 1;
-          if (pending === 0) finish(lastFail);
+          if (pending === 0) {
+            finish({
+              ok: false,
+              message: "No se pudo consultar el documento. Intente de nuevo.",
+            });
+          }
         });
     }
   });
 }
+
+function apisperuToken() {
+  return identityEnvKey("APISPERU_TOKEN");
+}
+
+function rucpeApiKey() {
+  return identityEnvKey("RUCPE_API_KEY") || identityEnvKey("VITE_RUCPE_API_KEY");
+}
+
+ipcMain.handle("list-sql-profiles", async () => {
+  const { listSqlProfiles } = require("./navaSql.cjs");
+  return listSqlProfiles();
+});
+
+ipcMain.handle("get-sql-status", async () => {
+  const { getSqlStatus } = require("./navaSql.cjs");
+  return getSqlStatus();
+});
+
+ipcMain.handle("set-sql-profile", async (_event, profileId) => {
+  const { setSqlProfile } = require("./navaSql.cjs");
+  return setSqlProfile(profileId);
+});
+
+ipcMain.handle("list-nava-day-report", async (_event, payload) => {
+  const { listNavaDayReport } = require("./navaSql.cjs");
+  try {
+    return await listNavaDayReport(payload);
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : String(err));
+  }
+});
+
+ipcMain.handle("list-nava-vendors", async () => {
+  const { listNavaVendors } = require("./navaSql.cjs");
+  try {
+    return await listNavaVendors();
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : String(err));
+  }
+});
+
+ipcMain.handle("nava-login", async (_event, payload) => {
+  const { navaLogin } = require("./navaSql.cjs");
+  try {
+    return await navaLogin(payload ?? {});
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : String(err));
+  }
+});
 
 ipcMain.handle("list-nava-docs", async (_event, payload) => {
   const { listNavaDocs } = require("./navaSql.cjs");
@@ -1954,10 +2086,10 @@ ipcMain.handle("list-nava-docs", async (_event, payload) => {
   }
 });
 
-ipcMain.handle("list-nava-dates", async () => {
+ipcMain.handle("list-nava-dates", async (_event, payload) => {
   const { listNavaDates } = require("./navaSql.cjs");
   try {
-    return await listNavaDates();
+    return await listNavaDates(payload);
   } catch (err) {
     throw new Error(err instanceof Error ? err.message : String(err));
   }
@@ -1981,21 +2113,15 @@ ipcMain.handle("warmup-http", async () => {
   ];
   await Promise.allSettled(
     urls.map((url) =>
-      fetchWithTimeout(url, { headers: { Accept: "*/*" }, method: "GET" }, 3000).then((r) =>
+      fetchWithTimeout(url, { headers: { Accept: "*/*" }, method: "GET" }, 1800).then((r) =>
         r.arrayBuffer(),
       ),
     ),
   );
-  try {
-    const { warmupSql } = require("./navaSql.cjs");
-    await warmupSql();
-  } catch {
-    /* SQL opcional */
-  }
   return true;
 });
 
-/** DNI → carrera servidor propio + bocasion · RUC → carrera API + /buscar. */
+/** DNI/RUC: varias fuentes en paralelo; un fallo transitorio no corta las demás. */
 ipcMain.handle("lookup-identity", async (_event, payload) => {
   const type = payload?.type === "dni" || payload?.type === "ruc" ? payload.type : null;
   const value = String(payload?.value ?? "").replace(/\D/g, "");
@@ -2009,34 +2135,54 @@ ipcMain.handle("lookup-identity", async (_event, payload) => {
     }
     const primary = dniApiBase();
     const tasks = [
-      async () => {
-        const { ok, body } = await fetchJsonHttps(`${primary}/api/dni/${value}`, null, 5000);
-        if (!ok || body?.success === false) return { ok: false, message: "API primaria sin datos" };
-        const name = pickIdentityName(body?.data ?? body);
-        if (!name) return { ok: false, message: "Sin nombre" };
-        return {
-          ok: true,
-          provider: primary,
-          result: { document: value, type: "dni", name },
-        };
-      },
+      () =>
+        withRetry(() =>
+          lookupJsonIdentity(`${primary}/api/dni/${value}`, null, 7000, "dni", value, primary),
+        ),
     ];
     if (primary.replace(/\/$/, "") !== DNI_API_FALLBACK.replace(/\/$/, "")) {
-      tasks.push(async () => {
-        const { ok, body } = await fetchJsonHttps(
-          `${DNI_API_FALLBACK}/api/dni/${value}`,
-          null,
-          8000,
-        );
-        if (!ok || body?.success === false) return { ok: false, message: "Fallback sin datos" };
-        const name = pickIdentityName(body?.data ?? body);
-        if (!name) return { ok: false, message: "Sin nombre" };
-        return {
-          ok: true,
-          provider: DNI_API_FALLBACK,
-          result: { document: value, type: "dni", name },
-        };
-      });
+      tasks.push(() =>
+        withRetry(() =>
+          lookupJsonIdentity(
+            `${DNI_API_FALLBACK}/api/dni/${value}`,
+            null,
+            8000,
+            "dni",
+            value,
+            DNI_API_FALLBACK,
+          ),
+        ),
+      );
+    }
+    const apis = apisperuToken();
+    if (apis) {
+      tasks.push(() =>
+        withRetry(() =>
+          lookupJsonIdentity(
+            `https://dniruc.apisperu.com/api/v1/dni/${value}?token=${encodeURIComponent(apis)}`,
+            { Authorization: `Bearer ${apis}` },
+            8000,
+            "dni",
+            value,
+            "dniruc.apisperu.com",
+          ),
+        ),
+      );
+    }
+    const rucpeKey = rucpeApiKey();
+    if (rucpeKey) {
+      tasks.push(() =>
+        withRetry(() =>
+          lookupJsonIdentity(
+            `https://consulta.rucpe.com/api/v1/dni/${value}`,
+            { "X-API-Key": rucpeKey },
+            8000,
+            "dni",
+            value,
+            "consulta.rucpe.com",
+          ),
+        ),
+      );
     }
     try {
       return await raceFirstOk(tasks);
@@ -2052,50 +2198,67 @@ ipcMain.handle("lookup-identity", async (_event, payload) => {
     return { ok: false, message: "RUC inválido (11 dígitos)" };
   }
 
-  const rucpeKey =
-    identityEnvKey("RUCPE_API_KEY") || identityEnvKey("VITE_RUCPE_API_KEY");
-
+  const rucpeKey = rucpeApiKey();
+  const apis = apisperuToken();
   const tasks = [];
   if (rucpeKey) {
-    tasks.push(async () => {
-      const url = `https://consulta.rucpe.com/api/v1/ruc/${value}`;
-      const { ok, body } = await fetchJsonHttps(url, { "X-API-Key": rucpeKey }, 6000);
-      if (!ok) return { ok: false, message: "API RUC sin datos" };
-      const name = pickIdentityName(body);
-      if (!name) return { ok: false, message: "API RUC sin nombre" };
-      return {
-        ok: true,
-        provider: "consulta.rucpe.com",
-        result: { document: value, type: "ruc", name },
-      };
-    });
+    tasks.push(() =>
+      withRetry(() =>
+        lookupJsonIdentity(
+          `https://consulta.rucpe.com/api/v1/ruc/${value}`,
+          { "X-API-Key": rucpeKey },
+          7000,
+          "ruc",
+          value,
+          "consulta.rucpe.com",
+        ),
+      ),
+    );
+  }
+  if (apis) {
+    tasks.push(() =>
+      withRetry(() =>
+        lookupJsonIdentity(
+          `https://dniruc.apisperu.com/api/v1/ruc/${value}?token=${encodeURIComponent(apis)}`,
+          { Authorization: `Bearer ${apis}` },
+          8000,
+          "ruc",
+          value,
+          "dniruc.apisperu.com",
+        ),
+      ),
+    );
   }
   tasks.push(async () => {
-    const buscarUrl = `https://consulta.rucpe.com/buscar?q=${encodeURIComponent(value)}`;
-    const response = await fetchWithTimeout(
-      buscarUrl,
-      {
-        headers: {
-          Accept: "text/html",
-          "HX-Request": "true",
-          "User-Agent": "Mozilla/5.0 (compatible; BocaSoft/1.0)",
+    try {
+      const buscarUrl = `https://consulta.rucpe.com/buscar?q=${encodeURIComponent(value)}`;
+      const response = await fetchWithTimeout(
+        buscarUrl,
+        {
+          headers: {
+            Accept: "text/html",
+            "HX-Request": "true",
+            "User-Agent": "Mozilla/5.0 (compatible; BocaSoft/1.0)",
+          },
         },
-      },
-      8000,
-    );
-    const html = await response.text();
-    if (!response.ok) {
-      return { ok: false, message: `Error al consultar RUC (${response.status})` };
+        8000,
+      );
+      const html = await response.text();
+      if (!response.ok) {
+        return identityFail(response.status, `Error al consultar RUC (${response.status})`);
+      }
+      const name = parseRucpeBuscarHtml(html, value);
+      if (!name) {
+        return identityFail(404, "RUC no encontrado en consulta.rucpe.com");
+      }
+      return {
+        ok: true,
+        provider: "consulta.rucpe.com/buscar",
+        result: { document: value, type: "ruc", name },
+      };
+    } catch (err) {
+      return identityFail(0, err instanceof Error ? err.message : "Error de red");
     }
-    const name = parseRucpeBuscarHtml(html, value);
-    if (!name) {
-      return { ok: false, message: "RUC no encontrado en consulta.rucpe.com" };
-    }
-    return {
-      ok: true,
-      provider: "consulta.rucpe.com/buscar",
-      result: { document: value, type: "ruc", name },
-    };
   });
 
   try {

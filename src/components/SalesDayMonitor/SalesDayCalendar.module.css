@@ -1,5 +1,5 @@
 .popupCalendar {
-  width: 212px;
+  width: 220px;
 }
 
 .triggerCalendar {
@@ -14,7 +14,7 @@
 }
 
 .weekdays {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   font-size: 10px;
   font-weight: 600;
   color: var(--win-picker-list-head-text);
@@ -27,21 +27,23 @@
 }
 
 .grid {
-  gap: 2px 0;
+  gap: 0;
 }
 
 .dayCell,
 .dayEmpty {
   width: 28px;
-  height: 28px;
+  height: 34px;
   margin: 0 auto;
 }
 
 .dayCell {
   position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  gap: 1px;
   padding: 0;
   border: none;
   background: transparent;
@@ -52,8 +54,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   font-size: 11px;
   font-weight: 500;
@@ -98,22 +100,34 @@
   background: transparent;
 }
 
-.salesDot {
-  position: absolute;
-  bottom: 2px;
-  left: 50%;
-  width: 4px;
-  height: 4px;
+.mark,
+.markSlot {
+  display: block;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #2a7a3f;
-  transform: translateX(-50%);
+  flex-shrink: 0;
   pointer-events: none;
 }
 
-:global([data-theme="dark"]) .salesDot {
-  background: #4cd4a0;
+.markSlot {
+  visibility: hidden;
 }
 
-.daySelected .salesDot {
-  background: #fff;
+.markSales {
+  background: #1f9d4a;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.markOpen {
+  background: #1d6fd8;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+:global([data-theme="dark"]) .markSales {
+  background: #3ee07a;
+}
+
+:global([data-theme="dark"]) .markOpen {
+  background: #5aa8ff;
 }

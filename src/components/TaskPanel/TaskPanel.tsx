@@ -1,13 +1,27 @@
 import { APP_LOGO_GRAY_SRC, COMPANY_NAME } from "../../config/brand";
+import type { Vendor } from "../../data/vendors";
 import styles from "./TaskPanel.module.css";
 
-const companyDetails = [
-  { label: "Región", value: "Lima" },
-  { label: "Tienda", value: "Demo Tienda" },
-  { label: "Punto emisión docs", value: "demo_caja" },
-  { label: "Almacén predeterminado", value: "Almacén principal" },
-  { label: "Fecha de transacción contable", value: "01/06/2026" },
-];
+type Props = {
+  vendor?: Vendor;
+};
+
+function sessionDetails(vendor?: Vendor) {
+  return [
+    { label: "Región", value: "Lima" },
+    { label: "Tienda", value: vendor?.tienda || "—" },
+    { label: "Punto emisión docs", value: vendor?.ptoVta || vendor?.nombre || "—" },
+    { label: "Almacén predeterminado", value: vendor?.almacen || "—" },
+    {
+      label: "Fecha de transacción contable",
+      value: new Date().toLocaleDateString("es-PE", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }),
+    },
+  ];
+}
 
 type ModuleItem = {
   label: string;
@@ -83,7 +97,8 @@ function ModuleList({ items }: { items: ModuleItem[] }) {
   );
 }
 
-export function TaskPanel() {
+export function TaskPanel({ vendor }: Props) {
+  const details = sessionDetails(vendor);
   return (
     <div className={styles.panel}>
       <div className={styles.top}>
@@ -97,7 +112,7 @@ export function TaskPanel() {
           <div className={styles.companyLogo}>
             <img src={APP_LOGO_GRAY_SRC} alt="Bocasión" className={styles.companyLogoImg} decoding="async" />
             <div className={styles.companyDetails}>
-              {companyDetails.map((d) => (
+              {details.map((d) => (
                 <div key={d.label} className={styles.detailRow}>
                   <span>{d.label}</span>
                   <strong>{d.value}</strong>

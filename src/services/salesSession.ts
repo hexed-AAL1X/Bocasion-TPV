@@ -205,7 +205,15 @@ export function updateSaleDocRef(saleId: string, docRef: string): void {
 function restoreLiveSession(): void {
   const key = sessionStorageKey(activeRegisterId, new Date());
   const session = loadAllSessions()[key];
-  if (!session) return;
+  if (!session) {
+    sessionOpenedAt = new Date();
+    sessionClosedAt = null;
+    sales = [];
+    boletaSeq = BOLETA_START;
+    facturaSeq = FACTURA_START;
+    notaSeq = NOTA_START;
+    return;
+  }
 
   sessionOpenedAt = new Date(session.openedAt);
   sessionClosedAt = session.closedAt ? new Date(session.closedAt) : null;
@@ -248,6 +256,15 @@ export function getActiveRegisterId(): string {
   return activeRegisterId;
 }
 
+export function setActiveRegisterId(registerId: string): void {
+  const next = registerId.trim();
+  if (!next || next === activeRegisterId) return;
+  persistLiveSession();
+  activeRegisterId = next;
+  restoreLiveSession();
+  emitSales();
+}
+
 export function getAvailableSaleDates(registerId = activeRegisterId): Date[] {
   const prefix = `${registerId}|`;
   const all = loadAllSessions();
@@ -257,6 +274,17 @@ export function getAvailableSaleDates(registerId = activeRegisterId): Date[] {
   });
 
   return keys
+    .map((key) => parseDateKey(key.split("|")[1] ?? ""))
+    .filter((date) => !Number.isNaN(date.getTime()))
+    .sort((a, b) => b.getTime() - a.getTime());
+}
+
+/** Días con caja abierta en esta app y sin ventas (punto azul). */
+export function getOpenedWithoutSalesDates(registerId = activeRegisterId): Date[] {
+  const prefix = `${registerId}|`;
+  const all = loadAllSessions();
+  return Object.keys(all)
+    .filter((key) => key.startsWith(prefix) && (all[key]?.sales.length ?? 0) === 0)
     .map((key) => parseDateKey(key.split("|")[1] ?? ""))
     .filter((date) => !Number.isNaN(date.getTime()))
     .sort((a, b) => b.getTime() - a.getTime());
@@ -472,8 +500,20 @@ export function registerSale(input: {
 
 function docRange(items: CompletedSale[]): { from: number; to: number } {
   if (items.length === 0) return { from: 0, to: 0 };
-  const nums = items.map((sale) => sale.docNumber);
-  return { from: Math.min(...nums), to: Math.max(...nums) };
+  const bySeries = new Map<string, number[]>();
+  for (const sale of items) {
+    const ref = (sale.docRef ?? "").trim();
+    const dash = ref.indexOf("-");
+    const series = dash > 0 ? ref.slice(0, dash) : sale.docType;
+    const nums = bySeries.get(series) ?? [];
+    nums.push(sale.docNumber);
+    bySeries.set(series, nums);
+  }
+  let best: number[] = [];
+  for (const nums of bySeries.values()) {
+    if (nums.length > best.length) best = nums;
+  }
+  return { from: Math.min(...best), to: Math.max(...best) };
 }
 
 function summarizeDocs(list: CompletedSale[]): DocSummary {

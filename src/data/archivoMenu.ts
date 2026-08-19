@@ -40,3 +40,14 @@ export const ARCHIVO_SESSION = {
   almacen: "Alicorp",
   cuentaPrincipal: "Principal",
 };
+
+export function applyArchivoSession(vendor: {
+  nombre: string;
+  ptoVta?: string;
+  almacen?: string;
+  tienda?: string;
+}): void {
+  if (vendor.tienda) ARCHIVO_SESSION.tienda = vendor.tienda;
+  if (vendor.almacen) ARCHIVO_SESSION.almacen = vendor.almacen;
+  ARCHIVO_SESSION.puntoEmision = vendor.ptoVta || vendor.nombre;
+}

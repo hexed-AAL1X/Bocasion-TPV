@@ -94,6 +94,7 @@ interface BocasoftAPI {
     cdocu?: "01" | "03" | "all";
     limit?: number;
     fecha?: string;
+    codven?: string;
   }) => Promise<
     Array<{
       fecha: string;
@@ -110,7 +111,83 @@ interface BocasoftAPI {
       codven: string;
     }>
   >;
-  listNavaDates?: () => Promise<string[]>;
+  listNavaDates?: (
+    payload?: string | { codven?: string; from?: string; to?: string },
+  ) => Promise<string[] | { sales: string[]; opened?: string[] }>;
+  listNavaDayReport?: (payload: string | { fecha: string; codven?: string }) => Promise<{
+    docs: {
+      boletas: number;
+      boletaFrom: number;
+      boletaTo: number;
+      notas: number;
+      notaFrom: number;
+      notaTo: number;
+      facturas: number;
+      facturaFrom: number;
+      facturaTo: number;
+      anulados: number;
+      total: number;
+    };
+    monetary: {
+      contado: number;
+      credito: number;
+      tarjeta: number;
+      banco: number;
+      cards: Array<{ label: string; total: number }>;
+      total: number;
+    };
+    groups: Array<{ group: string; total: number; percent: number }>;
+    articles: Array<{ description: string; qty: number; total: number }>;
+    grandTotal: number;
+  }>;
+  listNavaVendors?: () => Promise<
+    Array<{
+      codven: string;
+      nomven: string;
+      estado?: string;
+      usuario?: string;
+      nombres?: string;
+    }>
+  >;
+  navaLogin?: (payload: { password: string; user?: string }) => Promise<{
+    usuario: string;
+    nombres: string;
+    apellidos: string;
+    codven: string;
+    nomven: string;
+    codusu: string;
+    nompto?: string;
+    nomalm?: string;
+    nomtie?: string;
+  }>;
+  listSqlProfiles?: () => Promise<{
+    active: string;
+    profiles: Array<{
+      id: string;
+      label: string;
+      host: string;
+      database: string;
+      auth: string;
+    }>;
+  }>;
+  getSqlStatus?: () => Promise<{
+    ok: boolean;
+    profileId: string;
+    host: string;
+    server: string;
+    database: string;
+    login: string;
+    message: string;
+  }>;
+  setSqlProfile?: (profileId: string) => Promise<{
+    ok: boolean;
+    profileId: string;
+    host: string;
+    server: string;
+    database: string;
+    login: string;
+    message: string;
+  }>;
   insertNavaSale?: (payload: {
     cdocu: "01" | "03";
     nomcli: string;

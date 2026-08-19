@@ -489,6 +489,7 @@ export function AppShell({ vendor, onChangeVendor, onExit }: Props) {
               onExit={handleAppExit}
               onOpenBatchPrint={handleOpenBatchPrint}
               onOpenPageSetup={handleOpenPageSetup}
+              vendor={vendor}
             />
           ) : (
             <>
@@ -501,7 +502,7 @@ export function AppShell({ vendor, onChangeVendor, onExit }: Props) {
               />
               <div className={styles.workspace}>
                 {activeDocTab === "task" ? (
-                  <TaskPanel />
+                  <TaskPanel vendor={vendor} />
                 ) : (
                   <>
                     <POSTerminal

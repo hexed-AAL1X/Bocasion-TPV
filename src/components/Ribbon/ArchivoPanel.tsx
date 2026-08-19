@@ -13,6 +13,7 @@ import {
 } from "../../data/archivoMenu";
 import { ExitConfirmDialog } from "../ExitConfirmDialog/ExitConfirmDialog";
 import { OpcionesView } from "./OpcionesView";
+import type { Vendor } from "../../data/vendors";
 import styles from "./ArchivoPanel.module.css";
 
 const MAIN_MENU = ARCHIVO_MENU.filter((item) => item.id !== "salir");
@@ -23,6 +24,7 @@ type Props = {
   onExit: () => void;
   onOpenBatchPrint: () => void;
   onOpenPageSetup: () => void;
+  vendor?: Vendor;
 };
 
 function formatFechaContable(date: Date): string {
@@ -47,7 +49,7 @@ function FieldChevron() {
   );
 }
 
-function InformacionView({ stagger }: { stagger?: boolean }) {
+function InformacionView({ stagger, vendor }: { stagger?: boolean; vendor?: Vendor }) {
   const fechaContable = useMemo(() => formatFechaContable(new Date()), []);
 
   const fields = [
@@ -59,19 +61,19 @@ function InformacionView({ stagger }: { stagger?: boolean }) {
     },
     {
       label: "Tienda",
-      value: ARCHIVO_SESSION.tienda,
+      value: vendor?.tienda || ARCHIVO_SESSION.tienda,
       iconFile: "mostrador-shell32-275.png",
       selectable: false,
     },
     {
       label: "Punto emisión de documentos",
-      value: ARCHIVO_SESSION.puntoEmision,
+      value: vendor?.ptoVta || vendor?.nombre || ARCHIVO_SESSION.puntoEmision,
       iconFile: "documentos-imageres-102-G.png",
       selectable: true,
     },
     {
       label: "Almacén predeterminado",
-      value: ARCHIVO_SESSION.almacen,
+      value: vendor?.almacen || ARCHIVO_SESSION.almacen,
       iconFile: "menu-shell32-161.png",
       selectable: true,
     },
@@ -204,7 +206,7 @@ function getSectionIndex(sectionId: ArchivoSectionId): number {
   return MAIN_MENU.findIndex((item) => item.id === sectionId);
 }
 
-export function ArchivoPanel({ openWindows, onExit, onOpenBatchPrint, onOpenPageSetup }: Props) {
+export function ArchivoPanel({ openWindows, onExit, onOpenBatchPrint, onOpenPageSetup, vendor }: Props) {
   const [activeSection, setActiveSection] = useState<ArchivoSectionId>("informacion");
   const [sectionDirection, setSectionDirection] = useState<1 | -1 | 0>(0);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -318,7 +320,7 @@ export function ArchivoPanel({ openWindows, onExit, onOpenBatchPrint, onOpenPage
       <div className={styles.content}>
         <div key={activeSection} className={contentPaneClass}>
           {activeSection === "informacion" ? (
-            <InformacionView stagger={allowRichEnterRef.current} />
+            <InformacionView stagger={allowRichEnterRef.current} vendor={vendor} />
           ) : activeSection === "opciones" ? (
             <OpcionesView />
           ) : (

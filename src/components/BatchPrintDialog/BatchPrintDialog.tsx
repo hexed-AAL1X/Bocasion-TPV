@@ -6,7 +6,7 @@ import {
   getBatchPrintDoc,
   type BatchPrintDocId,
 } from "../../data/batchPrintConfig";
-import { POS_REGISTERS } from "../../data/posRegisters";
+import { POS_REGISTERS, loadPosRegistersFromNava } from "../../data/posRegisters";
 import { getActiveRegisterId } from "../../services/salesSession";
 import { useAppDialogClose } from "../AppDialog/useAppDialogClose";
 import { WinSelect } from "../WinSelect/WinSelect";
@@ -53,10 +53,15 @@ export function BatchPrintDialog({ onClose }: Props) {
     [],
   );
 
+  const [registerTick, setRegisterTick] = useState(0);
   const registerOptions = useMemo(
     () => POS_REGISTERS.map((item) => ({ value: item.id, label: item.point })),
-    [],
+    [registerTick],
   );
+
+  useEffect(() => {
+    void loadPosRegistersFromNava().then(() => setRegisterTick((n) => n + 1));
+  }, []);
 
   useEffect(() => {
     const doc = getBatchPrintDoc(docType);

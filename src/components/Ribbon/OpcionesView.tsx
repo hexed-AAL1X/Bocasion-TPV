@@ -1,17 +1,72 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { COLOR_PALETTE_OPTIONS } from "../../theme/definitions";
 import { useTheme } from "../../theme/ThemeProvider";
 import { getEfficientMode, setEfficientMode } from "../../services/performanceSettings";
 import { ThemePreview } from "./ThemePreview";
 import styles from "./OpcionesView.module.css";
 
+type SqlProfile = {
+  id: string;
+  label: string;
+  host: string;
+  database: string;
+  auth: string;
+};
+
+type SqlStatus = {
+  ok: boolean;
+  profileId: string;
+  host: string;
+  server: string;
+  database: string;
+  login: string;
+  message: string;
+};
+
 export function OpcionesView() {
   const { colorPalette, setColorPalette, theme, toggleTheme } = useTheme();
   const [efficientMode] = useState(getEfficientMode);
+  const [sqlProfiles, setSqlProfiles] = useState<SqlProfile[]>([]);
+  const [sqlActive, setSqlActive] = useState("");
+  const [sqlStatus, setSqlStatus] = useState<SqlStatus | null>(null);
+  const [sqlBusy, setSqlBusy] = useState(false);
+
+  useEffect(() => {
+    const api = window.bocasoft;
+    if (!api?.listSqlProfiles) return;
+    void api.listSqlProfiles().then((data) => {
+      setSqlProfiles(data.profiles);
+      setSqlActive(data.active);
+    });
+    void api.getSqlStatus?.().then(setSqlStatus);
+  }, []);
 
   const handleEfficientToggle = () => {
     setEfficientMode(!efficientMode);
     window.location.reload();
+  };
+
+  const handleSqlProfile = async (id: string) => {
+    const api = window.bocasoft;
+    if (!api?.setSqlProfile || sqlBusy) return;
+    setSqlBusy(true);
+    try {
+      const status = await api.setSqlProfile(id);
+      setSqlActive(id);
+      setSqlStatus(status);
+    } catch (err) {
+      setSqlStatus({
+        ok: false,
+        profileId: id,
+        host: "",
+        server: "",
+        database: "",
+        login: "",
+        message: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setSqlBusy(false);
+    }
   };
 
   return (
@@ -24,6 +79,53 @@ export function OpcionesView() {
           aquí abajo.
         </p>
       </header>
+
+      {sqlProfiles.length ? (
+        <section className={styles.section} aria-labelledby="sql-heading">
+          <h3 id="sql-heading" className={styles.sectionTitle}>
+            Servidor SQL
+          </h3>
+          <p className={styles.subtitle}>
+            Desarrollo: WIN-C6EKJGJR3FH. Producción: EC2AMAZ-O5TI2KP. El cambio aplica de inmediato.
+          </p>
+          <div className={styles.sqlGrid} role="radiogroup" aria-label="Servidor SQL">
+            {sqlProfiles.map((profile) => {
+              const selected = sqlActive === profile.id;
+              return (
+                <button
+                  key={profile.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={sqlBusy}
+                  className={[styles.sqlCard, selected ? styles.sqlCardActive : ""]
+                    .filter(Boolean)
+                    .join(" ")}
+                  onClick={() => void handleSqlProfile(profile.id)}
+                >
+                  <div className={styles.paletteHead}>
+                    <span className={styles.paletteLabel}>{profile.label}</span>
+                    <span
+                      className={[styles.check, selected ? styles.checkOn : ""].filter(Boolean).join(" ")}
+                      aria-hidden={!selected}
+                    >
+                      ✓
+                    </span>
+                  </div>
+                  <p className={styles.paletteDesc}>
+                    {profile.host} · {profile.database} · {profile.auth.toUpperCase()}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+          {sqlStatus ? (
+            <p className={sqlStatus.ok ? styles.sqlOk : styles.sqlErr}>
+              {sqlBusy ? "Conectando…" : sqlStatus.message}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
 
       <section className={styles.section} aria-labelledby="color-palette-heading">
         <h3 id="color-palette-heading" className={styles.sectionTitle}>

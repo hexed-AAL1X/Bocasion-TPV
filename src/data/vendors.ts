@@ -2,6 +2,9 @@ export type Vendor = {
   code: string;
   usuario: string;
   nombre: string;
+  ptoVta?: string;
+  almacen?: string;
+  tienda?: string;
 };
 
 /** Vendedores demo — TODO: cargar desde API / SQL Server */

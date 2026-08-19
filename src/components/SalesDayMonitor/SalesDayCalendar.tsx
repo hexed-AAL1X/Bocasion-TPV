@@ -15,7 +15,11 @@ const MONTHS = [
 type Props = {
   value: Date;
   onChange: (date: Date) => void;
+  /** Días con caja abierta y ventas (punto verde). */
   datesWithSales?: Date[];
+  /** Días con caja abierta sin ventas (punto azul). */
+  datesOpenedOnly?: Date[];
+  onVisibleMonthChange?: (month: Date) => void;
   /** Ancla externa: no renderiza el trigger propio */
   anchorRef?: RefObject<HTMLElement | null>;
   open?: boolean;
@@ -45,6 +49,8 @@ export function SalesDayCalendar({
   value,
   onChange,
   datesWithSales = [],
+  datesOpenedOnly = [],
+  onVisibleMonthChange,
   anchorRef: externalAnchorRef,
   open: controlledOpen,
   onOpenChange,
@@ -57,6 +63,10 @@ export function SalesDayCalendar({
   const salesKeys = useMemo(
     () => new Set(datesWithSales.map((date) => toDateKey(date))),
     [datesWithSales],
+  );
+  const openedKeys = useMemo(
+    () => new Set(datesOpenedOnly.map((date) => toDateKey(date))),
+    [datesOpenedOnly],
   );
 
   const isAnchored = Boolean(externalAnchorRef);
@@ -74,6 +84,10 @@ export function SalesDayCalendar({
   useEffect(() => {
     setViewMonth(startOfMonth(value));
   }, [value]);
+
+  useEffect(() => {
+    onVisibleMonthChange?.(viewMonth);
+  }, [viewMonth, onVisibleMonthChange]);
 
   const cells = useMemo(() => buildMonthGrid(viewMonth), [viewMonth]);
 
@@ -95,10 +109,10 @@ export function SalesDayCalendar({
       onClose={() => setOpen(false)}
       anchorRef={anchorRef}
       className={styles.popupCalendar}
-      popupWidth={212}
+      popupWidth={220}
       role="dialog"
       ariaLabel={ariaLabel}
-      estimatedHeight={260}
+      estimatedHeight={300}
     >
       <div className={shell.headerNav}>
         <button
@@ -139,14 +153,17 @@ export function SalesDayCalendar({
               return <span key={`empty-${index}`} className={styles.dayEmpty} aria-hidden />;
             }
 
+            const key = toDateKey(date);
             const isFuture = date > today;
             const selected = isSameDay(date, value);
             const isToday = isSameDay(date, today);
-            const hasSales = salesKeys.has(toDateKey(date));
+            const hasSales = salesKeys.has(key);
+            const openedOnly = !hasSales && openedKeys.has(key);
+            const mark = hasSales ? "sales" : openedOnly ? "open" : "";
 
             return (
               <button
-                key={toDateKey(date)}
+                key={key}
                 type="button"
                 className={[
                   styles.dayCell,
@@ -162,7 +179,17 @@ export function SalesDayCalendar({
                 aria-pressed={selected}
               >
                 <span className={styles.dayInner}>{date.getDate()}</span>
-                {hasSales ? <span className={styles.salesDot} aria-hidden /> : null}
+                {mark ? (
+                  <span
+                    className={[
+                      styles.mark,
+                      mark === "sales" ? styles.markSales : styles.markOpen,
+                    ].join(" ")}
+                    aria-hidden
+                  />
+                ) : (
+                  <span className={styles.markSlot} aria-hidden />
+                )}
               </button>
             );
           })}

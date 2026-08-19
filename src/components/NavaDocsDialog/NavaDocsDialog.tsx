@@ -21,10 +21,9 @@ export function NavaDocsDialog({ kind, onClose }: Props) {
     setError("");
     void listNavaDocs(kind)
       .then((data) => setRows(data))
-      .catch(() => {
-        setError(
-          "Sin conexión al SQL de Nava. Enciende el PC Windows (WIN-C6EKJGJR3FH / Tailscale) y pulsa Actualizar.",
-        );
+      .catch((err: unknown) => {
+        const detail = err instanceof Error ? err.message : "Error de conexión a SQL Server.";
+        setError(detail.replace(/\s+/g, " ").trim());
       });
   }, [kind]);
 
