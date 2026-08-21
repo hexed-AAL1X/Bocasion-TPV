@@ -7,7 +7,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { loadLogoEscPos, resolveLogoPath } = require("./thermalLogoEscPos.cjs");
-const { checkForUpdates, downloadAndInstall, autoCheckOnStartup } = require("./appUpdater.cjs");
+const { checkForUpdates, downloadAndInstall, autoCheckOnStartup, applyPendingUpdateOnStartup } = require("./appUpdater.cjs");
 const { mapPrinterInfo } = require("./printerInfo.cjs");
 const { resolvePrinterStatus } = require("./printerStatus.cjs");
 
@@ -33,13 +33,9 @@ if (!gotSingleInstanceLock) {
   });
 }
 
-// Cargar .env del proyecto (RUCPE_API_KEY / APISPERU_TOKEN) sin exponerlos al renderer.
+// Config: userData/config.env → resources/config.env (instalada) → .env (dev).
 try {
-  const dotenv = require("dotenv");
-  const envPath = path.join(__dirname, "..", ".env");
-  if (fsSync.existsSync(envPath)) {
-    dotenv.config({ path: envPath });
-  }
+  require("./loadAppEnv.cjs").loadAppEnv({ override: true });
 } catch {
   /* dotenv opcional */
 }
@@ -2382,8 +2378,16 @@ function createWindow() {
   loadMainWindowContent(win);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   if (!gotSingleInstanceLock) return;
+
+  // Si hay update pendiente, reemplaza el binario y relanza (no abrir UI vieja).
+  try {
+    const applied = await applyPendingUpdateOnStartup();
+    if (applied) return;
+  } catch (err) {
+    console.error("[updater] pending update:", err);
+  }
 
   session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => {
     if (permission === "geolocation") {

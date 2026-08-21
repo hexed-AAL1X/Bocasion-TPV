@@ -1,19 +1,12 @@
 const path = require("node:path");
 const fsSync = require("node:fs");
+const { loadAppEnv, isPackagedApp } = require("./loadAppEnv.cjs");
 
 let poolPromise = null;
 let poolKey = "";
 
 function loadSqlEnv() {
-  try {
-    const dotenv = require("dotenv");
-    const envPath = path.join(__dirname, "..", ".env");
-    if (fsSync.existsSync(envPath)) {
-      dotenv.config({ path: envPath, override: true });
-    }
-  } catch {
-    /* dotenv opcional */
-  }
+  loadAppEnv({ override: true });
 }
 
 function profileStatePath() {
@@ -81,8 +74,9 @@ function readStoredProfileId() {
   const id = String(readProfileState().id ?? "").trim().toLowerCase();
   if (id && profileIds().includes(id)) return id;
   loadSqlEnv();
-  const fromEnv = String(process.env.MSSQL_PROFILE ?? "dev").trim().toLowerCase();
-  return profileIds().includes(fromEnv) ? fromEnv : profileIds()[0];
+  const fallback = isPackagedApp() ? "prod" : "dev";
+  const fromEnv = String(process.env.MSSQL_PROFILE ?? fallback).trim().toLowerCase();
+  return profileIds().includes(fromEnv) ? fromEnv : profileIds().includes(fallback) ? fallback : profileIds()[0];
 }
 
 function writeStoredProfileId(id) {
@@ -112,7 +106,9 @@ function mssqlConfig(host) {
     throw new Error("Falta el host SQL del perfil activo");
   }
   if (!profile.user || !profile.password) {
-    throw new Error(`Falta usuario/contraseña SQL para el perfil ${profile.id}`);
+    throw new Error(
+      `Falta usuario/contraseña SQL (${profile.id}). En la app instalada coloca config.env en la carpeta de datos o regenera el instalador con .env.`,
+    );
   }
   const base = {
     server: host,

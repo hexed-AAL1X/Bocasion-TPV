@@ -1,6 +1,7 @@
 node_modules
 dist
 dist-electron
+build/
 src-tauri/target
 *.local
 .DS_Store

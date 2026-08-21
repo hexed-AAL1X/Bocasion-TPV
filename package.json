@@ -1,6 +1,6 @@
 {
   "name": "bocasoft",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
@@ -21,8 +21,8 @@
     "gen:boot-theme": "tsx scripts/gen-boot-theme.ts",
     "predev": "npm run gen:boot-theme",
     "build": "npm run gen:boot-theme && tsc && vite build",
-    "build:desktop": "npm run build && electron-builder --linux AppImage tar.xz dir && cp -f scripts/run-intranet-ventas.sh release/Intranet-Ventas.sh && chmod +x release/Intranet-Ventas.sh release/*.AppImage release/linux-unpacked/bocasoft",
-    "build:win": "npm run build && electron-builder --win",
+    "build:desktop": "node scripts/prepare-config-env.cjs && npm run build && electron-builder --linux AppImage tar.xz dir && cp -f scripts/run-intranet-ventas.sh release/Intranet-Ventas.sh && chmod +x release/Intranet-Ventas.sh release/*.AppImage release/linux-unpacked/bocasoft && (cp -f release/*.AppImage release/Intranet-Ventas.AppImage 2>/dev/null || true)",
+    "build:win": "node scripts/prepare-config-env.cjs && npm run build && electron-builder --win",
     "dev:tauri": "tauri dev",
     "build:tauri": "tauri build",
     "build:tauri:linux": "tauri build --bundles deb",
@@ -47,8 +47,13 @@
     "files": [
       "dist/**/*",
       "electron/**/*",
-      "package.json",
-      "!**/node_modules/**"
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "build/config.env",
+        "to": "config.env"
+      }
     ],
     "linux": {
       "target": [

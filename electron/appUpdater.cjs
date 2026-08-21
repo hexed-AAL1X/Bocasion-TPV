@@ -4,12 +4,15 @@ const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const os = require("node:os");
 const path = require("node:path");
+const { loadAppEnv } = require("./loadAppEnv.cjs");
 
 function githubToken() {
+  loadAppEnv();
   return String(process.env.GITHUB_TOKEN || process.env.GH_TOKEN || "").trim();
 }
 
 function repoSlug() {
+  loadAppEnv();
   const env = String(process.env.GITHUB_UPDATES_REPO ?? "").trim();
   if (env.includes("/")) return env.replace(/^https?:\/\/github\.com\//i, "").replace(/\.git$/, "");
   try {
@@ -63,6 +66,7 @@ function pickAsset(assets) {
   const list = Array.isArray(assets) ? assets : [];
   if (process.platform === "win32") {
     return (
+      list.find((asset) => /Setup.*\.exe$/i.test(asset.name)) ||
       list.find((asset) => /\.exe$/i.test(asset.name) && !/portable/i.test(asset.name)) ||
       list.find((asset) => /\.exe$/i.test(asset.name))
     );
@@ -71,6 +75,14 @@ function pickAsset(assets) {
     return list.find((asset) => /\.AppImage$/i.test(asset.name));
   }
   return list.find((asset) => /\.dmg$/i.test(asset.name) || /\.zip$/i.test(asset.name));
+}
+
+function pendingUpdateMetaPath() {
+  return path.join(app.getPath("userData"), "pending-update.json");
+}
+
+function pendingUpdateDir() {
+  return path.join(app.getPath("userData"), "pending-update");
 }
 
 async function checkForUpdates() {
@@ -100,7 +112,7 @@ async function checkForUpdates() {
         canInstall: false,
         message:
           status === 403
-            ? "GitHub limitó la consulta. Espera un momento o configura GITHUB_TOKEN en .env."
+            ? "GitHub limitó la consulta. Espera un momento o configura GITHUB_TOKEN."
             : "No se pudo consultar GitHub. Revisa la conexión.",
       };
     }
@@ -182,33 +194,176 @@ async function downloadToFile(url, dest, onProgress) {
   onProgress(100);
 }
 
-async function applyDownloadedUpdate(filePath) {
-  if (process.platform === "win32") {
-    const child = spawn(filePath, [], { detached: true, stdio: "ignore" });
-    child.unref();
-    app.quit();
-    return { applied: true };
+function resolveLinuxInstallTargets() {
+  const targets = [];
+  const appImage = process.env.APPIMAGE;
+  if (appImage && fs.existsSync(appImage)) {
+    targets.push({ type: "appimage", path: appImage });
   }
 
-  const currentAppImage = process.env.APPIMAGE;
-  if (process.platform === "linux" && currentAppImage) {
-    const scriptPath = path.join(os.tmpdir(), "bocasoft-apply-update.sh");
-    const script = `#!/bin/bash
-sleep 2
-mv -f ${JSON.stringify(filePath)} ${JSON.stringify(currentAppImage)}
-chmod +x ${JSON.stringify(currentAppImage)}
-nohup ${JSON.stringify(currentAppImage)} >/dev/null 2>&1 &
+  // Lanzador / carpeta de release: buscar AppImage junto al exe o al script
+  const exeDir = path.dirname(process.execPath);
+  const searchDirs = [exeDir, path.dirname(exeDir)];
+  if (appImage) searchDirs.unshift(path.dirname(appImage));
+
+  for (const dir of searchDirs) {
+    try {
+      const names = fs.readdirSync(dir).filter((name) => /\.AppImage$/i.test(name));
+      for (const name of names) {
+        const full = path.join(dir, name);
+        if (!targets.some((row) => row.path === full)) {
+          targets.push({ type: "appimage", path: full });
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // Si corre desde linux-unpacked, también actualizar cualquier AppImage hermano
+  if (/linux-unpacked/i.test(exeDir) || /[/\\]resources[/\\]app/i.test(exeDir)) {
+    const releaseRoot = path.resolve(exeDir, "..", "..");
+    try {
+      const names = fs.readdirSync(releaseRoot).filter((name) => /\.AppImage$/i.test(name));
+      for (const name of names) {
+        const full = path.join(releaseRoot, name);
+        if (!targets.some((row) => row.path === full)) {
+          targets.push({ type: "appimage", path: full });
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  return targets;
+}
+
+function shellQuote(value) {
+  return `'${String(value).replace(/'/g, `'\\''`)}'`;
+}
+
+async function applyLinuxAppImageUpdate(downloadedPath, targets) {
+  const primary = targets[0]?.path;
+  if (!primary) {
+    await shell.openPath(downloadedPath);
+    return { applied: false, opened: true };
+  }
+
+  const scriptPath = path.join(os.tmpdir(), `bocasoft-apply-update-${Date.now()}.sh`);
+  const copies = targets
+    .map((row) => row.path)
+    .filter((p, i, arr) => arr.indexOf(p) === i)
+    .map((dest) => {
+      // Mantener nombre estable sin versión para el próximo arranque del lanzador
+      const stable = path.join(path.dirname(dest), "Intranet-Ventas.AppImage");
+      return `
+cp -f ${shellQuote(downloadedPath)} ${shellQuote(dest)} || true
+chmod +x ${shellQuote(dest)} || true
+cp -f ${shellQuote(downloadedPath)} ${shellQuote(stable)} || true
+chmod +x ${shellQuote(stable)} || true
+`;
+    })
+    .join("\n");
+
+  const relaunch = process.env.APPIMAGE || primary;
+  const script = `#!/bin/bash
+set -e
+sleep 1
+${copies}
+nohup ${shellQuote(relaunch)} >/dev/null 2>&1 &
+rm -f ${shellQuote(downloadedPath)}
 rm -f "$0"
 `;
-    await fsp.writeFile(scriptPath, script, { mode: 0o755 });
-    const child = spawn(scriptPath, [], { detached: true, stdio: "ignore" });
-    child.unref();
-    app.quit();
-    return { applied: true };
+  await fsp.writeFile(scriptPath, script, { mode: 0o755 });
+  const child = spawn(scriptPath, [], { detached: true, stdio: "ignore" });
+  child.unref();
+  app.quit();
+  return { applied: true };
+}
+
+async function applyWindowsUpdate(filePath) {
+  const installDir = path.dirname(process.execPath);
+  const args = ["/S", `/D=${installDir}`];
+  const child = spawn(filePath, args, {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  child.unref();
+  // Dar tiempo a que el instalador tome el lock antes de salir
+  setTimeout(() => app.quit(), 800);
+  return { applied: true };
+}
+
+async function applyDownloadedUpdate(filePath) {
+  if (process.platform === "win32") {
+    return applyWindowsUpdate(filePath);
+  }
+
+  if (process.platform === "linux") {
+    const targets = resolveLinuxInstallTargets();
+    if (targets.length || process.env.APPIMAGE) {
+      return applyLinuxAppImageUpdate(filePath, targets.length ? targets : [{ type: "appimage", path: process.env.APPIMAGE }]);
+    }
   }
 
   await shell.openPath(filePath);
   return { applied: false, opened: true };
+}
+
+async function savePendingUpdate(filePath, meta) {
+  const dir = pendingUpdateDir();
+  await fsp.mkdir(dir, { recursive: true });
+  const dest = path.join(dir, path.basename(filePath));
+  await fsp.copyFile(filePath, dest);
+  await fsp.writeFile(
+    pendingUpdateMetaPath(),
+    JSON.stringify({
+      ...meta,
+      filePath: dest,
+      savedAt: Date.now(),
+    }),
+    "utf8",
+  );
+  return dest;
+}
+
+async function clearPendingUpdate() {
+  try {
+    await fsp.rm(pendingUpdateMetaPath(), { force: true });
+  } catch {
+    /* ignore */
+  }
+  try {
+    await fsp.rm(pendingUpdateDir(), { recursive: true, force: true });
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Aplica una actualización pendiente antes de abrir la UI (evita volver a la versión vieja). */
+async function applyPendingUpdateOnStartup() {
+  if (!app.isPackaged) return false;
+  let meta;
+  try {
+    meta = JSON.parse(await fsp.readFile(pendingUpdateMetaPath(), "utf8"));
+  } catch {
+    return false;
+  }
+  const filePath = String(meta?.filePath ?? "");
+  if (!filePath || !fs.existsSync(filePath)) {
+    await clearPendingUpdate();
+    return false;
+  }
+  try {
+    await applyDownloadedUpdate(filePath);
+    await clearPendingUpdate();
+    return true;
+  } catch (err) {
+    console.error("[updater] No se pudo aplicar actualización pendiente:", err);
+    return false;
+  }
 }
 
 async function downloadAndInstall(payload, browserWindow) {
@@ -217,9 +372,15 @@ async function downloadAndInstall(payload, browserWindow) {
   if (!url.startsWith("https://")) {
     throw new Error("No hay un instalador publicado para este sistema.");
   }
-  const dest = path.join(os.tmpdir(), fileName);
+  await fsp.mkdir(pendingUpdateDir(), { recursive: true });
+  const dest = path.join(pendingUpdateDir(), fileName);
   const webContents = browserWindow?.webContents;
   await downloadToFile(url, dest, (percent) => sendProgress(webContents, percent));
+  await savePendingUpdate(dest, {
+    latest: payload?.latest,
+    downloadUrl: url,
+    fileName,
+  });
 
   const latest = String(payload?.latest ?? "");
   const win = browserWindow && !browserWindow.isDestroyed() ? browserWindow : null;
@@ -227,16 +388,19 @@ async function downloadAndInstall(payload, browserWindow) {
     type: "info",
     title: "Actualización lista",
     message: latest ? `Se descargó la versión ${latest}.` : "Se descargó la actualización.",
-    detail: "Reinicia ahora para instalarla. Si eliges Después, el instalador queda en la carpeta temporal.",
+    detail:
+      "Reinicia ahora para instalarla de forma permanente. Si eliges Después, se aplicará al volver a abrir la app.",
     buttons: ["Reiniciar ahora", "Después"],
     defaultId: 0,
     cancelId: 1,
     noLink: true,
   });
   if (choice.response !== 0) {
-    return { downloaded: true, applied: false, path: dest };
+    return { downloaded: true, applied: false, pending: true, path: dest };
   }
-  return applyDownloadedUpdate(dest);
+  const result = await applyDownloadedUpdate(dest);
+  if (result.applied) await clearPendingUpdate();
+  return result;
 }
 
 async function autoCheckOnStartup(getWindow) {
@@ -262,5 +426,6 @@ module.exports = {
   checkForUpdates,
   downloadAndInstall,
   autoCheckOnStartup,
+  applyPendingUpdateOnStartup,
   repoSlug,
 };
