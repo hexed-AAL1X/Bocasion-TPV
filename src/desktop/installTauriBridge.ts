@@ -60,8 +60,8 @@ export async function installTauriDesktopBridge(): Promise<void> {
     listNavaDocs: async (payload) => {
       return invoke("list_nava_docs", { payload });
     },
-    listNavaDates: async () => {
-      return invoke("list_nava_dates");
+    listNavaDates: async (payload) => {
+      return invoke("list_nava_dates", { payload });
     },
     insertNavaSale: async (payload) => {
       return invoke("insert_nava_sale", { payload });

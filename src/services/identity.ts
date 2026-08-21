@@ -169,6 +169,9 @@ function friendlyApiMessage(message: string): string {
   if (message === "Ocurrió un Error" || lower.includes("ocurrió un error")) {
     return "No se obtuvieron datos del documento. Verifica el número o intenta de nuevo.";
   }
+  if (lower.includes("api primaria") || lower.includes("fallback sin") || lower.includes("sin datos")) {
+    return "No se pudo consultar el documento. Intente de nuevo.";
+  }
   if (lower.includes("not found") || lower.includes("no encontr")) {
     return "Documento no encontrado en el padrón.";
   }
@@ -337,11 +340,24 @@ export async function fetchIdentity(documentRaw: string): Promise<IdentityResult
       return local;
     }
 
-    // DNI → eldni (proxy). RUC → consulta.rucpe.com (público o API).
-    const result =
-      parsed.type === "dni"
-        ? await fetchDniFromLegacy(parsed.value)
-        : await fetchRuc(parsed.value);
+    const result = await (async () => {
+      const run = () =>
+        parsed.type === "dni"
+          ? fetchDniFromLegacy(parsed.value)
+          : fetchRuc(parsed.value);
+      try {
+        return await run();
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        const transient =
+          /intente de nuevo|sin datos|sin nombre|timeout|ocupado|red|connect|primaria|fallback/i.test(
+            msg,
+          );
+        if (!transient) throw err;
+        await new Promise((resolve) => setTimeout(resolve, 450));
+        return await run();
+      }
+    })();
 
     persistIdentityCache(cacheKey, result);
     return result;

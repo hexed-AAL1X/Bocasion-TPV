@@ -7,3 +7,4 @@ src-tauri/target
 .env
 server/dist
 release/
+.sql-profile.json

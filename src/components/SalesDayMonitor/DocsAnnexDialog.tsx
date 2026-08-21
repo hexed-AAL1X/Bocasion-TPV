@@ -595,7 +595,7 @@ export function DocsAnnexDialog({
   useEffect(() => {
     const date = parseSaleDateLabel(saleDate);
     let cancelled = false;
-    void listNavaSalesForDate(date)
+    void listNavaSalesForDate(date, registerId)
       .then((sales) => {
         if (!cancelled) setSqlSales(sales);
       })
@@ -605,7 +605,7 @@ export function DocsAnnexDialog({
     return () => {
       cancelled = true;
     };
-  }, [saleDate]);
+  }, [saleDate, registerId]);
   const totals = useMemo(() => sumRows(rows), [rows]);
   const editingSale = editingSaleId ? getSaleById(editingSaleId) : undefined;
 

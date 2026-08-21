@@ -8,20 +8,54 @@ export type PosRegister = {
   openedAtTime: string;
 };
 
-export const DEFAULT_REGISTER_ID = "18786";
+export type NavaVendorRow = {
+  codven: string;
+  nomven: string;
+  estado?: string;
+  usuario?: string;
+  nombres?: string;
+};
+
+/** Código Nava de caja (tbl01ven.codven), no el ID visual antiguo. */
+export const DEFAULT_REGISTER_ID = "V0046";
 
 export const POS_REGISTERS: PosRegister[] = [
-  { id: "18786", label: "ALICORP COPSA_CJA1", point: "ALICORP COPSA_CJA1", branch: "ALICORP COPSA", openedAtTime: "07:11 AM" },
-  { id: "19034", label: "UPC SI_CJA3", point: "UPC SI_CJA3", branch: "UPC", openedAtTime: "06:35 AM" },
-  { id: "19021", label: "UPC SM_CJA1", point: "UPC SM_CJA1", branch: "UPC", openedAtTime: "06:40 AM" },
-  { id: "19022", label: "UPC MO_CJA2", point: "UPC MO_CJA2", branch: "UPC", openedAtTime: "06:42 AM" },
-  { id: "19028", label: "UPN CJ_VTA2", point: "UPN CJ_VTA2", branch: "UPN", openedAtTime: "07:01 AM" },
-  { id: "19031", label: "BEGO_CJA1", point: "BEGO_CJA1", branch: "BEGO", openedAtTime: "06:48 AM" },
-  { id: "19035", label: "ALICORP_CJA1", point: "ALICORP_CJA1", branch: "ALICORP", openedAtTime: "06:52 AM" },
-  { id: "19036", label: "UPC SI_CJA1", point: "UPC SI_CJA1", branch: "UPC", openedAtTime: "06:38 AM" },
-  { id: "19037", label: "UPC SI_CJA2", point: "UPC SI_CJA2", branch: "UPC", openedAtTime: "06:39 AM" },
-  { id: "19038", label: "UPC MO_CJA1", point: "UPC MO_CJA1", branch: "UPC", openedAtTime: "06:41 AM" },
+  { id: "V0046", label: "ALICOPSA_CJA1", point: "ALICOPSA_CJA1", branch: "ALICOPSA", openedAtTime: "—" },
+  { id: "V0042", label: "UPC SI_CJA3", point: "UPC SI_CJA3", branch: "UPC SI", openedAtTime: "—" },
+  { id: "V0017", label: "BEGO_CJA1", point: "BEGO_CJA1", branch: "BEGO", openedAtTime: "—" },
 ];
+
+export function vendorRowToRegister(row: NavaVendorRow): PosRegister {
+  const label = (row.nomven || row.codven).trim();
+  const branch = label.replace(/[_\s]*(CJA|VTA)\d*$/i, "").trim() || label;
+  return {
+    id: row.codven.trim(),
+    label,
+    point: label,
+    branch,
+    openedAtTime: "—",
+  };
+}
+
+export function replacePosRegisters(rows: PosRegister[]): void {
+  if (!rows.length) return;
+  POS_REGISTERS.splice(0, POS_REGISTERS.length, ...rows);
+}
+
+export async function loadPosRegistersFromNava(): Promise<PosRegister[]> {
+  const api = window.bocasoft?.listNavaVendors;
+  if (!api) return POS_REGISTERS;
+  try {
+    const rows = await api();
+    const mapped = (rows ?? [])
+      .filter((row) => row.codven?.trim())
+      .map(vendorRowToRegister);
+    replacePosRegisters(mapped);
+  } catch {
+    /* se mantienen las cajas locales */
+  }
+  return POS_REGISTERS;
+}
 
 export function getRegisterById(id: string): PosRegister | undefined {
   return POS_REGISTERS.find((register) => register.id === id);

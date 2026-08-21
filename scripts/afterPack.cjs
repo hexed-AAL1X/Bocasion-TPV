@@ -8,10 +8,6 @@ const path = require("node:path");
 const REMOVE = [
   "LICENSES.chromium.html",
   "LICENSE.electron.txt",
-  "libvk_swiftshader.so",
-  "libvulkan.so.1",
-  "vk_swiftshader_icd.json",
-  "chrome_crashpad_handler",
   "chrome_200_percent.pak",
 ];
 

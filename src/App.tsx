@@ -3,7 +3,9 @@ import { AppBootSplash } from "./components/AppBootSplash";
 import { LoginScreen } from "./components/LoginScreen";
 import { DEFAULT_VENDOR } from "./data/vendors";
 import type { Vendor } from "./data/vendors";
-import { initSalesSessionForLogin } from "./services/salesSession";
+import { loadPosRegistersFromNava } from "./data/posRegisters";
+import { applyArchivoSession } from "./data/archivoMenu";
+import { initSalesSessionForLogin, setActiveRegisterId } from "./services/salesSession";
 import { ThemeProvider } from "./theme/ThemeProvider";
 import { getEfficientMode } from "./services/performanceSettings";
 import {
@@ -40,10 +42,6 @@ const LazyAppShell = lazy(() =>
   loadAppShellModule("montaje").then((m) => ({ default: m.AppShell })),
 );
 
-if (!EFFICIENT_MODE) {
-  void loadAppShellModule("prefetch arranque");
-}
-
 const LOGIN_FADE_MS = EFFICIENT_MODE ? 80 : 180;
 const SPLASH_FADE_MS = EFFICIENT_MODE ? 80 : 180;
 const MIN_SPLASH_MS = EFFICIENT_MODE ? 0 : 80;
@@ -78,15 +76,26 @@ export default function App() {
   const shellReadyRef = useRef(false);
 
   useEffect(() => {
-    // Modo eficiente: no precargar AppShell en el login (ahorra RAM/CPU).
     if (EFFICIENT_MODE) {
       return () => {
         if (loginTimerRef.current) window.clearTimeout(loginTimerRef.current);
         if (splashTimerRef.current) window.clearTimeout(splashTimerRef.current);
       };
     }
-    void loadAppShellModule("login idle");
+    let idleId = 0;
+    let timeoutId = 0;
+    const prefetch = () => {
+      void loadAppShellModule("login idle");
+    };
+    timeoutId = window.setTimeout(prefetch, 1800);
+    if (typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(prefetch, { timeout: 4000 });
+    }
     return () => {
+      window.clearTimeout(timeoutId);
+      if (idleId && typeof window.cancelIdleCallback === "function") {
+        window.cancelIdleCallback(idleId);
+      }
       if (loginTimerRef.current) window.clearTimeout(loginTimerRef.current);
       if (splashTimerRef.current) window.clearTimeout(splashTimerRef.current);
     };
@@ -129,6 +138,9 @@ export default function App() {
   const handleAuth = useCallback(
     (v: Vendor) => {
       logPerfEvent("Montando módulo de ventas", EFFICIENT_MODE);
+      if (v.code) setActiveRegisterId(v.code);
+      applyArchivoSession(v);
+      void loadPosRegistersFromNava();
       initSalesSessionForLogin(v.usuario);
       setVendor(v);
       shellReadyRef.current = false;
@@ -160,7 +172,11 @@ export default function App() {
     setSplashExiting(false);
   }, []);
 
-  const handleChangeVendor = useCallback((v: Vendor) => setVendor(v), []);
+  const handleChangeVendor = useCallback((v: Vendor) => {
+    if (v.code) setActiveRegisterId(v.code);
+    applyArchivoSession(v);
+    setVendor(v);
+  }, []);
 
   const showSplash = phase === "loading" || splashExiting;
   const showVentas = phase === "loading" || phase === "ventas";

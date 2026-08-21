@@ -1,22 +1,25 @@
-import { memo, useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { COMPANY_RUC } from "../../config/pos";
-import { DEFAULT_REGISTER_ID, getRegisterById } from "../../data/posRegisters";
+import { DEFAULT_REGISTER_ID, getRegisterById, loadPosRegistersFromNava } from "../../data/posRegisters";
 import {
   formatSaleDateLabel,
+  getActiveRegisterId,
+  getOpenedWithoutSalesDates,
   getSalesDaySnapshot,
-  getSalesForRegisterAndDate,
   isSameDay,
-  snapshotFromSalesList,
   subscribeSales,
+  toDateKey,
+  type SalesDaySnapshot,
 } from "../../services/salesSession";
 import {
-  getCachedNavaSales,
+  getCachedNavaDayReport,
+  getLastSqlError,
   isNavaOnline,
+  listNavaDayReport,
   listNavaSaleDates,
-  listNavaSalesForDate,
-  mergeDaySales,
+  type NavaDayReport,
 } from "../../services/navaDocs";
-import { openDocsAnnexDialog, isAppDialogOpen, setDocsAnnexContext, primeDocsAnnexDialog } from "../../services/appDialogs";
+import { openDocsAnnexDialog, isAppDialogOpen, setDocsAnnexContext } from "../../services/appDialogs";
 import { formatPercent, formatQty, formatSoles } from "../../utils/formatMoney";
 import { downloadSalesReportXls } from "../../utils/exportSalesReportXls";
 import { ModalStackRoot, useModalStack } from "../ModalStack/ModalStackContext";
@@ -24,8 +27,62 @@ import { useAppDialogClose } from "../AppDialog/useAppDialogClose";
 import { PrintPropertiesDialog } from "../PrintPropertiesDialog/PrintPropertiesDialog";
 import { SalesDayCalendar } from "./SalesDayCalendar";
 import { SalesRegisterPicker } from "./SalesRegisterPicker";
-import type { CompletedSale } from "../../types/sales";
 import styles from "./SalesDayMonitor.module.css";
+
+function mergeDaySnapshots(local: SalesDaySnapshot, remote: NavaDayReport | null): SalesDaySnapshot {
+  if (!remote || (remote.docs.total === 0 && remote.grandTotal === 0)) return local;
+  if (local.docs.total === 0 && local.grandTotal === 0) {
+    return {
+      ...local,
+      docs: remote.docs,
+      monetary: remote.monetary,
+      groups: remote.groups,
+      articles: remote.articles,
+      grandTotal: remote.grandTotal,
+    };
+  }
+  const grand = local.grandTotal + remote.grandTotal;
+  const groupsMap = new Map<string, number>();
+  for (const row of [...local.groups, ...remote.groups]) {
+    groupsMap.set(row.group, (groupsMap.get(row.group) ?? 0) + row.total);
+  }
+  const articlesMap = new Map<string, { qty: number; total: number }>();
+  for (const row of [...local.articles, ...remote.articles]) {
+    const prev = articlesMap.get(row.description) ?? { qty: 0, total: 0 };
+    articlesMap.set(row.description, { qty: prev.qty + row.qty, total: prev.total + row.total });
+  }
+  return {
+    ...local,
+    docs: {
+      boletas: local.docs.boletas + remote.docs.boletas,
+      boletaFrom: remote.docs.boletas ? remote.docs.boletaFrom : local.docs.boletaFrom,
+      boletaTo: remote.docs.boletas ? remote.docs.boletaTo : local.docs.boletaTo,
+      notas: local.docs.notas + remote.docs.notas,
+      notaFrom: local.docs.notaFrom,
+      notaTo: local.docs.notaTo,
+      facturas: local.docs.facturas + remote.docs.facturas,
+      facturaFrom: remote.docs.facturas ? remote.docs.facturaFrom : local.docs.facturaFrom,
+      facturaTo: remote.docs.facturas ? remote.docs.facturaTo : local.docs.facturaTo,
+      anulados: local.docs.anulados + remote.docs.anulados,
+      total: local.docs.total + remote.docs.total,
+    },
+    monetary: {
+      contado: local.monetary.contado + remote.monetary.contado,
+      credito: local.monetary.credito + remote.monetary.credito,
+      tarjeta: local.monetary.tarjeta + remote.monetary.tarjeta,
+      banco: local.monetary.banco + remote.monetary.banco,
+      cards: remote.monetary.cards.length ? remote.monetary.cards : local.monetary.cards,
+      total: local.monetary.total + remote.monetary.total,
+    },
+    groups: [...groupsMap.entries()]
+      .map(([group, total]) => ({ group, total, percent: grand > 0 ? (total / grand) * 100 : 0 }))
+      .sort((a, b) => b.total - a.total),
+    articles: [...articlesMap.entries()]
+      .map(([description, row]) => ({ description, ...row }))
+      .sort((a, b) => b.total - a.total),
+    grandTotal: grand,
+  };
+}
 
 type Props = {
   onClose: () => void;
@@ -127,53 +184,83 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [tick, setTick] = useState(0);
   const [saleDate, setSaleDate] = useState(() => new Date());
-  const [registerId, setRegisterId] = useState(DEFAULT_REGISTER_ID);
-  const [sqlSales, setSqlSales] = useState<CompletedSale[]>(() => getCachedNavaSales(new Date()));
+  const [registerId, setRegisterId] = useState(() => getActiveRegisterId() || DEFAULT_REGISTER_ID);
+  const [sqlReport, setSqlReport] = useState<NavaDayReport | null>(() =>
+    getCachedNavaDayReport(new Date(), getActiveRegisterId() || DEFAULT_REGISTER_ID),
+  );
   const [navaDates, setNavaDates] = useState<Date[]>([]);
+  const [navaOpenedDates, setNavaOpenedDates] = useState<Date[]>([]);
+  const [calendarMonth, setCalendarMonth] = useState(
+    () => new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+  );
   const [navaRefresh, setNavaRefresh] = useState(0);
   const [navaOffline, setNavaOffline] = useState(() => !isNavaOnline());
+  const [sqlError, setSqlError] = useState(() => getLastSqlError());
   const today = useMemo(() => new Date(), []);
-  const selectedRegister = useMemo(
-    () => getRegisterById(registerId) ?? getRegisterById(DEFAULT_REGISTER_ID)!,
-    [registerId],
-  );
+  const selectedRegister = useMemo(() => {
+    return (
+      getRegisterById(registerId) ?? {
+        id: registerId,
+        label: registerId,
+        point: registerId,
+        branch: registerId,
+        openedAtTime: "—",
+      }
+    );
+  }, [registerId]);
   const viewingToday = isSameDay(saleDate, today);
+
+  useEffect(() => {
+    void loadPosRegistersFromNava();
+  }, []);
 
   useEffect(() => subscribeSales(() => setTick((n) => n + 1)), []);
 
-  useEffect(() => {
-    void listNavaSaleDates().then((dates) => {
-      setNavaDates(dates);
-      setNavaOffline(!isNavaOnline());
+  const handleVisibleMonthChange = useCallback((month: Date) => {
+    setCalendarMonth((prev) => {
+      if (prev.getFullYear() === month.getFullYear() && prev.getMonth() === month.getMonth()) {
+        return prev;
+      }
+      return new Date(month.getFullYear(), month.getMonth(), 1);
     });
-  }, [navaRefresh]);
+  }, []);
+
+  useEffect(() => {
+    const from = toDateKey(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() - 1, 1));
+    const to = toDateKey(new Date(calendarMonth.getFullYear(), calendarMonth.getMonth() + 2, 0));
+    void listNavaSaleDates(registerId, { from, to }).then((marks) => {
+      setNavaDates(marks.sales);
+      setNavaOpenedDates(marks.opened);
+      setNavaOffline(!isNavaOnline());
+      setSqlError(getLastSqlError());
+    });
+  }, [navaRefresh, registerId, calendarMonth]);
 
   useEffect(() => {
     let cancelled = false;
-    setSqlSales(getCachedNavaSales(saleDate));
-    void listNavaSalesForDate(saleDate)
-      .then((rows) => {
+    setSqlReport(getCachedNavaDayReport(saleDate, registerId));
+    void listNavaDayReport(saleDate, registerId)
+      .then((report) => {
         if (cancelled) return;
-        setSqlSales(rows);
+        setSqlReport(report);
         setNavaOffline(!isNavaOnline());
+        setSqlError(getLastSqlError());
       })
       .catch(() => {
         if (cancelled) return;
-        setSqlSales(getCachedNavaSales(saleDate));
+        setSqlReport(getCachedNavaDayReport(saleDate, registerId));
         setNavaOffline(true);
+        setSqlError(getLastSqlError());
       });
     return () => {
       cancelled = true;
     };
-  }, [saleDate, navaRefresh]);
+  }, [saleDate, registerId, navaRefresh]);
 
   const snapshot = useMemo(() => {
-    const local = getSalesForRegisterAndDate(registerId, saleDate);
-    const merged = mergeDaySales(local, sqlSales);
-    return merged.length
-      ? snapshotFromSalesList(registerId, saleDate, merged)
-      : getSalesDaySnapshot(registerId, saleDate);
-  }, [registerId, saleDate, tick, sqlSales]);
+    const local = getSalesDaySnapshot(registerId, saleDate);
+    return mergeDaySnapshots(local, sqlReport);
+  }, [registerId, saleDate, tick, sqlReport]);
   const {
     docs,
     monetary,
@@ -187,14 +274,27 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
   } = snapshot;
   const availableDates = useMemo(() => {
     const map = new Map<string, Date>();
-    for (const date of [...snapshotDates, ...navaDates]) {
-      map.set(
-        `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`,
-        date,
-      );
+    const extras =
+      sqlReport && (sqlReport.docs.total > 0 || sqlReport.grandTotal > 0) ? [saleDate] : [];
+    for (const date of [...snapshotDates, ...navaDates, ...extras]) {
+      map.set(toDateKey(date), date);
     }
     return [...map.values()].sort((a, b) => b.getTime() - a.getTime());
-  }, [snapshotDates, navaDates]);
+  }, [snapshotDates, navaDates, sqlReport, saleDate]);
+  const datesOpenedOnly = useMemo(() => {
+    const salesKeys = new Set(availableDates.map((date) => toDateKey(date)));
+    const map = new Map<string, Date>();
+    const extras =
+      sqlReport && sqlReport.docs.total === 0 && sqlReport.grandTotal === 0 && openedAt
+        ? [saleDate]
+        : [];
+    for (const date of [...getOpenedWithoutSalesDates(registerId), ...navaOpenedDates, ...extras]) {
+      const key = toDateKey(date);
+      if (salesKeys.has(key)) continue;
+      map.set(key, date);
+    }
+    return [...map.values()];
+  }, [availableDates, navaOpenedDates, registerId, sqlReport, saleDate, openedAt, tick]);
   const totalArticleQty = useMemo(
     () => articles.reduce((sum, row) => sum + row.qty, 0),
     [articles],
@@ -220,18 +320,6 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
       registerPoint: selectedRegister.point,
       saleDate: saleDateLabel,
     });
-    let cancelled = false;
-    let inner = 0;
-    const outer = requestAnimationFrame(() => {
-      inner = requestAnimationFrame(() => {
-        if (!cancelled) primeDocsAnnexDialog();
-      });
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(outer);
-      if (inner) cancelAnimationFrame(inner);
-    };
   }, [registerId, saleDateLabel, selectedRegister.label, selectedRegister.point]);
 
   const handleDocsAnnex = () => {
@@ -314,6 +402,8 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
                 value={saleDate}
                 onChange={setSaleDate}
                 datesWithSales={availableDates}
+                datesOpenedOnly={datesOpenedOnly}
+                onVisibleMonthChange={handleVisibleMonthChange}
               />
             </span>
           </div>
@@ -399,71 +489,82 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
           <div className={styles.scrollArea}>
             {navaOffline ? (
               <p className={styles.navaBanner}>
-                Sin conexión al SQL de Nava (PC Windows / Tailscale). Las ventas pasadas
-                viven ahí: enciende <strong>WIN-C6EKJGJR3FH</strong> y pulsa Actualizar.
-                {sqlSales.length ? " Mostrando la última copia guardada en este equipo." : ""}
+                Error de conexión a SQL Server. Histórico no disponible.
+                {sqlError ? ` ${sqlError}` : ""}
+                {sqlReport?.docs.total ? " Se muestra la última consulta en caché." : ""}
               </p>
             ) : null}
             {!hasSales ? (
               <p className={styles.emptyHint}>
                 {navaOffline
-                  ? `No hay copia local de ventas para el ${saleDateLabel}. Con el servidor encendido verás boletas y facturas de mst01fac.`
+                  ? `Sin documentos para ${saleDateLabel}.`
                   : viewingToday
-                    ? `Aún no hay ventas registradas hoy en ${selectedRegister.label}. Cobre comprobantes en el TPV para ver el reporte.`
-                    : `No hay ventas de Nava ni de esta caja para el ${saleDateLabel}.`}
+                    ? `No hay ventas registradas hoy en ${selectedRegister.label}.`
+                    : `No hay ventas para ${selectedRegister.label} el ${saleDateLabel}.`}
               </p>
             ) : null}
 
             <div className={styles.summaryGrid}>
               <section className={styles.panel}>
                 <h2 className={styles.panelTitle}>DOCS. EMITIDOS</h2>
-                <table className={styles.table}>
-                  <colgroup>
-                    <col className={styles.colLabelDocs} />
-                    <col className={styles.colTotalCount} />
-                    <col className={styles.colCorrelativo} />
-                  </colgroup>
-                  <thead>
-                    <tr>
-                      <th />
-                      <th className={styles.num}>Total</th>
-                      <th className={styles.correlativo}>Correlativo</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>Docs. boleta</td>
-                      <td className={styles.num}>{docs.boletas}</td>
-                      <td className={styles.correlativo}>
-                        {correlativo(docs.boletaFrom, docs.boletaTo)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Docs. nota vta.</td>
-                      <td className={styles.num}>{docs.notas}</td>
-                      <td className={styles.correlativo}>
-                        {correlativo(docs.notaFrom, docs.notaTo)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Docs. factura</td>
-                      <td className={styles.num}>{docs.facturas}</td>
-                      <td className={styles.correlativo}>
-                        {correlativo(docs.facturaFrom, docs.facturaTo)}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td>Docs. anulados</td>
-                      <td className={styles.num}>{docs.anulados}</td>
-                      <td className={styles.correlativo} />
-                    </tr>
-                    <tr className={styles.total}>
-                      <td>Total docs. emitidos</td>
-                      <td className={styles.num}>{docs.total}</td>
-                      <td className={styles.correlativo} />
-                    </tr>
-                  </tbody>
-                </table>
+                <div className={styles.docsBody}>
+                  <table className={styles.table}>
+                    <colgroup>
+                      <col className={styles.colLabelDocs} />
+                      <col className={styles.colTotalCount} />
+                      <col className={styles.colCorrelativo} />
+                    </colgroup>
+                    <thead>
+                      <tr>
+                        <th />
+                        <th className={styles.num}>Total</th>
+                        <th className={styles.correlativo}>Correlativo</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>Docs. boleta</td>
+                        <td className={styles.num}>{docs.boletas}</td>
+                        <td className={styles.correlativo}>
+                          {correlativo(docs.boletaFrom, docs.boletaTo)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Docs. nota vta.</td>
+                        <td className={styles.num}>{docs.notas}</td>
+                        <td className={styles.correlativo}>
+                          {correlativo(docs.notaFrom, docs.notaTo)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Docs. factura</td>
+                        <td className={styles.num}>{docs.facturas}</td>
+                        <td className={styles.correlativo}>
+                          {correlativo(docs.facturaFrom, docs.facturaTo)}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>Docs. anulados</td>
+                        <td className={styles.num}>{docs.anulados}</td>
+                        <td className={styles.correlativo} />
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table className={`${styles.table} ${styles.docsTotal}`}>
+                    <colgroup>
+                      <col className={styles.colLabelDocs} />
+                      <col className={styles.colTotalCount} />
+                      <col className={styles.colCorrelativo} />
+                    </colgroup>
+                    <tbody>
+                      <tr className={styles.total}>
+                        <td>Total docs. emitidos</td>
+                        <td className={styles.num}>{docs.total}</td>
+                        <td className={styles.correlativo} />
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </section>
 
               <section className={styles.panel}>

@@ -44,7 +44,7 @@ export async function waitForAppReady(): Promise<void> {
   await Promise.race([
     ready,
     new Promise<void>((resolve) => {
-      setTimeout(resolve, efficient ? 800 : 2000);
+      setTimeout(resolve, efficient ? 400 : 700);
     }),
   ]);
 }

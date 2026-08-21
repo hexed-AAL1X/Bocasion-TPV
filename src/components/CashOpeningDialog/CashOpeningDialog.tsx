@@ -7,7 +7,7 @@ import {
   type CashOpeningBalance,
   type CashOpeningCurrency,
 } from "../../data/cashOpeningBalances";
-import { POS_REGISTERS } from "../../data/posRegisters";
+import { POS_REGISTERS, loadPosRegistersFromNava } from "../../data/posRegisters";
 import type { Vendor } from "../../data/vendors";
 import {
   getActiveRegisterId,
@@ -106,10 +106,15 @@ export function CashOpeningDialog({ vendor, onClose }: Props) {
   const dirty =
     JSON.stringify(balances) !== JSON.stringify(savedBalances) || registerId !== savedRegisterId;
 
+  const [registerTick, setRegisterTick] = useState(0);
   const registerOptions = useMemo(
     () => POS_REGISTERS.map((item) => ({ value: item.id, label: item.point })),
-    [],
+    [registerTick],
   );
+
+  useEffect(() => {
+    void loadPosRegistersFromNava().then(() => setRegisterTick((n) => n + 1));
+  }, []);
 
   const handleCancelEdit = useCallback(() => {
     setBalances(savedBalances);

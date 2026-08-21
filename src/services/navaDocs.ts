@@ -24,6 +24,16 @@ export type NavaDocRow = {
   monvuelto?: number;
   observ?: string;
   codtar?: string;
+  lines?: Array<{
+    codi: string;
+    descr: string;
+    umed: string;
+    cant: number;
+    preu: number;
+    dsct: number;
+    totn: number;
+    nomgru: string;
+  }>;
 };
 
 export function navaDocKindLabel(kind: Exclude<NavaDocKind, "all">): string {
@@ -41,16 +51,17 @@ export async function listNavaDocs(
   kind: NavaDocKind,
   limit = 150,
   fecha?: string,
+  codven?: string,
 ): Promise<NavaDocRow[]> {
   const api = window.bocasoft?.listNavaDocs;
   if (!api) {
     throw new Error("Esta vista requiere la app de escritorio (Electron/Tauri) con SQL configurado.");
   }
-  return api({ cdocu: kind, limit, fecha });
+  return api({ cdocu: kind, limit, fecha, codven: codven?.trim() || undefined });
 }
 
-export async function listNavaDocsForDate(date: Date, limit = 500): Promise<NavaDocRow[]> {
-  return listNavaDocs("all", limit, toDateKey(date));
+export async function listNavaDocsForDate(date: Date, limit = 800, codven?: string): Promise<NavaDocRow[]> {
+  return listNavaDocs("all", limit, toDateKey(date), codven);
 }
 
 function parseDocNumber(ndocu: string): number {
@@ -100,7 +111,20 @@ export function navaRowToSale(row: NavaDocRow): CompletedSale {
     clienteLabel: cliente,
     vendedor: row.codven || "",
     paymentMethod: pm,
-    lines: [],
+    lines: (row.lines ?? []).map((line, index) => {
+      const qty = line.cant || 1;
+      const lineTotal = line.totn || qty * line.preu;
+      return {
+        id: `${row.cdocu}-${row.ndocu}-${index + 1}`,
+        code: line.codi,
+        description: line.descr || line.codi || "ITEM",
+        group: line.nomgru || "Otros",
+        qty,
+        um: line.umed || "UND",
+        unitPrice: qty ? lineTotal / qty : lineTotal,
+        dscto: 0,
+      };
+    }),
     total,
     receivedS: row.monrecib ?? 0,
     vueltoS: row.monvuelto ?? 0,
@@ -126,9 +150,28 @@ type PersistShape = {
 };
 
 let navaOnline = false;
+let lastSqlError = "";
 
 export function isNavaOnline(): boolean {
   return navaOnline;
+}
+
+export function getLastSqlError(): string {
+  return lastSqlError;
+}
+
+function markSqlOk(): void {
+  navaOnline = true;
+  lastSqlError = "";
+}
+
+function markSqlError(err: unknown): void {
+  navaOnline = false;
+  const raw = err instanceof Error ? err.message : String(err ?? "Error desconocido");
+  lastSqlError = raw.replace(/\s+/g, " ").trim().slice(0, 280);
+  if (!/Failed to connect|ETIMEOUT|timeout/i.test(lastSqlError)) {
+    console.error(`[SQL] ${lastSqlError}`);
+  }
 }
 
 function loadPersist(): PersistShape {
@@ -148,10 +191,13 @@ function loadPersist(): PersistShape {
 function savePersist(patch: { dates?: string[]; dayKey?: string; rows?: NavaDocRow[] }): void {
   const cur = loadPersist();
   const days = { ...cur.days };
-  if (patch.dayKey && patch.rows) days[patch.dayKey] = patch.rows;
+  if (patch.dayKey && patch.rows) {
+    days[patch.dayKey] = patch.rows.length > 1200 ? [] : patch.rows;
+  }
   let dates = patch.dates ?? cur.dates;
-  if (patch.dayKey && patch.rows?.length && !dates.includes(patch.dayKey)) {
-    dates = [patch.dayKey, ...dates];
+  const dateOnly = patch.dayKey?.slice(0, 10) ?? "";
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateOnly) && patch.rows?.length && !dates.includes(dateOnly)) {
+    dates = [dateOnly, ...dates];
   }
   const keys = Object.keys(days).sort().reverse();
   if (keys.length > 90) {
@@ -190,20 +236,21 @@ export function mergeDaySales(local: CompletedSale[], remote: CompletedSale[]): 
   return [...local, ...extra].sort((a, b) => b.at.getTime() - a.at.getTime());
 }
 
-export async function listNavaSalesForDate(date: Date): Promise<CompletedSale[]> {
-  const key = toDateKey(date);
+export async function listNavaSalesForDate(date: Date, codven = ""): Promise<CompletedSale[]> {
+  const ven = codven.trim();
+  const key = `${toDateKey(date)}|${ven}`;
   const pending = salesInflight.get(key);
   if (pending) return pending;
-  const request = listNavaDocsForDate(date)
+  const request = listNavaDocsForDate(date, 800, ven)
     .then((rows) => {
-      navaOnline = true;
+      markSqlOk();
       const mapped = salesFromRows(rows);
       salesCache.set(key, mapped);
       savePersist({ dayKey: key, rows });
       return mapped;
     })
     .catch((err) => {
-      navaOnline = false;
+      markSqlError(err);
       const fallback = cachedOrPersisted(key);
       if (fallback.length) return fallback;
       throw err;
@@ -215,10 +262,72 @@ export async function listNavaSalesForDate(date: Date): Promise<CompletedSale[]>
   return request;
 }
 
-export function prefetchNavaSalesForDate(date = new Date()): void {
-  void listNavaSalesForDate(date).catch(() => {
+export function prefetchNavaSalesForDate(date = new Date(), codven = ""): void {
+  void listNavaDayReport(date, codven).catch(() => {
     /* silencio */
   });
+}
+
+export type NavaDayReport = {
+  docs: {
+    boletas: number;
+    boletaFrom: number;
+    boletaTo: number;
+    notas: number;
+    notaFrom: number;
+    notaTo: number;
+    facturas: number;
+    facturaFrom: number;
+    facturaTo: number;
+    anulados: number;
+    total: number;
+  };
+  monetary: {
+    contado: number;
+    credito: number;
+    tarjeta: number;
+    banco: number;
+    cards: Array<{ label: string; total: number }>;
+    total: number;
+  };
+  groups: Array<{ group: string; total: number; percent: number }>;
+  articles: Array<{ description: string; qty: number; total: number }>;
+  grandTotal: number;
+};
+
+const reportCache = new Map<string, NavaDayReport>();
+const reportInflight = new Map<string, Promise<NavaDayReport>>();
+
+export function getCachedNavaDayReport(date: Date, codven = ""): NavaDayReport | null {
+  return reportCache.get(`${toDateKey(date)}|${codven.trim()}`) ?? null;
+}
+
+export async function listNavaDayReport(date: Date, codven = ""): Promise<NavaDayReport> {
+  const ven = codven.trim();
+  const key = `${toDateKey(date)}|${ven}`;
+  const pending = reportInflight.get(key);
+  if (pending) return pending;
+  const api = window.bocasoft?.listNavaDayReport;
+  if (!api) {
+    throw new Error("Esta vista requiere la app de escritorio (Electron) con SQL configurado.");
+  }
+  const request = api({ fecha: toDateKey(date), codven: ven })
+    .then((data) => {
+      markSqlOk();
+      reportCache.set(key, data);
+      return data;
+    })
+    .catch((err) => {
+      markSqlError(err);
+      const cached = reportCache.get(key);
+      if (cached) return cached;
+      throw err;
+    })
+    .finally(() => {
+      reportInflight.delete(key);
+    });
+  reportInflight.set(key, request);
+  return request;
 }
 
 function parseCliente(sale: CompletedSale): { nomcli: string; ruccli: string } {
@@ -237,22 +346,48 @@ function keysToDates(keys: string[]): Date[] {
     .filter((date) => !Number.isNaN(date.getTime()));
 }
 
-export async function listNavaSaleDates(): Promise<Date[]> {
+export type NavaCalendarMarks = {
+  sales: Date[];
+  opened: Date[];
+};
+
+function parseDateListPayload(
+  raw: string[] | { sales?: string[]; opened?: string[] } | null | undefined,
+): { sales: string[]; opened: string[] } {
+  if (Array.isArray(raw)) return { sales: raw, opened: [] };
+  return {
+    sales: Array.isArray(raw?.sales) ? raw.sales : [],
+    opened: Array.isArray(raw?.opened) ? raw.opened : [],
+  };
+}
+
+export async function listNavaSaleDates(
+  codven = "",
+  range?: { from: string; to: string },
+): Promise<NavaCalendarMarks> {
   const api = window.bocasoft?.listNavaDates;
   if (!api) {
-    navaOnline = false;
-    return keysToDates(loadPersist().dates);
+    markSqlError(new Error("IPC SQL no disponible (requiere app de escritorio)."));
+    return { sales: keysToDates(loadPersist().dates), opened: [] };
   }
   try {
-    const keys = await api();
-    navaOnline = true;
-    savePersist({ dates: keys });
-    return keysToDates(keys);
-  } catch {
-    navaOnline = false;
+    const raw = await api({
+      codven: codven.trim(),
+      from: range?.from,
+      to: range?.to,
+    });
+    markSqlOk();
+    const parsed = parseDateListPayload(raw);
+    savePersist({ dates: parsed.sales });
+    return { sales: keysToDates(parsed.sales), opened: keysToDates(parsed.opened) };
+  } catch (err) {
+    markSqlError(err);
     const persisted = loadPersist();
     const fromDays = Object.keys(persisted.days).filter((k) => persisted.days[k]?.length);
-    return keysToDates([...new Set([...persisted.dates, ...fromDays])]);
+    return {
+      sales: keysToDates([...new Set([...persisted.dates, ...fromDays])]),
+      opened: [],
+    };
   }
 }
 

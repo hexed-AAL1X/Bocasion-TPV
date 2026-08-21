@@ -73,6 +73,9 @@ export function StatusBar({ vendor }: Props) {
   const [now, setNow] = useState(new Date());
   const [aboutOpen, setAboutOpen] = useState(false);
   const weather = useLocalWeather(EFFICIENT);
+  const tienda = vendor.tienda || session.tienda;
+  const ptoVta = vendor.ptoVta || vendor.nombre || session.ptoVta;
+  const almacen = vendor.almacen || session.almacen;
 
   useEffect(() => {
     const interval = EFFICIENT ? 60_000 : 1_000;
@@ -96,9 +99,9 @@ export function StatusBar({ vendor }: Props) {
           {weather && (
             <span><em>Ubicación:</em> {weather.locality}</span>
           )}
-          <span><em>Tienda:</em> {session.tienda}</span>
-          <span><em>Pto.Vta:</em> {session.ptoVta}</span>
-          <span><em>Almacén:</em> {session.almacen}</span>
+          <span><em>Tienda:</em> {tienda}</span>
+          <span><em>Pto.Vta:</em> {ptoVta}</span>
+          <span><em>Almacén:</em> {almacen}</span>
           <span><em>Vendedor:</em> {vendor.nombre} ({vendor.usuario})</span>
           <span><em>Fecha contable:</em> {formatFechaContable(now)}</span>
         </div>

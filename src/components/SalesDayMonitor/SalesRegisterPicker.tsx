@@ -1,6 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   POS_REGISTERS,
+  loadPosRegistersFromNava,
   type PosRegister,
   type RegisterStatus,
 } from "../../data/posRegisters";
@@ -23,11 +24,24 @@ function getStatus(registerId: string, saleDate: Date): RegisterStatus {
 export function SalesRegisterPicker({ value, onChange, saleDate }: Props) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
+  const [registers, setRegisters] = useState(POS_REGISTERS);
   const selected = useMemo(
-    () => POS_REGISTERS.find((register) => register.id === value) ?? POS_REGISTERS[0],
-    [value],
+    () =>
+      registers.find((register) => register.id === value) ??
+      registers[0] ?? {
+        id: value,
+        label: value,
+        point: value,
+        branch: value,
+        openedAtTime: "—",
+      },
+    [registers, value],
   );
   const selectedStatus = getStatus(selected.id, saleDate);
+
+  useEffect(() => {
+    void loadPosRegistersFromNava().then((rows) => setRegisters([...rows]));
+  }, []);
 
   const pickRegister = (register: PosRegister) => {
     onChange(register.id);
@@ -80,7 +94,7 @@ export function SalesRegisterPicker({ value, onChange, saleDate }: Props) {
               <span className={styles.colStatus}>Estado</span>
             </div>
 
-            {POS_REGISTERS.map((register) => {
+            {registers.map((register) => {
               const status = getStatus(register.id, saleDate);
               const active = register.id === value;
 

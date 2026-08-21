@@ -16,6 +16,132 @@ function loadSqlEnv() {
   }
 }
 
+function profileStatePath() {
+  try {
+    const { app } = require("electron");
+    return path.join(app.getPath("userData"), "sql-profile.json");
+  } catch {
+    return path.join(__dirname, "..", ".sql-profile.json");
+  }
+}
+
+function envPref(prefix, key, fallback = "") {
+  const specific = String(process.env[`${prefix}${key}`] ?? "").trim();
+  if (specific) return specific;
+  return String(process.env[`MSSQL_${key}`] ?? fallback).trim();
+}
+
+function readProfileDef(id) {
+  loadSqlEnv();
+  const prefix = `MSSQL_${id.toUpperCase()}_`;
+  const defaults = {
+    dev: { label: "Desarrollo", host: "100.87.28.27" },
+    prod: { label: "Producción", host: "52.41.28.184" },
+  };
+  const meta = defaults[id] ?? { label: id, host: "" };
+  return {
+    id,
+    label: envPref(prefix, "LABEL", meta.label) || meta.label,
+    host: envPref(prefix, "HOST", meta.host),
+    fallback: envPref(prefix, "HOST_FALLBACK"),
+    port: Number(envPref(prefix, "PORT", "1433")) || 1433,
+    database: envPref(prefix, "DATABASE", "Bdnava02") || "Bdnava02",
+    auth: (envPref(prefix, "AUTH", "sql") || "sql").toLowerCase(),
+    domain: envPref(prefix, "DOMAIN"),
+    user: envPref(prefix, "USER"),
+    password: String(process.env[`${prefix}PASSWORD`] ?? process.env.MSSQL_PASSWORD ?? ""),
+  };
+}
+
+function profileIds() {
+  loadSqlEnv();
+  const raw = String(process.env.MSSQL_PROFILES ?? "dev,prod")
+    .split(",")
+    .map((id) => id.trim().toLowerCase())
+    .filter(Boolean);
+  return [...new Set(raw.length ? raw : ["dev"])];
+}
+
+function readProfileState() {
+  try {
+    return JSON.parse(fsSync.readFileSync(profileStatePath(), "utf8")) ?? {};
+  } catch {
+    return {};
+  }
+}
+
+function writeProfileState(patch) {
+  const file = profileStatePath();
+  const next = { ...readProfileState(), ...patch };
+  fsSync.mkdirSync(path.dirname(file), { recursive: true });
+  fsSync.writeFileSync(file, JSON.stringify(next), "utf8");
+}
+
+function readStoredProfileId() {
+  const id = String(readProfileState().id ?? "").trim().toLowerCase();
+  if (id && profileIds().includes(id)) return id;
+  loadSqlEnv();
+  const fromEnv = String(process.env.MSSQL_PROFILE ?? "dev").trim().toLowerCase();
+  return profileIds().includes(fromEnv) ? fromEnv : profileIds()[0];
+}
+
+function writeStoredProfileId(id) {
+  writeProfileState({ id });
+}
+
+function readLastHost() {
+  return String(readProfileState().lastHost ?? "").trim();
+}
+
+function activeProfile() {
+  return readProfileDef(readStoredProfileId());
+}
+
+function hostList() {
+  const profile = activeProfile();
+  const extra = String(profile.fallback ?? "")
+    .split(",")
+    .map((h) => h.trim())
+    .filter(Boolean);
+  return [...new Set([profile.host, ...extra].filter(Boolean))];
+}
+
+function mssqlConfig(host) {
+  const profile = activeProfile();
+  if (!host) {
+    throw new Error("Falta el host SQL del perfil activo");
+  }
+  if (!profile.user || !profile.password) {
+    throw new Error(`Falta usuario/contraseña SQL para el perfil ${profile.id}`);
+  }
+  const base = {
+    server: host,
+    port: profile.port,
+    database: profile.database,
+    options: {
+      encrypt: true,
+      trustServerCertificate: true,
+    },
+    connectionTimeout: 12000,
+    requestTimeout: 60000,
+    pool: { max: 4, min: 1, idleTimeoutMillis: 300_000 },
+  };
+  if (profile.auth === "ntlm") {
+    return {
+      ...base,
+      authentication: {
+        type: "ntlm",
+        options: {
+          domain: profile.domain || host,
+          userName: profile.user,
+          password: profile.password,
+        },
+      },
+    };
+  }
+  return { ...base, user: profile.user, password: profile.password };
+}
+
 const SELECT_COLS = `
          CONVERT(varchar(19), fecha, 120) AS fecha,
          LTRIM(RTRIM(cdocu)) AS cdocu,
@@ -33,65 +159,59 @@ const SELECT_COLS = `
          LTRIM(RTRIM(ISNULL(observ, ''))) AS observ,
          LTRIM(RTRIM(ISNULL(codtar, ''))) AS codtar`;
 
-function hostList() {
-  loadSqlEnv();
-  const primary = String(process.env.MSSQL_HOST ?? "").trim();
-  const extra = String(process.env.MSSQL_HOST_FALLBACK ?? "192.168.18.104")
-    .split(",")
-    .map((h) => h.trim())
-    .filter(Boolean);
-  return [...new Set([primary, ...extra].filter(Boolean))];
+async function closePool() {
+  if (!poolPromise) return;
+  try {
+    const pool = await poolPromise;
+    await pool.close();
+  } catch {
+    /* pool ya cerrado */
+  }
+  poolPromise = null;
+  poolKey = "";
 }
 
-function mssqlConfig(host) {
-  loadSqlEnv();
-  const user = String(process.env.MSSQL_USER ?? "").trim();
-  const password = String(process.env.MSSQL_PASSWORD ?? "");
-  if (!host) {
-    throw new Error("Falta MSSQL_HOST en .env (ej. 100.87.28.27)");
-  }
-  if (!user || !password) {
-    throw new Error("Falta MSSQL_USER / MSSQL_PASSWORD en .env");
-  }
-  const database = String(process.env.MSSQL_DATABASE ?? "").trim() || "Bdnava02";
-  const port = Number(process.env.MSSQL_PORT || 1433) || 1433;
-  const auth = String(process.env.MSSQL_AUTH ?? "sql").trim().toLowerCase();
-  const domain = String(process.env.MSSQL_DOMAIN ?? "").trim();
-  const hosts = hostList();
-  const base = {
-    server: host,
-    port,
-    database,
-    options: {
-      encrypt: true,
-      trustServerCertificate: true,
-    },
-    connectionTimeout: hosts.length > 1 ? 2500 : 8000,
-    requestTimeout: 20000,
-    pool: { max: 4, min: 0, idleTimeoutMillis: 30_000 },
-  };
-  if (auth === "ntlm") {
-    return {
-      ...base,
-      authentication: {
-        type: "ntlm",
-        options: {
-          domain: domain || host,
-          userName: user,
-          password,
-        },
-      },
+function tcpReachable(host, port, ms = 2200) {
+  const net = require("node:net");
+  return new Promise((resolve) => {
+    const socket = net.connect({ host, port }, () => {
+      socket.destroy();
+      resolve(true);
+    });
+    const fail = () => {
+      socket.destroy();
+      resolve(false);
     };
-  }
-  return { ...base, user, password };
+    socket.setTimeout(ms, fail);
+    socket.once("error", fail);
+  });
+}
+
+async function orderReachableHosts(hosts, port) {
+  const last = readLastHost();
+  const unique = [...new Set([last, ...hosts].filter((h) => hosts.includes(h)))];
+  const checks = await Promise.all(
+    unique.map(async (host) => ({ host, ok: await tcpReachable(host, port) })),
+  );
+  const up = checks.filter((row) => row.ok).map((row) => row.host);
+  return up.length ? up : unique;
+}
+
+function connectError(hosts, lastErr) {
+  const list = hosts.join(", ");
+  const detail = lastErr instanceof Error ? lastErr.message : String(lastErr);
+  return new Error(
+    `No hay SQL en ${list}. Si usa Desarrollo, abra Tailscale y reintente. (${detail})`,
+  );
 }
 
 async function getPool() {
-  const hosts = hostList();
+  const profile = activeProfile();
+  const hosts = hostList().slice(0, 2);
   if (!hosts.length) {
-    throw new Error("Falta MSSQL_HOST en .env (ej. 100.87.28.27)");
+    throw new Error(`Falta MSSQL_${profile.id.toUpperCase()}_HOST en .env`);
   }
-  const nextKey = hosts.join(",");
+  const nextKey = `${profile.id}|${hosts.join(",")}`;
   if (poolPromise && poolKey === nextKey) return poolPromise;
 
   let mssql;
@@ -101,22 +221,93 @@ async function getPool() {
     throw new Error("Falta el paquete mssql. Ejecuta: npm install mssql");
   }
 
-  let lastErr = new Error("No se pudo conectar a SQL Server");
-  for (const host of hosts) {
-    try {
-      const cfg = mssqlConfig(host);
-      const pending = mssql.connect(cfg);
-      poolPromise = pending;
-      poolKey = nextKey;
-      await pending;
-      return pending;
-    } catch (err) {
+  if (poolPromise && poolKey !== nextKey) {
+    await closePool();
+  }
+
+  const pending = (async () => {
+    const ordered = await orderReachableHosts(hosts, profile.port);
+    let lastErr = new Error("No se pudo conectar a SQL Server");
+    for (const host of ordered) {
+      try {
+        const pool = await mssql.connect(mssqlConfig(host));
+        writeProfileState({ lastHost: host });
+        return pool;
+      } catch (err) {
+        lastErr = err;
+      }
+    }
+    throw connectError(ordered, lastErr);
+  })();
+
+  poolPromise = pending;
+  poolKey = nextKey;
+  try {
+    return await pending;
+  } catch (err) {
+    if (poolPromise === pending) {
       poolPromise = null;
       poolKey = "";
-      lastErr = err;
     }
+    throw err;
   }
-  throw lastErr;
+}
+
+async function probeStatus() {
+  const profile = activeProfile();
+  try {
+    const pool = await getPool();
+    const result = await pool.request().query(`
+      SELECT @@SERVERNAME AS srv, DB_NAME() AS db, SUSER_SNAME() AS login
+    `);
+    const row = result.recordset[0] ?? {};
+    return {
+      ok: true,
+      profileId: profile.id,
+      host: profile.host,
+      server: String(row.srv ?? ""),
+      database: String(row.db ?? profile.database),
+      login: String(row.login ?? ""),
+      message: `Conectado a ${row.srv || profile.host} / ${row.db || profile.database}`,
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      profileId: profile.id,
+      host: profile.host,
+      server: "",
+      database: profile.database,
+      login: "",
+      message: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+function listSqlProfiles() {
+  const active = readStoredProfileId();
+  return {
+    active,
+    profiles: profileIds().map((id) => {
+      const def = readProfileDef(id);
+      return {
+        id: def.id,
+        label: def.label,
+        host: def.host,
+        database: def.database,
+        auth: def.auth,
+      };
+    }),
+  };
+}
+
+async function setSqlProfile(id) {
+  const next = String(id ?? "").trim().toLowerCase();
+  if (!profileIds().includes(next)) {
+    throw new Error(`Perfil SQL desconocido: ${id}`);
+  }
+  writeStoredProfileId(next);
+  await closePool();
+  return probeStatus();
 }
 
 function cell(value) {
@@ -152,6 +343,7 @@ function mapRow(row) {
     monvuelto: money(row.monvuelto),
     observ: cell(row.observ),
     codtar: cell(row.codtar),
+    lines: [],
   };
 }
 
@@ -162,7 +354,8 @@ async function listNavaDocs(payload) {
   }
   const kind = !raw || raw === "all" ? "all" : raw;
   const fecha = String(payload?.fecha ?? "").trim().slice(0, 10);
-  const defaultLimit = fecha ? 500 : 150;
+  const ven = cell(payload?.codven);
+  const defaultLimit = fecha ? 800 : 150;
   const limit = Math.min(2000, Math.max(1, Number(payload?.limit) || defaultLimit));
   const pool = await getPool();
   const request = pool.request().input("p1", limit).input("p2", kind);
@@ -174,21 +367,174 @@ async function listNavaDocs(payload) {
     request.input("p3", fecha);
     sql += ` AND fecha >= @p3 AND fecha < DATEADD(day, 1, @p3)`;
   }
+  if (ven) {
+    request.input("ven", ven);
+    sql += ` AND RTRIM(codven) = @ven`;
+  }
   sql += " ORDER BY fecha DESC, ndocu DESC";
 
   const result = await request.query(sql);
   return (result.recordset ?? []).map(mapRow);
 }
 
-async function listNavaDates() {
+function correlativoNum(ndocu) {
+  const raw = cell(ndocu);
+  const dash = raw.lastIndexOf("-");
+  const digits = (dash >= 0 ? raw.slice(dash + 1) : raw).replace(/\D/g, "");
+  return Number(digits) || 0;
+}
+
+async function listNavaDayReport(payload) {
+  const day = String(typeof payload === "string" ? payload : payload?.fecha ?? "").trim().slice(0, 10);
+  const ven = cell(typeof payload === "string" ? "" : payload?.codven);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+    throw new Error("Fecha inválida");
+  }
+  const venSql = ` AND (@ven = '' OR RTRIM(codven) = @ven)`;
   const pool = await getPool();
-  const result = await pool.request().query(`
-    SELECT DISTINCT CONVERT(varchar(10), fecha, 23) AS d
+  const bind = (req) => req.input("p3", day).input("ven", ven);
+  const [docsRes, payRes, seriesRes, artRes, grpRes] = await Promise.all([
+    bind(pool.request()).query(`
+      SELECT
+        SUM(CASE WHEN cdocu = '03' THEN 1 ELSE 0 END) AS boletas,
+        SUM(CASE WHEN cdocu = '01' THEN 1 ELSE 0 END) AS facturas,
+        COUNT(*) AS total,
+        SUM(CASE WHEN LTRIM(RTRIM(CONVERT(varchar(20), flag))) IN ('1','A','X','S') THEN totn ELSE 0 END) AS anulados,
+        SUM(totn) AS totn
+      FROM mst01fac WITH (NOLOCK)
+      WHERE cdocu IN ('01','03') AND fecha >= @p3 AND fecha < DATEADD(day, 1, @p3)${venSql}`),
+    bind(pool.request()).query(`
+      SELECT
+        SUM(CASE WHEN ISNULL(tarjeta,0) = 0 AND ISNULL(banco,0) = 0 THEN totn ELSE 0 END) AS contado,
+        SUM(ISNULL(tarjeta,0)) AS tarjeta,
+        SUM(ISNULL(banco,0)) AS banco
+      FROM mst01fac WITH (NOLOCK)
+      WHERE cdocu IN ('01','03') AND fecha >= @p3 AND fecha < DATEADD(day, 1, @p3)${venSql}`),
+    bind(pool.request()).query(`
+      SELECT cdocu, LEFT(LTRIM(RTRIM(ndocu)), 4) AS serie, COUNT(*) AS n,
+             MIN(ndocu) AS mn, MAX(ndocu) AS mx
+      FROM mst01fac WITH (NOLOCK)
+      WHERE cdocu IN ('01','03') AND fecha >= @p3 AND fecha < DATEADD(day, 1, @p3)${venSql}
+      GROUP BY cdocu, LEFT(LTRIM(RTRIM(ndocu)), 4)`),
+    bind(pool.request()).query(`
+      SELECT TOP 80
+        LTRIM(RTRIM(descr)) AS descr,
+        SUM(cant) AS qty,
+        SUM(totn) AS tot
+      FROM dtl01fac WITH (NOLOCK)
+      WHERE cdocu IN ('01','03') AND fecha >= @p3 AND fecha < DATEADD(day, 1, @p3)${venSql}
+      GROUP BY LTRIM(RTRIM(descr))
+      ORDER BY SUM(totn) DESC`),
+    bind(pool.request()).query(`
+      SELECT TOP 40
+        ISNULL(NULLIF(LTRIM(RTRIM(g.nomgru)), ''), 'Otros') AS nomgru,
+        SUM(d.totn) AS tot
+      FROM dtl01fac d WITH (NOLOCK)
+      LEFT JOIN tbl01itm i WITH (NOLOCK) ON i.codi = d.codi
+      LEFT JOIN tbl01grp g WITH (NOLOCK) ON g.codgru = i.codgru
+      WHERE d.cdocu IN ('01','03') AND d.fecha >= @p3 AND d.fecha < DATEADD(day, 1, @p3)
+        AND (@ven = '' OR RTRIM(d.codven) = @ven)
+      GROUP BY ISNULL(NULLIF(LTRIM(RTRIM(g.nomgru)), ''), 'Otros')
+      ORDER BY SUM(d.totn) DESC`),
+  ]);
+
+  const docsRow = docsRes.recordset?.[0] ?? {};
+  const payRow = payRes.recordset?.[0] ?? {};
+  const grand = money(docsRow.totn);
+  const pickRange = (cdocu) => {
+    const rows = (seriesRes.recordset ?? []).filter((row) => cell(row.cdocu) === cdocu);
+    if (!rows.length) return { from: 0, to: 0 };
+    rows.sort((a, b) => money(b.n) - money(a.n));
+    return { from: correlativoNum(rows[0].mn), to: correlativoNum(rows[0].mx) };
+  };
+  const bol = pickRange("03");
+  const fac = pickRange("01");
+  const groups = (grpRes.recordset ?? []).map((row) => ({
+    group: cell(row.nomgru) || "Otros",
+    total: money(row.tot),
+    percent: grand > 0 ? (money(row.tot) / grand) * 100 : 0,
+  }));
+  const articles = (artRes.recordset ?? []).map((row) => ({
+    description: cell(row.descr) || "ITEM",
+    qty: money(row.qty),
+    total: money(row.tot),
+  }));
+
+  return {
+    docs: {
+      boletas: money(docsRow.boletas),
+      boletaFrom: bol.from,
+      boletaTo: bol.to,
+      notas: 0,
+      notaFrom: 0,
+      notaTo: 0,
+      facturas: money(docsRow.facturas),
+      facturaFrom: fac.from,
+      facturaTo: fac.to,
+      anulados: money(docsRow.anulados),
+      total: money(docsRow.total),
+    },
+    monetary: {
+      contado: money(payRow.contado),
+      credito: 0,
+      tarjeta: money(payRow.tarjeta),
+      banco: money(payRow.banco),
+      cards: [],
+      total: grand,
+    },
+    groups,
+    articles,
+    grandTotal: grand,
+  };
+}
+
+function ymd(value) {
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const y = value.getFullYear();
+    const m = String(value.getMonth() + 1).padStart(2, "0");
+    const d = String(value.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  const s = String(value ?? "").trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : "";
+}
+
+async function listNavaDates(payload) {
+  const src = typeof payload === "string" ? { codven: payload } : payload ?? {};
+  const ven = cell(src.codven);
+  const from = ymd(src.from) || null;
+  const to = ymd(src.to) || null;
+  const pool = await getPool();
+  const request = pool.request().input("ven", ven);
+  let rangeSql = "";
+  if (from) {
+    request.input("from", from);
+    rangeSql += " AND fecha >= @from";
+  } else {
+    rangeSql += " AND fecha >= DATEADD(month, -18, CAST(GETDATE() AS date))";
+  }
+  if (to) {
+    request.input("to", to);
+    rangeSql += " AND fecha < DATEADD(day, 1, @to)";
+  }
+  const result = await request.query(`
+    SELECT CONVERT(varchar(10), fecha, 23) AS d,
+           SUM(CASE WHEN ISNULL(totn, 0) <> 0 THEN 1 ELSE 0 END) AS conVenta
     FROM mst01fac WITH (NOLOCK)
     WHERE cdocu IN ('01','03')
-      AND fecha >= DATEADD(day, -180, CAST(GETDATE() AS date))
+      ${rangeSql}
+      AND (@ven = '' OR RTRIM(codven) = @ven)
+    GROUP BY CONVERT(varchar(10), fecha, 23)
     ORDER BY d DESC`);
-  return (result.recordset ?? []).map((row) => cell(row.d)).filter(Boolean);
+  const sales = [];
+  const opened = [];
+  for (const row of result.recordset ?? []) {
+    const d = ymd(row.d);
+    if (!d) continue;
+    if (Number(row.conVenta) > 0) sales.push(d);
+    else opened.push(d);
+  }
+  return { sales, opened };
 }
 
 function pad(value, len) {
@@ -346,4 +692,113 @@ function warmupSql() {
   return getPool().then(() => true).catch(() => false);
 }
 
-module.exports = { listNavaDocs, listNavaDates, insertNavaSale, warmupSql };
+async function listNavaVendors() {
+  const pool = await getPool();
+  const result = await pool.request().query(`
+    SELECT
+      LTRIM(RTRIM(v.codven)) AS codven,
+      LTRIM(RTRIM(v.nomven)) AS nomven,
+      LTRIM(RTRIM(CONVERT(varchar(20), v.estado))) AS estado,
+      LTRIM(RTRIM(ISNULL(u.Usuario, ''))) AS usuario,
+      LTRIM(RTRIM(ISNULL(u.Nombres, ''))) AS nombres
+    FROM tbl01ven v WITH (NOLOCK)
+    LEFT JOIN TBL_USUARIO u WITH (NOLOCK)
+      ON RTRIM(u.Codven) = RTRIM(v.codven) AND LTRIM(RTRIM(CONVERT(varchar(10), u.Estado))) = '1'
+    WHERE LTRIM(RTRIM(CONVERT(varchar(20), v.estado))) = '1'
+    ORDER BY v.nomven`);
+  const seen = new Set();
+  return (result.recordset ?? [])
+    .map((row) => ({
+      codven: cell(row.codven),
+      nomven: cell(row.nomven),
+      estado: cell(row.estado),
+      usuario: cell(row.usuario),
+      nombres: cell(row.nombres),
+    }))
+    .filter((row) => {
+      if (!row.codven || seen.has(row.codven)) return false;
+      seen.add(row.codven);
+      return true;
+    });
+}
+
+async function navaLogin(payload) {
+  const password = String(payload?.password ?? payload?.clave ?? payload?.user ?? "").trim();
+  if (!password) {
+    throw new Error("Ingrese su clave");
+  }
+  const pool = await getPool();
+  const caja = await pool
+    .request()
+    .input("pass", password)
+    .query(`
+      SELECT TOP 1
+        LTRIM(RTRIM(f.nomacc)) AS usuario,
+        LTRIM(RTRIM(f.nomusu)) AS nombres,
+        '' AS apellidos,
+        LTRIM(RTRIM(ISNULL(NULLIF(RTRIM(f.codven), ''), ISNULL(v.codven, '')))) AS codven,
+        LTRIM(RTRIM(ISNULL(v.nomven, f.nomusu))) AS nomven,
+        LTRIM(RTRIM(f.codusu)) AS codusu,
+        LTRIM(RTRIM(ISNULL(p.nompto, f.nomusu))) AS nompto,
+        LTRIM(RTRIM(ISNULL(a.nomalm, ''))) AS nomalm,
+        LTRIM(RTRIM(ISNULL(NULLIF(RTRIM(ISNULL(t.nomtie, '')), ''), ISNULL(s.NomSuc, '')))) AS nomtie
+      FROM fcu0000 f WITH (NOLOCK)
+      LEFT JOIN tbl01ven v WITH (NOLOCK)
+        ON RTRIM(v.codven) = RTRIM(f.codven)
+        OR RTRIM(v.nomven) = RTRIM(f.nomusu)
+      LEFT JOIN tbl01pto p WITH (NOLOCK) ON RTRIM(p.codpto) = RTRIM(f.codpto)
+      LEFT JOIN tbl01alm a WITH (NOLOCK) ON RTRIM(a.codalm) = RTRIM(f.codalm)
+      LEFT JOIN tbl_tienda t WITH (NOLOCK) ON RTRIM(t.codtie) = RTRIM(p.codtie)
+      LEFT JOIN Tbl_Sucursal s WITH (NOLOCK) ON RTRIM(s.CodSuc) = RTRIM(p.codsuc)
+      WHERE ISNULL(f.estado, 0) = 1
+        AND RTRIM(f.clausu) = RTRIM(dbo.fn_Encrip(@pass))
+      ORDER BY CASE WHEN RTRIM(ISNULL(f.codven, '')) = '' THEN 1 ELSE 0 END, f.nomusu`);
+  let row = caja.recordset?.[0];
+  if (!row) {
+    const office = await pool
+      .request()
+      .input("pass", password)
+      .query(`
+        SELECT TOP 1
+          LTRIM(RTRIM(u.Usuario)) AS usuario,
+          LTRIM(RTRIM(ISNULL(u.Nombres, ''))) AS nombres,
+          LTRIM(RTRIM(ISNULL(u.Apellidos, ''))) AS apellidos,
+          LTRIM(RTRIM(ISNULL(u.Codven, ''))) AS codven,
+          LTRIM(RTRIM(ISNULL(v.nomven, ''))) AS nomven,
+          LTRIM(RTRIM(ISNULL(u.codusu, ''))) AS codusu,
+          LTRIM(RTRIM(ISNULL(v.nomven, ''))) AS nompto,
+          '' AS nomalm,
+          '' AS nomtie
+        FROM TBL_USUARIO u WITH (NOLOCK)
+        LEFT JOIN tbl01ven v WITH (NOLOCK) ON RTRIM(v.codven) = RTRIM(u.Codven)
+        WHERE LTRIM(RTRIM(CONVERT(varchar(10), u.Estado))) = '1'
+          AND LTRIM(RTRIM(u.Clave)) = @pass
+        ORDER BY CASE WHEN RTRIM(ISNULL(u.Codven, '')) = '' THEN 1 ELSE 0 END, u.Usuario`);
+    row = office.recordset?.[0];
+  }
+  if (!row) throw new Error("Clave incorrecta");
+  return {
+    usuario: cell(row.usuario),
+    nombres: cell(row.nombres),
+    apellidos: cell(row.apellidos),
+    codven: cell(row.codven),
+    nomven: cell(row.nomven),
+    codusu: cell(row.codusu),
+    nompto: cell(row.nompto),
+    nomalm: cell(row.nomalm),
+    nomtie: cell(row.nomtie),
+  };
+}
+
+module.exports = {
+  listNavaDocs,
+  listNavaDates,
+  listNavaDayReport,
+  insertNavaSale,
+  warmupSql,
+  listSqlProfiles,
+  setSqlProfile,
+  getSqlStatus: probeStatus,
+  listNavaVendors,
+  navaLogin,
+};

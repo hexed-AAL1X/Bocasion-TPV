@@ -212,10 +212,28 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
   margin-bottom: 12px;
+  align-items: stretch;
 }
 
 .panel {
   composes: winShadePanel from global;
+  display: flex;
+  flex-direction: column;
+}
+
+.docsBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.docsTotal {
+  margin-top: auto;
+}
+
+.docsBody > .table:first-child tr:last-child td {
+  border-bottom: 1px solid var(--win-table-border);
 }
 
 .panelTitle {
