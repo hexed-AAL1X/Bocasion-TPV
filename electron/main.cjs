@@ -33,7 +33,7 @@ if (!gotSingleInstanceLock) {
   });
 }
 
-// Config: userData/config.env → resources/config.env (instalada) → .env (dev).
+// Config: fusiona resources/config.env (instalada) + .env (dev); userData gana por clave.
 try {
   require("./loadAppEnv.cjs").loadAppEnv({ override: true });
 } catch {

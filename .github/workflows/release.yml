@@ -28,7 +28,7 @@ jobs:
       - run: npm ci
       - name: Preparar config.env para la app instalada
         env:
-          MSSQL_PROFILE: prod
+          MSSQL_PROFILE: dev
           MSSQL_PROFILES: ${{ secrets.MSSQL_PROFILES }}
           MSSQL_DEV_HOST: ${{ secrets.MSSQL_DEV_HOST }}
           MSSQL_DEV_HOST_FALLBACK: ${{ secrets.MSSQL_DEV_HOST_FALLBACK }}

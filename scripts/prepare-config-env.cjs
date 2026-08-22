@@ -61,14 +61,16 @@ if (!lines.length) {
   console.warn("[prepare-config-env] Sin variables SQL/API: la app instalada pedirá config.env en userData.");
 }
 
-// En builds instalados usar producción por defecto
-if (!merged.MSSQL_PROFILE) {
-  lines.push("MSSQL_PROFILE=prod");
-} else if (String(merged.MSSQL_PROFILE).trim().toLowerCase() === "dev") {
-  // Sustituir solo en el archivo empaquetado: las cajas deben ir a prod
-  const idx = lines.findIndex((line) => line.startsWith("MSSQL_PROFILE="));
-  if (idx >= 0) lines[idx] = "MSSQL_PROFILE=prod";
-  else lines.push("MSSQL_PROFILE=prod");
+// Etapa actual: instaladores arrancan en desarrollo (Tailscale / SQL dev)
+const activeProfile = String(merged.MSSQL_PROFILE ?? "dev").trim().toLowerCase();
+const profileIdx = lines.findIndex((line) => line.startsWith("MSSQL_PROFILE="));
+if (profileIdx >= 0) lines[profileIdx] = `MSSQL_PROFILE=${activeProfile}`;
+else lines.push(`MSSQL_PROFILE=${activeProfile}`);
+
+if (activeProfile === "dev" && (!merged.MSSQL_DEV_USER || !merged.MSSQL_DEV_PASSWORD)) {
+  console.warn(
+    "[prepare-config-env] ADVERTENCIA: faltan MSSQL_DEV_USER/PASSWORD; el instalador no conectará a SQL dev.",
+  );
 }
 
 fs.mkdirSync(outDir, { recursive: true });

@@ -71,12 +71,19 @@ function writeProfileState(patch) {
 }
 
 function readStoredProfileId() {
-  const id = String(readProfileState().id ?? "").trim().toLowerCase();
-  if (id && profileIds().includes(id)) return id;
   loadSqlEnv();
-  const fallback = isPackagedApp() ? "prod" : "dev";
+  const fallback = "dev";
   const fromEnv = String(process.env.MSSQL_PROFILE ?? fallback).trim().toLowerCase();
-  return profileIds().includes(fromEnv) ? fromEnv : profileIds().includes(fallback) ? fallback : profileIds()[0];
+  const envProfile = profileIds().includes(fromEnv) ? fromEnv : fallback;
+
+  const stored = String(readProfileState().id ?? "").trim().toLowerCase();
+  if (isPackagedApp() && stored !== envProfile && profileIds().includes(envProfile)) {
+    writeStoredProfileId(envProfile);
+    return envProfile;
+  }
+  if (stored && profileIds().includes(stored)) return stored;
+
+  return profileIds().includes(envProfile) ? envProfile : profileIds()[0];
 }
 
 function writeStoredProfileId(id) {
