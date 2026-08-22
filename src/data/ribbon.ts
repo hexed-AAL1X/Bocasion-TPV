@@ -36,7 +36,7 @@ const ribbonIcon = (id: string) => imageUrl(`ribbon/${id}.png`);
 
 export const inicioActions: RibbonAction[] = [
   { id: "inbox", label: "Actualizar Inbox", group: "Inbox", image: ribbonIcon("inbox") },
-  { id: "productos", label: "Padrón de Productos", group: "Compras", image: ribbonIcon("productos") },
+  { id: "productos", label: "Padrón de Items", group: "Compras", image: ribbonIcon("productos") },
   { id: "orden-compra", label: "Orden compra", group: "Compras", image: ribbonIcon("orden-compra") },
   { id: "notas-ingreso", label: "Notas ingreso", group: "Compras", image: ribbonIcon("notas-ingreso") },
   { id: "notas-salida", label: "Notas salida", group: "Compras", image: ribbonIcon("notas-salida") },

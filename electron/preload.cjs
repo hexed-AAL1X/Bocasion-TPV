@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld("bocasoft", {
   listNavaVendors: () => ipcRenderer.invoke("list-nava-vendors"),
   navaLogin: (payload) => ipcRenderer.invoke("nava-login", payload),
   insertNavaSale: (payload) => ipcRenderer.invoke("insert-nava-sale", payload),
+  peekNavaDocSeries: () => ipcRenderer.invoke("peek-nava-doc-series"),
   listSqlProfiles: () => ipcRenderer.invoke("list-sql-profiles"),
   getSqlStatus: () => ipcRenderer.invoke("get-sql-status"),
   setSqlProfile: (profileId) => ipcRenderer.invoke("set-sql-profile", profileId),

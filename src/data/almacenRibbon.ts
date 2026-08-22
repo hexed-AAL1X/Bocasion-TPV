@@ -18,7 +18,7 @@ const ribbonIcon = (id: string) => imageUrl(`ribbon/${id}.png`);
 const icon = (file: string) => imageUrl(`iconos/${file}`);
 
 export const almacenArticulos: AlmacenLargeAction[] = [
-  { id: "productos", label: "Padrón de Productos", image: ribbonIcon("productos") },
+  { id: "productos", label: "Padrón de Items", image: ribbonIcon("productos") },
 ];
 
 export const almacenDocs: AlmacenLargeAction[] = [

@@ -197,6 +197,8 @@ export function AppDialogHost({
           <CashOpeningDialog vendor={vendor} onClose={closeCashOpening} />
         ) : null}
         {dialogs.batchPrint ? <BatchPrintDialog onClose={closeBatchPrint} /> : null}
+      </Suspense>
+      <Suspense fallback={null}>
         {dialogs.pageSetup ? (
           <PageSetupDialog
             settings={pageSetup}

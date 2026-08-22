@@ -2100,6 +2100,15 @@ ipcMain.handle("insert-nava-sale", async (_event, payload) => {
   }
 });
 
+ipcMain.handle("peek-nava-doc-series", async () => {
+  const { peekNavaDocSeries } = require("./navaSql.cjs");
+  try {
+    return await peekNavaDocSeries();
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : String(err));
+  }
+});
+
 ipcMain.handle("warmup-http", async () => {
   const urls = [
     `${dniApiBase()}/`,

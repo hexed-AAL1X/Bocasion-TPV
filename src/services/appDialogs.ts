@@ -10,6 +10,7 @@ export type AppDialogId =
   | "condicionesVenta"
   | "categoriasCliente"
   | "puntosVenta"
+  | "productos"
   | "comanda"
   | "navaBoletas"
   | "navaFacturas"
@@ -49,6 +50,7 @@ const INITIAL: DialogState = {
   condicionesVenta: false,
   categoriasCliente: false,
   puntosVenta: false,
+  productos: false,
   comanda: false,
   navaBoletas: false,
   navaFacturas: false,
@@ -181,4 +183,5 @@ export const ENTIDADES_ACTION_TO_DIALOG: Record<string, AppDialogId> = {
   "condiciones-venta": "condicionesVenta",
   "categorias-cliente": "categoriasCliente",
   "puntos-venta": "puntosVenta",
+  productos: "productos",
 };

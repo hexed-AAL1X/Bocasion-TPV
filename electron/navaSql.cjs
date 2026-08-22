@@ -370,7 +370,50 @@ async function listNavaDocs(payload) {
   sql += " ORDER BY fecha DESC, ndocu DESC";
 
   const result = await request.query(sql);
-  return (result.recordset ?? []).map(mapRow);
+  const rows = (result.recordset ?? []).map(mapRow);
+  if (!fecha || !rows.length) return rows;
+
+  // Detalle de ítems (el monitor/anexo necesitan lines; el header solo trae totales).
+  const lineReq = pool.request().input("p3", fecha);
+  let lineSql = `
+    SELECT
+      d.cdocu, d.ndocu, d.item, d.codi, d.descr, d.umed, d.cant, d.preu, d.totn,
+      ISNULL(NULLIF(LTRIM(RTRIM(g.nomgru)), ''), 'Otros') AS nomgru
+    FROM dtl01fac d WITH (NOLOCK)
+    LEFT JOIN tbl01itm i WITH (NOLOCK) ON i.codi = d.codi
+    LEFT JOIN tbl01grp g WITH (NOLOCK) ON g.codgru = i.codgru
+    WHERE d.cdocu IN ('01','03')
+      AND d.fecha >= @p3 AND d.fecha < DATEADD(day, 1, @p3)`;
+  if (kind !== "all") {
+    lineReq.input("kind", kind);
+    lineSql += ` AND d.cdocu = @kind`;
+  }
+  if (ven) {
+    lineReq.input("ven", ven);
+    lineSql += ` AND RTRIM(d.codven) = @ven`;
+  }
+  lineSql += ` ORDER BY d.ndocu, d.item`;
+
+  const lineRes = await lineReq.query(lineSql);
+  const byDoc = new Map();
+  for (const row of lineRes.recordset ?? []) {
+    const key = `${cell(row.cdocu)}|${cell(row.ndocu)}`;
+    const list = byDoc.get(key) ?? [];
+    list.push({
+      codi: cell(row.codi),
+      descr: cell(row.descr),
+      umed: cell(row.umed),
+      cant: money(row.cant),
+      preu: money(row.preu),
+      totn: money(row.totn),
+      nomgru: cell(row.nomgru) || "Otros",
+    });
+    byDoc.set(key, list);
+  }
+  for (const doc of rows) {
+    doc.lines = byDoc.get(`${doc.cdocu}|${doc.ndocu}`) ?? [];
+  }
+  return rows;
 }
 
 function correlativoNum(ndocu) {
@@ -540,9 +583,53 @@ function pad(value, len) {
 function nextNdocu(last, serie) {
   const prefix = `${serie}-`;
   const raw = String(last ?? "").trim();
-  const n = raw.startsWith(prefix) ? Number(raw.slice(prefix.length)) : 0;
+  const n = raw.startsWith(prefix) ? Number(raw.slice(prefix.length)) : Number(raw.replace(/\D/g, "").slice(-7));
   const next = (Number.isFinite(n) ? n : 0) + 1;
   return `${serie}-${String(next).padStart(7, "0")}`;
+}
+
+function correlativoFromNdocu(ndocu) {
+  const raw = String(ndocu ?? "").trim();
+  const dash = raw.lastIndexOf("-");
+  const digits = (dash >= 0 ? raw.slice(dash + 1) : raw).replace(/\D/g, "");
+  return Number(digits) || 0;
+}
+
+/** Último correlativo real en mst01fac (serie B038 / F036). */
+async function peekNavaDocSeries() {
+  const pool = await getPool();
+  const [bol, fac] = await Promise.all([
+    pool.request().query(`
+      SELECT TOP 1 RTRIM(ndocu) AS ndocu
+      FROM mst01fac WITH (NOLOCK)
+      WHERE cdocu = '03' AND ndocu LIKE 'B038-%'
+      ORDER BY TRY_CAST(RIGHT(RTRIM(ndocu), 7) AS int) DESC`),
+    pool.request().query(`
+      SELECT TOP 1 RTRIM(ndocu) AS ndocu
+      FROM mst01fac WITH (NOLOCK)
+      WHERE cdocu = '01' AND ndocu LIKE 'F036-%'
+      ORDER BY TRY_CAST(RIGHT(RTRIM(ndocu), 7) AS int) DESC`),
+  ]);
+  const boletaLast = cell(bol.recordset?.[0]?.ndocu);
+  const facturaLast = cell(fac.recordset?.[0]?.ndocu);
+  const boletaNum = correlativoFromNdocu(boletaLast);
+  const facturaNum = correlativoFromNdocu(facturaLast);
+  return {
+    boleta: {
+      serie: "B038",
+      last: boletaLast,
+      lastNum: boletaNum,
+      next: nextNdocu(boletaLast || "B038-0000000", "B038"),
+      nextNum: boletaNum + 1,
+    },
+    factura: {
+      serie: "F036",
+      last: facturaLast,
+      lastNum: facturaNum,
+      next: nextNdocu(facturaLast || "F036-0000000", "F036"),
+      nextNum: facturaNum + 1,
+    },
+  };
 }
 
 async function insertNavaSale(payload) {
@@ -564,9 +651,11 @@ async function insertNavaSale(payload) {
     const max = await new (require("mssql").Request)(trx)
       .input("c", cdocu)
       .input("p", `${serie}-%`)
-      .query(
-        "SELECT MAX(ndocu) AS ndocu FROM mst01fac WITH (UPDLOCK, HOLDLOCK) WHERE cdocu = @c AND ndocu LIKE @p",
-      );
+      .query(`
+        SELECT TOP 1 RTRIM(ndocu) AS ndocu
+        FROM mst01fac WITH (UPDLOCK, HOLDLOCK)
+        WHERE cdocu = @c AND ndocu LIKE @p
+        ORDER BY TRY_CAST(RIGHT(RTRIM(ndocu), 7) AS int) DESC`);
     const ndocu = nextNdocu(max.recordset?.[0]?.ndocu, serie);
     const nomcli = String(payload?.nomcli ?? "VENTA CONTADO").trim().slice(0, 60) || "VENTA CONTADO";
     const ruccli = pad(payload?.ruccli ?? "", 11);
@@ -791,6 +880,7 @@ module.exports = {
   listNavaDates,
   listNavaDayReport,
   insertNavaSale,
+  peekNavaDocSeries,
   warmupSql,
   listSqlProfiles,
   setSqlProfile,

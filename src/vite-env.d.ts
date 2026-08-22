@@ -213,6 +213,10 @@ interface BocasoftAPI {
       dscto?: number;
     }>;
   }) => Promise<{ ndocu: string; cdocu: string; fecha: string }>;
+  peekNavaDocSeries?: () => Promise<{
+    boleta: { serie: string; last: string; lastNum: number; next: string; nextNum: number };
+    factura: { serie: string; last: string; lastNum: number; next: string; nextNum: number };
+  }>;
   getPrinters?: () => Promise<PrinterInfoLite[]>;
   printReport?: (options: PrintReportOptions) => Promise<void>;
   getDefaultExportDirectory?: (kind: string) => Promise<string>;

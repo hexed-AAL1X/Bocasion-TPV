@@ -5,20 +5,21 @@ import {
   formatSaleDateLabel,
   getActiveRegisterId,
   getOpenedWithoutSalesDates,
-  getSalesDaySnapshot,
+  getSalesForRegisterAndDate,
   isSameDay,
+  snapshotFromSalesList,
   subscribeSales,
   toDateKey,
-  type SalesDaySnapshot,
 } from "../../services/salesSession";
 import {
-  getCachedNavaDayReport,
+  getCachedNavaSales,
   getLastSqlError,
   isNavaOnline,
-  listNavaDayReport,
   listNavaSaleDates,
-  type NavaDayReport,
+  listNavaSalesForDate,
+  mergeDaySales,
 } from "../../services/navaDocs";
+import type { CompletedSale } from "../../types/sales";
 import { openDocsAnnexDialog, isAppDialogOpen, setDocsAnnexContext } from "../../services/appDialogs";
 import { formatPercent, formatQty, formatSoles } from "../../utils/formatMoney";
 import { downloadSalesReportXls } from "../../utils/exportSalesReportXls";
@@ -28,61 +29,6 @@ import { PrintPropertiesDialog } from "../PrintPropertiesDialog/PrintPropertiesD
 import { SalesDayCalendar } from "./SalesDayCalendar";
 import { SalesRegisterPicker } from "./SalesRegisterPicker";
 import styles from "./SalesDayMonitor.module.css";
-
-function mergeDaySnapshots(local: SalesDaySnapshot, remote: NavaDayReport | null): SalesDaySnapshot {
-  if (!remote || (remote.docs.total === 0 && remote.grandTotal === 0)) return local;
-  if (local.docs.total === 0 && local.grandTotal === 0) {
-    return {
-      ...local,
-      docs: remote.docs,
-      monetary: remote.monetary,
-      groups: remote.groups,
-      articles: remote.articles,
-      grandTotal: remote.grandTotal,
-    };
-  }
-  const grand = local.grandTotal + remote.grandTotal;
-  const groupsMap = new Map<string, number>();
-  for (const row of [...local.groups, ...remote.groups]) {
-    groupsMap.set(row.group, (groupsMap.get(row.group) ?? 0) + row.total);
-  }
-  const articlesMap = new Map<string, { qty: number; total: number }>();
-  for (const row of [...local.articles, ...remote.articles]) {
-    const prev = articlesMap.get(row.description) ?? { qty: 0, total: 0 };
-    articlesMap.set(row.description, { qty: prev.qty + row.qty, total: prev.total + row.total });
-  }
-  return {
-    ...local,
-    docs: {
-      boletas: local.docs.boletas + remote.docs.boletas,
-      boletaFrom: remote.docs.boletas ? remote.docs.boletaFrom : local.docs.boletaFrom,
-      boletaTo: remote.docs.boletas ? remote.docs.boletaTo : local.docs.boletaTo,
-      notas: local.docs.notas + remote.docs.notas,
-      notaFrom: local.docs.notaFrom,
-      notaTo: local.docs.notaTo,
-      facturas: local.docs.facturas + remote.docs.facturas,
-      facturaFrom: remote.docs.facturas ? remote.docs.facturaFrom : local.docs.facturaFrom,
-      facturaTo: remote.docs.facturas ? remote.docs.facturaTo : local.docs.facturaTo,
-      anulados: local.docs.anulados + remote.docs.anulados,
-      total: local.docs.total + remote.docs.total,
-    },
-    monetary: {
-      contado: local.monetary.contado + remote.monetary.contado,
-      credito: local.monetary.credito + remote.monetary.credito,
-      tarjeta: local.monetary.tarjeta + remote.monetary.tarjeta,
-      banco: local.monetary.banco + remote.monetary.banco,
-      cards: remote.monetary.cards.length ? remote.monetary.cards : local.monetary.cards,
-      total: local.monetary.total + remote.monetary.total,
-    },
-    groups: [...groupsMap.entries()]
-      .map(([group, total]) => ({ group, total, percent: grand > 0 ? (total / grand) * 100 : 0 }))
-      .sort((a, b) => b.total - a.total),
-    articles: [...articlesMap.entries()]
-      .map(([description, row]) => ({ description, ...row }))
-      .sort((a, b) => b.total - a.total),
-    grandTotal: grand,
-  };
-}
 
 type Props = {
   onClose: () => void;
@@ -185,8 +131,8 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
   const [tick, setTick] = useState(0);
   const [saleDate, setSaleDate] = useState(() => new Date());
   const [registerId, setRegisterId] = useState(() => getActiveRegisterId() || DEFAULT_REGISTER_ID);
-  const [sqlReport, setSqlReport] = useState<NavaDayReport | null>(() =>
-    getCachedNavaDayReport(new Date(), getActiveRegisterId() || DEFAULT_REGISTER_ID),
+  const [sqlSales, setSqlSales] = useState<CompletedSale[]>(() =>
+    getCachedNavaSales(new Date()),
   );
   const [navaDates, setNavaDates] = useState<Date[]>([]);
   const [navaOpenedDates, setNavaOpenedDates] = useState<Date[]>([]);
@@ -238,17 +184,17 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
 
   useEffect(() => {
     let cancelled = false;
-    setSqlReport(getCachedNavaDayReport(saleDate, registerId));
-    void listNavaDayReport(saleDate, registerId)
-      .then((report) => {
+    setSqlSales(getCachedNavaSales(saleDate));
+    void listNavaSalesForDate(saleDate, registerId)
+      .then((sales) => {
         if (cancelled) return;
-        setSqlReport(report);
+        setSqlSales(sales);
         setNavaOffline(!isNavaOnline());
         setSqlError(getLastSqlError());
       })
       .catch(() => {
         if (cancelled) return;
-        setSqlReport(getCachedNavaDayReport(saleDate, registerId));
+        setSqlSales(getCachedNavaSales(saleDate));
         setNavaOffline(true);
         setSqlError(getLastSqlError());
       });
@@ -258,9 +204,10 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
   }, [saleDate, registerId, navaRefresh]);
 
   const snapshot = useMemo(() => {
-    const local = getSalesDaySnapshot(registerId, saleDate);
-    return mergeDaySnapshots(local, sqlReport);
-  }, [registerId, saleDate, tick, sqlReport]);
+    const local = getSalesForRegisterAndDate(registerId, saleDate);
+    // Misma deduplicación que el Anexo: no sumar local + SQL de la misma boleta.
+    return snapshotFromSalesList(registerId, saleDate, mergeDaySales(local, sqlSales));
+  }, [registerId, saleDate, tick, sqlSales]);
   const {
     docs,
     monetary,
@@ -274,27 +221,23 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
   } = snapshot;
   const availableDates = useMemo(() => {
     const map = new Map<string, Date>();
-    const extras =
-      sqlReport && (sqlReport.docs.total > 0 || sqlReport.grandTotal > 0) ? [saleDate] : [];
+    const extras = sqlSales.length > 0 ? [saleDate] : [];
     for (const date of [...snapshotDates, ...navaDates, ...extras]) {
       map.set(toDateKey(date), date);
     }
     return [...map.values()].sort((a, b) => b.getTime() - a.getTime());
-  }, [snapshotDates, navaDates, sqlReport, saleDate]);
+  }, [snapshotDates, navaDates, sqlSales, saleDate]);
   const datesOpenedOnly = useMemo(() => {
     const salesKeys = new Set(availableDates.map((date) => toDateKey(date)));
     const map = new Map<string, Date>();
-    const extras =
-      sqlReport && sqlReport.docs.total === 0 && sqlReport.grandTotal === 0 && openedAt
-        ? [saleDate]
-        : [];
+    const extras = sqlSales.length === 0 && openedAt ? [saleDate] : [];
     for (const date of [...getOpenedWithoutSalesDates(registerId), ...navaOpenedDates, ...extras]) {
       const key = toDateKey(date);
       if (salesKeys.has(key)) continue;
       map.set(key, date);
     }
     return [...map.values()];
-  }, [availableDates, navaOpenedDates, registerId, sqlReport, saleDate, openedAt, tick]);
+  }, [availableDates, navaOpenedDates, registerId, sqlSales, saleDate, openedAt, tick]);
   const totalArticleQty = useMemo(
     () => articles.reduce((sum, row) => sum + row.qty, 0),
     [articles],
@@ -491,7 +434,7 @@ function SalesDayMonitorContent({ onClose, windowRef }: ContentProps) {
               <p className={styles.navaBanner}>
                 Error de conexión a SQL Server. Histórico no disponible.
                 {sqlError ? ` ${sqlError}` : ""}
-                {sqlReport?.docs.total ? " Se muestra la última consulta en caché." : ""}
+                {sqlSales.length ? " Se muestra la última consulta en caché." : ""}
               </p>
             ) : null}
             {!hasSales ? (

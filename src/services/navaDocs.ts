@@ -1,4 +1,5 @@
 import type { CompletedSale, PaymentMethod } from "../types/sales";
+import { lookupProduct } from "../data/productCatalog";
 
 export type NavaDocKind = "01" | "03" | "all";
 
@@ -114,11 +115,14 @@ export function navaRowToSale(row: NavaDocRow): CompletedSale {
     lines: (row.lines ?? []).map((line, index) => {
       const qty = line.cant || 1;
       const lineTotal = line.totn || qty * line.preu;
+      const code = String(line.codi ?? "").trim();
+      // Grupos/nombres del catálogo BocaSoft (productos sacados de la DB), no el nomgru genérico de Nava.
+      const catalog = lookupProduct(code);
       return {
         id: `${row.cdocu}-${row.ndocu}-${index + 1}`,
-        code: line.codi,
-        description: line.descr || line.codi || "ITEM",
-        group: line.nomgru || "Otros",
+        code: catalog?.code || code,
+        description: catalog?.description || line.descr || code || "ITEM",
+        group: catalog?.group || line.nomgru || "Otros",
         qty,
         um: line.umed || "UND",
         unitPrice: qty ? lineTotal / qty : lineTotal,
@@ -225,15 +229,22 @@ export function getCachedNavaSales(date: Date): CompletedSale[] {
 }
 
 export function mergeDaySales(local: CompletedSale[], remote: CompletedSale[]): CompletedSale[] {
-  const keys = new Set(
-    local.map((sale) => (sale.docRef || `${sale.docType}-${sale.docNumber}`).trim()),
-  );
-  const extra = remote.filter((sale) => {
-    const key = (sale.docRef || "").trim();
-    if (key && keys.has(key)) return false;
-    return !local.some((item) => item.id === sale.id);
-  });
-  return [...local, ...extra].sort((a, b) => b.at.getTime() - a.at.getTime());
+  const keyOf = (sale: CompletedSale) =>
+    (sale.docRef || `${sale.docType}-${sale.docNumber}`).trim() || sale.id;
+  const prefer = (a: CompletedSale, b: CompletedSale) => {
+    const aLines = a.lines?.length ?? 0;
+    const bLines = b.lines?.length ?? 0;
+    if (aLines !== bLines) return aLines > bLines ? a : b;
+    return a;
+  };
+  const byKey = new Map<string, CompletedSale>();
+  // Remoto primero; local gana empates. Si uno trae ítems y el otro no, nos quedamos con el que tiene lines.
+  for (const sale of [...remote, ...local]) {
+    const key = keyOf(sale);
+    const prev = byKey.get(key);
+    byKey.set(key, prev ? prefer(prev, sale) : sale);
+  }
+  return [...byKey.values()].sort((a, b) => b.at.getTime() - a.at.getTime());
 }
 
 export async function listNavaSalesForDate(date: Date, codven = ""): Promise<CompletedSale[]> {
@@ -450,14 +461,29 @@ export async function persistSaleToNava(sale: CompletedSale, vendorCode = ""): P
     const key = toDateKey(sale.at);
     const cached = salesCache.get(key) ?? [];
     salesCache.set(key, [
-      { ...sale, docRef: result.ndocu },
+      { ...sale, docRef: result.ndocu, docNumber: Number(String(result.ndocu).replace(/\D/g, "").slice(-7)) || sale.docNumber },
       ...cached.filter((item) => item.id !== sale.id),
     ]);
     void flushNavaInsertQueue();
+    void syncDocSequencesFromNava();
   } catch {
     const queue = readInsertQueue();
     queue.push(payload);
     writeInsertQueue(queue);
+  }
+}
+
+/** Sincroniza boleta/factura locales con el último correlativo de mst01fac. */
+export async function syncDocSequencesFromNava(): Promise<void> {
+  const api = window.bocasoft?.peekNavaDocSeries;
+  if (!api) return;
+  try {
+    const series = await api();
+    const { syncDocSequencesFromDb } = await import("./salesSession");
+    syncDocSequencesFromDb(series.boleta.nextNum, series.factura.nextNum);
+    markSqlOk();
+  } catch (err) {
+    markSqlError(err);
   }
 }
 

@@ -42,6 +42,8 @@ export async function authenticateVendor(clave: string): Promise<Vendor> {
   if (api) {
     try {
       const row = await api({ password });
+      const { syncDocSequencesFromNava } = await import("./navaDocs");
+      await syncDocSequencesFromNava();
       return vendorFromNavaLogin(row);
     } catch (err) {
       const demo = tryDemoVendor(password);
