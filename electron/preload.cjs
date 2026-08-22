@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld("bocasoft", {
   showAppMessage: (options) => ipcRenderer.invoke("show-app-message", options),
   checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
   installUpdate: (payload) => ipcRenderer.invoke("install-update", payload),
+  getAppVersion: () => ipcRenderer.invoke("get-app-version"),
   onUpdateDownloadProgress: (callback) => {
     const listener = (_event, payload) => callback(payload);
     ipcRenderer.on("update-download-progress", listener);

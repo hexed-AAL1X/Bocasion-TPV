@@ -1,6 +1,6 @@
 {
   "name": "bocasoft",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
@@ -91,7 +91,11 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Intranet Ventas"
+      "shortcutName": "Intranet Ventas",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "perMachine": false,
+      "allowElevation": true
     }
   },
   "dependencies": {

@@ -283,16 +283,44 @@ rm -f "$0"
 }
 
 async function applyWindowsUpdate(filePath) {
-  const installDir = path.dirname(process.execPath);
-  const args = ["/S", `/D=${installDir}`];
-  const child = spawn(filePath, args, {
+  const installDir = path.dirname(process.execPath).replace(/[\\/]+$/, "");
+  const exePath = process.execPath;
+  const exeName = path.basename(exePath);
+  const pid = process.pid;
+  const scriptPath = path.join(os.tmpdir(), `bocasoft-apply-update-${Date.now()}.cmd`);
+
+  // NSIS: /S silencioso; /D=DIR debe ir al final y sin comillas.
+  const script = `@echo off
+setlocal EnableExtensions
+set "INSTALLER=${filePath.replace(/"/g, "")}"
+set "INSTALLDIR=${installDir.replace(/"/g, "")}"
+set "EXEPATH=${path.join(installDir, exeName).replace(/"/g, "")}"
+set "PID=${pid}"
+:wait
+tasklist /FI "PID eq %PID%" 2>nul | findstr /I "%PID%" >nul
+if not errorlevel 1 (
+  timeout /t 1 /nobreak >nul
+  goto wait
+)
+timeout /t 1 /nobreak >nul
+"%INSTALLER%" /S /D=%INSTALLDIR%
+if exist "%EXEPATH%" (
+  start "" "%EXEPATH%"
+) else (
+  start "" "${exePath.replace(/"/g, "")}"
+)
+del /f /q "%INSTALLER%" >nul 2>&1
+del /f /q "%~f0" >nul 2>&1
+`;
+
+  await fsp.writeFile(scriptPath, script, "utf8");
+  const child = spawn("cmd.exe", ["/c", scriptPath], {
     detached: true,
     stdio: "ignore",
     windowsHide: true,
   });
   child.unref();
-  // Dar tiempo a que el instalador tome el lock antes de salir
-  setTimeout(() => app.quit(), 800);
+  app.quit();
   return { applied: true };
 }
 
@@ -389,7 +417,7 @@ async function downloadAndInstall(payload, browserWindow) {
     title: "Actualización lista",
     message: latest ? `Se descargó la versión ${latest}.` : "Se descargó la actualización.",
     detail:
-      "Reinicia ahora para instalarla de forma permanente. Si eliges Después, se aplicará al volver a abrir la app.",
+      "Se instalará encima de la carpeta actual y quedará permanente. Reinicia ahora (recomendado) o al volver a abrir la app.",
     buttons: ["Reiniciar ahora", "Después"],
     defaultId: 0,
     cancelId: 1,

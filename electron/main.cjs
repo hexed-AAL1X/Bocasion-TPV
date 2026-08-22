@@ -1788,6 +1788,10 @@ ipcMain.handle("check-for-updates", async () => {
   return checkForUpdates();
 });
 
+ipcMain.handle("get-app-version", async () => {
+  return { version: app.getVersion() };
+});
+
 ipcMain.handle("install-update", async (event, payload) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   return downloadAndInstall(payload ?? {}, win);

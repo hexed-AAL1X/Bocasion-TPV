@@ -31,6 +31,14 @@ export function AboutDialog({ onClose }: Props) {
   const [installing, setInstalling] = useState(false);
   const [progress, setProgress] = useState<number | null>(null);
   const [result, setResult] = useState<UpdateCheckResult | null>(null);
+  const [installedVersion, setInstalledVersion] = useState(APP_VERSION);
+
+  useEffect(() => {
+    void window.bocasoft?.getAppVersion?.().then((data) => {
+      const next = String(data?.version ?? "").trim();
+      if (next) setInstalledVersion(next);
+    });
+  }, []);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -55,7 +63,7 @@ export function AboutDialog({ onClose }: Props) {
     } catch (err) {
       setResult({
         status: "error",
-        current: APP_VERSION,
+        current: installedVersion,
         message: err instanceof Error ? err.message : "No se pudo buscar actualizaciones.",
       });
     } finally {
@@ -155,7 +163,7 @@ export function AboutDialog({ onClose }: Props) {
               <div className={styles.metaRow}>
                 <dt>Versión:</dt>
                 <dd>
-                  <strong>{APP_VERSION}</strong>
+                  <strong>{installedVersion}</strong>
                 </dd>
               </div>
               <div className={styles.metaRow}>
