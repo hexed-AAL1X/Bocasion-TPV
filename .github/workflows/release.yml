@@ -15,9 +15,9 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            args: --linux AppImage tar.xz
+            args: --linux AppImage
           - os: windows-latest
-            args: --win nsis portable
+            args: --win nsis
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -26,10 +26,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Preparar config.env para la app instalada
+      - name: Preparar config.env (desarrollo público, cualquier PC)
         env:
-          MSSQL_PROFILE: dev
-          MSSQL_PROFILES: ${{ secrets.MSSQL_PROFILES }}
+          BOCASOFT_INSTALLER: "1"
           MSSQL_DEV_HOST: ${{ secrets.MSSQL_DEV_HOST }}
           MSSQL_DEV_HOST_FALLBACK: ${{ secrets.MSSQL_DEV_HOST_FALLBACK }}
           MSSQL_DEV_PORT: ${{ secrets.MSSQL_DEV_PORT }}
@@ -38,16 +37,11 @@ jobs:
           MSSQL_DEV_DOMAIN: ${{ secrets.MSSQL_DEV_DOMAIN }}
           MSSQL_DEV_USER: ${{ secrets.MSSQL_DEV_USER }}
           MSSQL_DEV_PASSWORD: ${{ secrets.MSSQL_DEV_PASSWORD }}
-          MSSQL_PROD_HOST: ${{ secrets.MSSQL_PROD_HOST }}
-          MSSQL_PROD_PORT: ${{ secrets.MSSQL_PROD_PORT }}
-          MSSQL_PROD_DATABASE: ${{ secrets.MSSQL_PROD_DATABASE }}
-          MSSQL_PROD_AUTH: ${{ secrets.MSSQL_PROD_AUTH }}
-          MSSQL_PROD_USER: ${{ secrets.MSSQL_PROD_USER }}
-          MSSQL_PROD_PASSWORD: ${{ secrets.MSSQL_PROD_PASSWORD }}
+          MSSQL_DEV_LABEL: Desarrollo
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           APISPERU_TOKEN: ${{ secrets.APISPERU_TOKEN }}
           RUCPE_API_KEY: ${{ secrets.RUCPE_API_KEY }}
-        run: node scripts/prepare-config-env.cjs
+        run: node scripts/prepare-config-env.cjs --installer
       - name: Publicar instaladores en GitHub Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -28,7 +28,8 @@ function readProfileDef(id) {
   loadSqlEnv();
   const prefix = `MSSQL_${id.toUpperCase()}_`;
   const defaults = {
-    dev: { label: "Desarrollo", host: "100.87.28.27" },
+    // IP pública por defecto en empaquetado; .env puede poner Tailscale en local
+    dev: { label: "Desarrollo", host: "38.253.130.229" },
     prod: { label: "Producción", host: "52.41.28.184" },
   };
   const meta = defaults[id] ?? { label: id, host: "" };
@@ -48,11 +49,15 @@ function readProfileDef(id) {
 
 function profileIds() {
   loadSqlEnv();
-  const raw = String(process.env.MSSQL_PROFILES ?? "dev,prod")
+  const packaged = isPackagedApp();
+  const raw = String(
+    process.env.MSSQL_PROFILES ?? (packaged ? "dev" : "dev,prod"),
+  )
     .split(",")
     .map((id) => id.trim().toLowerCase())
     .filter(Boolean);
-  return [...new Set(raw.length ? raw : ["dev"])];
+  const ids = [...new Set(raw.length ? raw : ["dev"])];
+  return packaged && !ids.includes("dev") ? ["dev", ...ids] : ids;
 }
 
 function readProfileState() {
@@ -72,12 +77,18 @@ function writeProfileState(patch) {
 
 function readStoredProfileId() {
   loadSqlEnv();
+  const packaged = isPackagedApp();
   const fallback = "dev";
   const fromEnv = String(process.env.MSSQL_PROFILE ?? fallback).trim().toLowerCase();
   const envProfile = profileIds().includes(fromEnv) ? fromEnv : fallback;
 
   const stored = String(readProfileState().id ?? "").trim().toLowerCase();
-  if (isPackagedApp() && stored !== envProfile && profileIds().includes(envProfile)) {
+  // Instalador (etapa desarrollo): forzar dev si quedó prod de un build anterior
+  if (packaged && stored === "prod") {
+    writeStoredProfileId("dev");
+    return "dev";
+  }
+  if (packaged && stored !== envProfile && profileIds().includes(envProfile)) {
     writeStoredProfileId(envProfile);
     return envProfile;
   }
@@ -203,9 +214,9 @@ async function orderReachableHosts(hosts, port) {
 function connectError(hosts, lastErr) {
   const list = hosts.join(", ");
   const detail = lastErr instanceof Error ? lastErr.message : String(lastErr);
-  return new Error(
-    `No hay SQL en ${list}. Si usa Desarrollo, abra Tailscale y reintente. (${detail})`,
-  );
+    return new Error(
+      `No hay SQL en ${list}. Verifique internet y firewall (puerto 1433). (${detail})`,
+    );
 }
 
 async function getPool() {
