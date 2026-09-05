@@ -26,9 +26,33 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Preparar config.env (solo producción, cualquier PC)
+        env:
+          BOCASOFT_INSTALLER: "1"
+          MSSQL_PROD_HOST: ${{ secrets.MSSQL_PROD_HOST }}
+          MSSQL_PROD_PORT: ${{ secrets.MSSQL_PROD_PORT }}
+          MSSQL_PROD_DATABASE: ${{ secrets.MSSQL_PROD_DATABASE }}
+          MSSQL_PROD_AUTH: ${{ secrets.MSSQL_PROD_AUTH }}
+          MSSQL_PROD_USER: ${{ secrets.MSSQL_PROD_USER }}
+          MSSQL_PROD_PASSWORD: ${{ secrets.MSSQL_PROD_PASSWORD }}
+          MSSQL_PROD_LABEL: Producción
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          APISPERU_TOKEN: ${{ secrets.APISPERU_TOKEN }}
+          RUCPE_API_KEY: ${{ secrets.RUCPE_API_KEY }}
+        run: node scripts/prepare-config-env.cjs --installer
       - name: Publicar instaladores en GitHub Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm run build
           npx electron-builder ${{ matrix.args }} --publish always
+      - name: Copiar lanzador Linux
+        if: runner.os == 'Linux'
+        run: |
+          cp -f scripts/run-intranet-ventas.sh release/Intranet-Ventas.sh || true
+          chmod +x release/Intranet-Ventas.sh release/*.AppImage 2>/dev/null || true
+          shopt -s nullglob
+          for f in release/*.AppImage; do
+            cp -f "$f" release/Intranet-Ventas.AppImage
+            break
+          done
