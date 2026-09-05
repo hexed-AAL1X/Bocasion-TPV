@@ -121,14 +121,9 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       ...server,
-      // Puerto fijo: Tauri espera http://localhost:5173
       port: 5173,
       strictPort: true,
     },
-    // No arrancar Electron cuando el comando viene de `tauri dev` / `tauri build`
-    plugins: [
-      react(),
-      ...(process.env.TAURI_ENV_PLATFORM || process.env.TAURI_CLI ? [] : [electronDev()]),
-    ],
+    plugins: [react(), electronDev()],
   };
 });
