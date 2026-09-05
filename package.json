@@ -15,18 +15,12 @@
     "dev:fresh": "rm -rf node_modules/.vite dist-electron && npm run dev:all",
     "build:api": "node server/build.mjs",
     "pack:api": "npm run build:api && mkdir -p release && npm pack --prefix server --pack-destination=release",
-    "pack:cpanel": "bash scripts/pack-cpanel.sh",
     "start:api": "npm run start --prefix server",
-    "catalog:gen": "python3 scripts/generate-product-catalog.py",
     "gen:boot-theme": "tsx scripts/gen-boot-theme.ts",
     "predev": "npm run gen:boot-theme",
     "build": "npm run gen:boot-theme && tsc && vite build",
     "build:desktop": "npm run build && electron-builder --linux AppImage tar.xz dir && cp -f scripts/run-intranet-ventas.sh release/Intranet-Ventas.sh && chmod +x release/Intranet-Ventas.sh release/*.AppImage release/linux-unpacked/bocasoft",
     "build:win": "npm run build && electron-builder --win",
-    "dev:tauri": "tauri dev",
-    "build:tauri": "tauri build",
-    "build:tauri:linux": "tauri build --bundles deb",
-    "build:tauri:win": "tauri build --bundles nsis",
     "pack:linux": "npm run build:desktop",
     "pack:win": "npm run build:win",
     "preview": "vite preview"
@@ -96,8 +90,6 @@
   "dependencies": {
     "@fontsource/geist-mono": "^5.2.8",
     "@fontsource/poppins": "^5.2.6",
-    "@tauri-apps/api": "^2.11.1",
-    "@tauri-apps/plugin-opener": "^2.5.4",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
@@ -109,7 +101,6 @@
     "react-dom": "^19.1.0"
   },
   "devDependencies": {
-    "@tauri-apps/cli": "^2.11.4",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.2",
     "@types/react": "^19.1.2",

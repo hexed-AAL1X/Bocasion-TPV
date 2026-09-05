@@ -1,10 +1,11 @@
 node_modules
 dist
 dist-electron
-src-tauri/target
 *.local
 .DS_Store
 .env
 server/dist
 release/
+build/
+*.tsbuildinfo
 .sql-profile.json

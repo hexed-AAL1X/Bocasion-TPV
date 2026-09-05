@@ -31,7 +31,6 @@ export type RibbonAction = {
 
 import { imageUrl } from "../utils/assetUrl";
 
-/** Iconos Vista unificados (shell32/imageres + Vista Business demo). Ver docs/ICONOS.md */
 const ribbonIcon = (id: string) => imageUrl(`ribbon/${id}.png`);
 
 export const inicioActions: RibbonAction[] = [

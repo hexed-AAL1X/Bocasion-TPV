@@ -1,4 +1,4 @@
-// Generado por: npm run catalog:gen — catálogo final (solo productos con grupo).
+// Catálogo de productos (solo ítems con grupo).
 export type Product = {
   code: string;
   description: string;
