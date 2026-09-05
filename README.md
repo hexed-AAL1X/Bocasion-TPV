@@ -11,7 +11,7 @@
 <!-- PROJECT LOGO -->
 <br>
 <div align="center">
-   <img src="assets/images/logo.png" alt="Logo Bocasión" width="220">
+   <img src="assets/images/logo.png" alt="Logo Bocasión" width="320">
    <h3 align="center">Intranet Ventas</h3>
    <p align="center">
      Aplicación de escritorio TPV para BOCASIÓN S.A.C.
