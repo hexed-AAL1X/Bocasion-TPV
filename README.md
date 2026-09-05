@@ -93,7 +93,7 @@ Incluye, entre otras funciones
 > |-----------|-------------|
 > | Sistema operativo | ![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white&color=black) ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black&color=black) |
 > | Entorno de desarrollo | ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white&color=black) ![Node 20+](https://img.shields.io/badge/20%2B-recomendado-black?style=for-the-badge) |
-> | Base de datos | ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white&color=black) ![Producción](https://img.shields.io/badge/Producción-0E7A0D?style=for-the-badge&color=black) ![Pruebas](https://img.shields.io/badge/Pruebas-0A66C2?style=for-the-badge&color=black) |
+> | Base de datos | ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white&color=black) |
 > | Red | ![Internet](https://img.shields.io/badge/Internet-5B5EA6?style=for-the-badge&logo=internetexplorer&logoColor=white&color=black) ![Red de sede](https://img.shields.io/badge/Red%20de%20sede-555555?style=for-the-badge&color=black) |
 
 > [!IMPORTANT]
