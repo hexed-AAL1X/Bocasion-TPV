@@ -56,7 +56,8 @@
 <img src="https://user-images.githubusercontent.com/73097560/115834477-dbab4500-a447-11eb-908a-139a6edaec5c.gif">
 
 <div align="center">
-  <img src="assets/images/apicon.png" alt="Icono Intranet Ventas" width="96">
+  <img src="assets/images/app-preview.png" alt="Vista de Intranet Ventas — Terminal Punto de Venta" width="900">
+  <p><em>Terminal punto de venta (TPV)</em></p>
 </div>
 
 **Intranet Ventas** es la aplicación de escritorio para cajas y puntos de venta de **BOCASIÓN S.A.C.** Permite operar el mostrador, emitir documentos y consultar información de clientes contra la base de datos de la empresa.
@@ -91,9 +92,9 @@ Incluye, entre otras funciones
 > | Requisito | Descripción |
 > |-----------|-------------|
 > | Sistema operativo | ![Windows](https://img.shields.io/badge/Windows-0078D6?style=for-the-badge&logo=windows&logoColor=white&color=black) ![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black&color=black) |
-> | Entorno de desarrollo | ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white&color=black) (recomendado 20+) |
-> | Base de datos | SQL Server Nava (producción o pruebas) |
-> | Red | Internet o red de sede según el entorno elegido |
+> | Entorno de desarrollo | ![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white&color=black) ![Node 20+](https://img.shields.io/badge/20%2B-recomendado-black?style=for-the-badge) |
+> | Base de datos | ![SQL Server](https://img.shields.io/badge/SQL%20Server-CC2927?style=for-the-badge&logo=microsoftsqlserver&logoColor=white&color=black) ![Producción](https://img.shields.io/badge/Producción-0E7A0D?style=for-the-badge&color=black) ![Pruebas](https://img.shields.io/badge/Pruebas-0A66C2?style=for-the-badge&color=black) |
+> | Red | ![Internet](https://img.shields.io/badge/Internet-5B5EA6?style=for-the-badge&logo=internetexplorer&logoColor=white&color=black) ![Red de sede](https://img.shields.io/badge/Red%20de%20sede-555555?style=for-the-badge&color=black) |
 
 > [!IMPORTANT]
 > En las cajas instaladas la app apunta a la base de datos de **producción**. El entorno de **pruebas** se usa en desarrollo técnico. No compartas el archivo `.env` ni contraseñas en el repositorio.
