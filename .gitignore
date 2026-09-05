@@ -1,11 +1,22 @@
 node_modules
 dist
 dist-electron
+build/
+src-tauri/target
 *.local
 .DS_Store
 .env
+.env.*
+!.env.example
 server/dist
 release/
-build/
-*.tsbuildinfo
 .sql-profile.json
+*.tsbuildinfo
+# Datos locales / exports (no van al repo ni al instalador)
+/*.xlsx
+/*.xls
+/*.csv
+/*.zip
+/*.rar
+awa.xlsx
+clientes-registro-*.csv

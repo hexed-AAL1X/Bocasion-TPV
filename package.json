@@ -1,6 +1,6 @@
 {
   "name": "bocasoft",
-  "version": "0.1.0",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "main": "electron/main.cjs",
@@ -15,12 +15,18 @@
     "dev:fresh": "rm -rf node_modules/.vite dist-electron && npm run dev:all",
     "build:api": "node server/build.mjs",
     "pack:api": "npm run build:api && mkdir -p release && npm pack --prefix server --pack-destination=release",
+    "pack:cpanel": "bash scripts/pack-cpanel.sh",
     "start:api": "npm run start --prefix server",
+    "catalog:gen": "python3 scripts/generate-product-catalog.py",
     "gen:boot-theme": "tsx scripts/gen-boot-theme.ts",
     "predev": "npm run gen:boot-theme",
     "build": "npm run gen:boot-theme && tsc && vite build",
-    "build:desktop": "npm run build && electron-builder --linux AppImage tar.xz dir && cp -f scripts/run-intranet-ventas.sh release/Intranet-Ventas.sh && chmod +x release/Intranet-Ventas.sh release/*.AppImage release/linux-unpacked/bocasoft",
-    "build:win": "npm run build && electron-builder --win",
+    "build:desktop": "BOCASOFT_INSTALLER=1 node scripts/prepare-config-env.cjs && npm run build && electron-builder --linux AppImage && cp -f scripts/run-intranet-ventas.sh release/Intranet-Ventas.sh && chmod +x release/Intranet-Ventas.sh release/*.AppImage && (cp -f release/*.AppImage release/Intranet-Ventas.AppImage 2>/dev/null || true)",
+    "build:win": "BOCASOFT_INSTALLER=1 node scripts/prepare-config-env.cjs && npm run build && electron-builder --win",
+    "dev:tauri": "tauri dev",
+    "build:tauri": "tauri build",
+    "build:tauri:linux": "tauri build --bundles deb",
+    "build:tauri:win": "tauri build --bundles nsis",
     "pack:linux": "npm run build:desktop",
     "pack:win": "npm run build:win",
     "preview": "vite preview"
@@ -32,6 +38,7 @@
       "output": "release"
     },
     "afterPack": "./scripts/afterPack.cjs",
+    "asar": true,
     "compression": "maximum",
     "electronLanguages": [
       "es",
@@ -40,15 +47,21 @@
     ],
     "files": [
       "dist/**/*",
-      "electron/**/*",
+      "electron/**/*.cjs",
       "package.json",
-      "!**/node_modules/**"
+      "!**/node_modules/**/{CHANGELOG.md,README.md,README,readme.md,LICENSE,LICENSE.txt,*.map,*.d.ts,*.ts}",
+      "!**/node_modules/**/dist/{browser,esm,es}/**",
+      "!**/node_modules/**/{test,tests,docs,examples,coverage,__tests__}/**"
+    ],
+    "extraResources": [
+      {
+        "from": "build/config.env",
+        "to": "config.env"
+      }
     ],
     "linux": {
       "target": [
-        "AppImage",
-        "tar.xz",
-        "dir"
+        "AppImage"
       ],
       "category": "Office",
       "icon": "public/images/apicon.png",
@@ -60,12 +73,6 @@
       "target": [
         {
           "target": "nsis",
-          "arch": [
-            "x64"
-          ]
-        },
-        {
-          "target": "portable",
           "arch": [
             "x64"
           ]
@@ -84,31 +91,32 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "Intranet Ventas"
+      "shortcutName": "Intranet Ventas",
+      "deleteAppDataOnUninstall": false,
+      "runAfterFinish": true,
+      "perMachine": false,
+      "allowElevation": true
     }
   },
   "dependencies": {
-    "@fontsource/geist-mono": "^5.2.8",
-    "@fontsource/poppins": "^5.2.6",
-    "cors": "^2.8.5",
     "dotenv": "^16.5.0",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.5.2",
-    "helmet": "^8.2.0",
-    "mssql": "^11.0.1",
-    "next-themes": "^0.4.6",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "mssql": "^11.0.1"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.18",
-    "@types/express": "^5.0.2",
+    "@fontsource/geist-mono": "^5.2.8",
+    "@fontsource/poppins": "^5.2.6",
+    "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/cli": "^2.11.4",
+    "@tauri-apps/plugin-opener": "^2.5.4",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.4.1",
     "concurrently": "^9.1.2",
     "electron": "^36.3.1",
     "electron-builder": "^26.15.3",
+    "next-themes": "^0.4.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3",
     "vite": "^6.3.5",

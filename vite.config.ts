@@ -55,6 +55,10 @@ function electronDev(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
+  const pkg = JSON.parse(fs.readFileSync(path.resolve("package.json"), "utf8")) as {
+    version?: string;
+  };
+  const appVersion = String(pkg.version ?? "0.0.0");
   const remoteApi = (env.VITE_API_BASE_URL ?? "").trim();
   const apiPort = env.API_PORT || "3001";
   const apiTarget = `http://localhost:${apiPort}`;
@@ -112,6 +116,9 @@ export default defineConfig(({ mode }) => {
   return {
     base: "./",
     clearScreen: false,
+    define: {
+      "import.meta.env.VITE_APP_VERSION": JSON.stringify(appVersion),
+    },
     server: {
       ...server,
       port: 5173,

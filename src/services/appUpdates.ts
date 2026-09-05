@@ -63,8 +63,19 @@ function pickAsset(assets: GithubRelease["assets"]) {
   return list.find((asset) => /\.AppImage$/i.test(asset.name));
 }
 
+async function resolveCurrentVersion(): Promise<string> {
+  try {
+    const data = await window.bocasoft?.getAppVersion?.();
+    const next = String(data?.version ?? "").trim();
+    if (next) return next;
+  } catch {
+    /* fallback */
+  }
+  return APP_VERSION;
+}
+
 async function checkViaGithubApi(): Promise<UpdateCheckResult> {
-  const current = APP_VERSION;
+  const current = await resolveCurrentVersion();
   const slug = repoSlug();
   const url = `https://api.github.com/repos/${slug}/releases/latest`;
   const json = (await window.bocasoft?.fetchJsonUrl?.(url)) as GithubRelease | null;
@@ -112,7 +123,7 @@ export async function checkForProductUpdates(): Promise<UpdateCheckResult> {
   } catch {
     return {
       status: "error",
-      current: APP_VERSION,
+      current: await resolveCurrentVersion(),
       message: "No se pudo consultar GitHub. Revisa la conexión.",
     };
   }

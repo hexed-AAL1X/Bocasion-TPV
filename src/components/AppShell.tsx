@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { RibbonTabId } from "../data/ribbon";
 import type { SaleLine } from "./POSTerminal/POSTerminal";
 import type { DocTab } from "./DocumentTabs";
@@ -9,6 +9,11 @@ import {
   normalizeDocument,
 } from "../services/identity";
 import { openAppDialog, getOpenAppDialogs } from "../services/appDialogs";
+import {
+  clearWorkspaceTabFocus,
+  closeWorkspaceTab,
+  useWorkspaceTabs,
+} from "../services/workspaceTabs";
 import { Ribbon } from "./Ribbon/Ribbon";
 import { ArchivoPanel } from "./Ribbon/ArchivoPanel";
 import { DocumentTabs } from "./DocumentTabs";
@@ -34,6 +39,10 @@ import { collectOpenWindowLabels } from "../utils/openWindows";
 
 import styles from "./AppShell.module.css";
 
+const ProductosPadronPanel = lazy(() =>
+  import("./ProductosDialog/ProductosDialog").then((m) => ({ default: m.ProductosPadronPanel })),
+);
+
 type Props = {
   vendor: Vendor;
   onChangeVendor: (vendor: Vendor) => void;
@@ -53,6 +62,28 @@ export function AppShell({ vendor, onChangeVendor, onExit }: Props) {
 
   const [tpvTabs, setTpvTabs] = useState<string[]>(["tpv-1"]);
   const [activeDocTab, setActiveDocTab] = useState<DocTab>("tpv-1");
+  const { tabs: workspaceTabs, focusId: workspaceFocusId } = useWorkspaceTabs();
+  const padronMounted = workspaceTabs.some((tab) => tab.id === "padron-items");
+  const padronActive = activeDocTab === "padron-items";
+
+  useEffect(() => {
+    if (!workspaceFocusId) return;
+    setActiveDocTab(workspaceFocusId);
+    clearWorkspaceTabFocus();
+  }, [workspaceFocusId]);
+
+  const handleCloseWorkspaceTab = useCallback(
+    (id: string) => {
+      closeWorkspaceTab(id);
+      if (activeDocTab !== id) return;
+      setActiveDocTab((prev) => {
+        if (prev !== id) return prev;
+        if (tpvTabs.length > 0) return tpvTabs[tpvTabs.length - 1];
+        return "task";
+      });
+    },
+    [activeDocTab, tpvTabs],
+  );
   const [lines, setLines] = useState<SaleLine[]>([]);
   const [exitingLineIds, setExitingLineIds] = useState<string[]>([]);
   const [selectedLineId, setSelectedLineId] = useState<string | null>(null);
@@ -229,17 +260,21 @@ export function AppShell({ vendor, onChangeVendor, onExit }: Props) {
           nombre && (isDni || isRuc)
             ? formatClienteLabel(nombre, isDni ? "dni" : "ruc", docDigits)
             : "Venta Contado";
-        const sale = registerSale({
-          docType,
-          paymentMethod: method,
-          clienteLabel,
-          vendedor: vendor.usuario,
-          lines,
-          total,
-          tipoVenta: saleType,
-          payment,
-        });
-        void persistSaleToNava(sale, vendor.code);
+        void (async () => {
+          const { syncDocSequencesFromNava } = await import("../services/navaDocs");
+          await syncDocSequencesFromNava();
+          const sale = registerSale({
+            docType,
+            paymentMethod: method,
+            clienteLabel,
+            vendedor: vendor.usuario,
+            lines,
+            total,
+            tipoVenta: saleType,
+            payment,
+          });
+          await persistSaleToNava(sale, vendor.code);
+        })();
       }
       setShowPayment(false);
       setLines([]);
@@ -496,14 +531,28 @@ export function AppShell({ vendor, onChangeVendor, onExit }: Props) {
               <DocumentTabs
                 activeTab={activeDocTab}
                 tpvTabs={tpvTabs}
+                workspaceTabs={workspaceTabs}
                 onTabChange={setActiveDocTab}
                 onAddTpv={handleAddTpv}
                 onCloseTpv={handleCloseTpv}
+                onCloseWorkspaceTab={handleCloseWorkspaceTab}
               />
               <div className={styles.workspace}>
-                {activeDocTab === "task" ? (
-                  <TaskPanel vendor={vendor} />
-                ) : (
+                {activeDocTab === "task" ? <TaskPanel vendor={vendor} /> : null}
+                {padronMounted ? (
+                  <div
+                    className={styles.padronHost}
+                    hidden={!padronActive}
+                    aria-hidden={!padronActive}
+                  >
+                    <Suspense
+                      fallback={<div className={styles.padronLoading}>Cargando Padrón de Items…</div>}
+                    >
+                      <ProductosPadronPanel />
+                    </Suspense>
+                  </div>
+                ) : null}
+                {activeDocTab !== "task" && !padronActive ? (
                   <>
                     <POSTerminal
                       lines={lines}
@@ -554,13 +603,13 @@ export function AppShell({ vendor, onChangeVendor, onExit }: Props) {
                       hasProducts={lines.length > 0}
                     />
                   </>
-                )}
+                ) : null}
               </div>
             </>
           )}
         </main>
 
-        {!isArchivoView && activeDocTab !== "task" ? (
+        {!isArchivoView && activeDocTab !== "task" && activeDocTab !== "padron-items" ? (
           <div className={styles.otherFuncCol}>
             <OtherFunctionsMenu
               open={showOtherFunctions}

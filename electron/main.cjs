@@ -7,7 +7,7 @@ const os = require("node:os");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 const { loadLogoEscPos, resolveLogoPath } = require("./thermalLogoEscPos.cjs");
-const { checkForUpdates, downloadAndInstall, autoCheckOnStartup } = require("./appUpdater.cjs");
+const { checkForUpdates, downloadAndInstall, autoCheckOnStartup, applyPendingUpdateOnStartup } = require("./appUpdater.cjs");
 const { mapPrinterInfo } = require("./printerInfo.cjs");
 const { resolvePrinterStatus } = require("./printerStatus.cjs");
 
@@ -33,13 +33,9 @@ if (!gotSingleInstanceLock) {
   });
 }
 
-// Cargar .env del proyecto (RUCPE_API_KEY / APISPERU_TOKEN) sin exponerlos al renderer.
+// Config: fusiona resources/config.env (instalada) + .env (dev); userData gana por clave.
 try {
-  const dotenv = require("dotenv");
-  const envPath = path.join(__dirname, "..", ".env");
-  if (fsSync.existsSync(envPath)) {
-    dotenv.config({ path: envPath });
-  }
+  require("./loadAppEnv.cjs").loadAppEnv({ override: true });
 } catch {
   /* dotenv opcional */
 }
@@ -1792,6 +1788,10 @@ ipcMain.handle("check-for-updates", async () => {
   return checkForUpdates();
 });
 
+ipcMain.handle("get-app-version", async () => {
+  return { version: app.getVersion() };
+});
+
 ipcMain.handle("install-update", async (event, payload) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   return downloadAndInstall(payload ?? {}, win);
@@ -2104,6 +2104,15 @@ ipcMain.handle("insert-nava-sale", async (_event, payload) => {
   }
 });
 
+ipcMain.handle("peek-nava-doc-series", async () => {
+  const { peekNavaDocSeries } = require("./navaSql.cjs");
+  try {
+    return await peekNavaDocSeries();
+  } catch (err) {
+    throw new Error(err instanceof Error ? err.message : String(err));
+  }
+});
+
 ipcMain.handle("warmup-http", async () => {
   const urls = [
     `${dniApiBase()}/`,
@@ -2382,8 +2391,16 @@ function createWindow() {
   loadMainWindowContent(win);
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   if (!gotSingleInstanceLock) return;
+
+  // Si hay update pendiente, reemplaza el binario y relanza (no abrir UI vieja).
+  try {
+    const applied = await applyPendingUpdateOnStartup();
+    if (applied) return;
+  } catch (err) {
+    console.error("[updater] pending update:", err);
+  }
 
   session.defaultSession.setPermissionRequestHandler((_wc, permission, callback) => {
     if (permission === "geolocation") {

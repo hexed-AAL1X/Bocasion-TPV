@@ -4,6 +4,8 @@ interface ImportMetaEnv {
   readonly VITE_API_BASE_URL?: string;
   /** Clave API de https://consulta.rucpe.com/api (DNI 8 / RUC 11). */
   readonly VITE_RUCPE_API_KEY?: string;
+  /** Versión de package.json inyectada en build. */
+  readonly VITE_APP_VERSION?: string;
 }
 
 interface ImportMeta {
@@ -213,6 +215,10 @@ interface BocasoftAPI {
       dscto?: number;
     }>;
   }) => Promise<{ ndocu: string; cdocu: string; fecha: string }>;
+  peekNavaDocSeries?: () => Promise<{
+    boleta: { serie: string; last: string; lastNum: number; next: string; nextNum: number };
+    factura: { serie: string; last: string; lastNum: number; next: string; nextNum: number };
+  }>;
   getPrinters?: () => Promise<PrinterInfoLite[]>;
   printReport?: (options: PrintReportOptions) => Promise<void>;
   getDefaultExportDirectory?: (kind: string) => Promise<string>;
@@ -256,7 +262,14 @@ interface BocasoftAPI {
     downloadUrl?: string;
     fileName?: string;
     latest?: string;
-  }) => Promise<{ downloaded?: boolean; applied?: boolean; opened?: boolean; path?: string }>;
+  }) => Promise<{
+    downloaded?: boolean;
+    applied?: boolean;
+    opened?: boolean;
+    pending?: boolean;
+    path?: string;
+  }>;
+  getAppVersion?: () => Promise<{ version: string }>;
   onUpdateDownloadProgress?: (
     callback: (payload: { percent: number }) => void,
   ) => () => void;

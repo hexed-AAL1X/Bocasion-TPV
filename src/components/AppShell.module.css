@@ -68,6 +68,25 @@
   background: var(--card);
 }
 
+.padronHost {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+}
+
+.padronHost[hidden] {
+  display: none !important;
+}
+
+.padronLoading {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  color: var(--text-dim);
+}
+
 .moduleWorkspace {
   display: flex;
   flex: 1;

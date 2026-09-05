@@ -16,7 +16,8 @@ export const THERMAL_RECEIPT_HEADER_LINES = [
   "DPTO. 201",
 ] as const;
 export const COPYRIGHT_YEAR_START = 2018;
-export const APP_VERSION = "0.1.0";
+/** Inyectada en build desde package.json (vite); en Electron preferir getAppVersion(). */
+export const APP_VERSION = String(import.meta.env.VITE_APP_VERSION ?? "0.0.0");
 export const APP_DEFAULT_DIR = "C:\\bocasoft\\intranet\\";
 export const APP_PRODUCT_ID = "B7A3F2E91C04";
 export const APP_WINDOW_TITLE = `${APP_NAME} — ${COMPANY_NAME}`;

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { APP_LOGO_GRAY_SRC } from "../config/brand";
+import type { WorkspaceTab } from "../services/workspaceTabs";
 import styles from "./DocumentTabs.module.css";
 
 export type DocTab = string;
@@ -7,9 +8,11 @@ export type DocTab = string;
 type Props = {
   activeTab: DocTab;
   tpvTabs: string[];
+  workspaceTabs?: WorkspaceTab[];
   onTabChange: (tab: DocTab) => void;
   onAddTpv: () => void;
   onCloseTpv: (id: string) => void;
+  onCloseWorkspaceTab?: (id: string) => void;
 };
 
 const TaskIcon = () => (
@@ -32,7 +35,15 @@ const PlusIcon = () => (
   </svg>
 );
 
-export function DocumentTabs({ activeTab, tpvTabs, onTabChange, onAddTpv, onCloseTpv }: Props) {
+export function DocumentTabs({
+  activeTab,
+  tpvTabs,
+  workspaceTabs = [],
+  onTabChange,
+  onAddTpv,
+  onCloseTpv,
+  onCloseWorkspaceTab,
+}: Props) {
   const stripRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,12 +51,11 @@ export function DocumentTabs({ activeTab, tpvTabs, onTabChange, onAddTpv, onClos
     if (!strip) return;
     const active = strip.querySelector<HTMLElement>('[role="tab"][aria-selected="true"]');
     active?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  }, [activeTab, tpvTabs.length]);
+  }, [activeTab, tpvTabs.length, workspaceTabs.length]);
 
   return (
     <div className={styles.bar} role="tablist" aria-label="Documentos abiertos">
       <div className={styles.tabStrip} ref={stripRef}>
-        {/* Task tab: icon only, small */}
         <button
           type="button"
           className={`${activeTab === "task" ? styles.tabActive : styles.tab} ${styles.tabSmall}`}
@@ -57,7 +67,6 @@ export function DocumentTabs({ activeTab, tpvTabs, onTabChange, onAddTpv, onClos
           <TaskIcon />
         </button>
 
-        {/* TPV tabs */}
         {tpvTabs.map((id, i) => (
           <button
             key={id}
@@ -82,16 +91,44 @@ export function DocumentTabs({ activeTab, tpvTabs, onTabChange, onAddTpv, onClos
             </span>
             <span
               className={styles.closeBtn}
-              onClick={(e) => { e.stopPropagation(); onCloseTpv(id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onCloseTpv(id);
+              }}
               title="Cerrar pestaña"
             >
               <CloseIcon />
             </span>
           </button>
         ))}
+
+        {workspaceTabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            className={activeTab === tab.id ? styles.tabActive : styles.tab}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            title={tab.label}
+            onClick={() => onTabChange(tab.id)}
+          >
+            <span className={styles.tabLabel}>{tab.label}</span>
+            {onCloseWorkspaceTab ? (
+              <span
+                className={styles.closeBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onCloseWorkspaceTab(tab.id);
+                }}
+                title="Cerrar pestaña"
+              >
+                <CloseIcon />
+              </span>
+            ) : null}
+          </button>
+        ))}
       </div>
 
-      {/* Add new TPV tab — siempre visible a la derecha */}
       <button
         type="button"
         className={styles.addBtn}

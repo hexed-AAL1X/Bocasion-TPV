@@ -86,7 +86,7 @@ export function OpcionesView() {
             Servidor SQL
           </h3>
           <p className={styles.subtitle}>
-            Desarrollo: WIN-C6EKJGJR3FH. Producción: EC2AMAZ-O5TI2KP. El cambio aplica de inmediato.
+            Etapa desarrollo: SQL WIN-C6EKJGJR3FH (IP pública). Cualquier PC con internet; Tailscale opcional en oficina.
           </p>
           <div className={styles.sqlGrid} role="radiogroup" aria-label="Servidor SQL">
             {sqlProfiles.map((profile) => {

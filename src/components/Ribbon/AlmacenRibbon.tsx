@@ -5,6 +5,7 @@ import {
   almacenKardex,
   almacenStockConsolidado,
 } from "../../data/almacenRibbon";
+import { openPadronItemsTab } from "../../services/workspaceTabs";
 import { ActionGroup, LargeAction, MenuAction } from "./RibbonActions";
 import { RibbonToolbar } from "./RibbonToolbar";
 import styles from "./Ribbon.module.css";
@@ -14,7 +15,11 @@ export function AlmacenRibbon() {
     <RibbonToolbar>
       <ActionGroup label="Artículos">
         {almacenArticulos.map((action) => (
-          <LargeAction key={action.id} action={action} />
+          <LargeAction
+            key={action.id}
+            action={action}
+            onClick={action.id === "productos" ? () => openPadronItemsTab() : undefined}
+          />
         ))}
       </ActionGroup>
 

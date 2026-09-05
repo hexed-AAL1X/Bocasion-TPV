@@ -381,7 +381,14 @@ const PRODUCT_GROUPS = [...PRODUCTS_BY_GROUP.keys()].sort((a, b) => a.localeComp
 export function lookupProduct(code: string): Product | null {
   const trimmed = code.trim();
   if (!trimmed) return null;
-  return CODE_LOOKUP.get(trimmed) ?? CODE_LOOKUP.get(trimmed.toLowerCase()) ?? null;
+  const direct = CODE_LOOKUP.get(trimmed) ?? CODE_LOOKUP.get(trimmed.toLowerCase());
+  if (direct) return direct;
+  // SQL a veces guarda el código con ceros a la izquierda (p. ej. 00000001029).
+  if (/^0+\d+$/.test(trimmed)) {
+    const stripped = trimmed.replace(/^0+/, "") || "0";
+    return CODE_LOOKUP.get(stripped) ?? CODE_LOOKUP.get(stripped.toLowerCase()) ?? null;
+  }
+  return null;
 }
 
 export function searchProducts(query: string, limit = SEARCH_MAX_RESULTS): Product[] {

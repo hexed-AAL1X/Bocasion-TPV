@@ -1,6 +1,7 @@
 import type { RibbonTabId } from "../../data/ribbon";
 import { inicioActions } from "../../data/ribbon";
 import { openAppDialog } from "../../services/appDialogs";
+import { openPadronItemsTab } from "../../services/workspaceTabs";
 import { EntidadesRibbon } from "./EntidadesRibbon";
 import { AlmacenRibbon } from "./AlmacenRibbon";
 import { LogisticaRibbon } from "./LogisticaRibbon";
@@ -52,6 +53,7 @@ export function RibbonToolbarContent({ tab, onEntidadesAction }: Props) {
                         if (action.id === "boleta") openAppDialog("navaBoletas");
                         else if (action.id === "factura") openAppDialog("navaFacturas");
                         else if (action.id === "comanda") openAppDialog("comanda");
+                        else if (action.id === "productos") openPadronItemsTab();
                       }}
                     >
                       <span className={styles.actionIcon} aria-hidden>

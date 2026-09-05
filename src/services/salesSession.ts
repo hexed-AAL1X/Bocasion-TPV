@@ -159,14 +159,34 @@ function restoreSequencesFromSales(list: CompletedSale[]): void {
   notaSeq = NOTA_START;
 
   for (const sale of list) {
-    if (sale.docType === "boleta") {
-      boletaSeq = Math.max(boletaSeq, sale.docNumber + 1);
-    } else if (sale.docType === "factura") {
-      facturaSeq = Math.max(facturaSeq, sale.docNumber + 1);
+    const fromRef = sale.docRef
+      ? Number(String(sale.docRef).replace(/\D/g, "").slice(-7)) || 0
+      : 0;
+    const num = fromRef || sale.docNumber;
+    if (sale.docType === "factura") {
+      facturaSeq = Math.max(facturaSeq, num + 1);
+    } else if (sale.docType === "nota") {
+      notaSeq = Math.max(notaSeq, num + 1);
     } else {
-      notaSeq = Math.max(notaSeq, sale.docNumber + 1);
+      boletaSeq = Math.max(boletaSeq, num + 1);
     }
   }
+}
+
+/** Alinea correlativos locales con el último número de SQL (siguiente a emitir). */
+export function syncDocSequencesFromDb(boletaNext: number, facturaNext: number): void {
+  if (Number.isFinite(boletaNext) && boletaNext > 0) {
+    boletaSeq = Math.max(boletaSeq, Math.floor(boletaNext));
+  }
+  if (Number.isFinite(facturaNext) && facturaNext > 0) {
+    facturaSeq = Math.max(facturaSeq, Math.floor(facturaNext));
+  }
+}
+
+export function getNextDocNumberPreview(type: SaleDocType): number {
+  if (type === "factura") return facturaSeq;
+  if (type === "nota") return notaSeq;
+  return boletaSeq;
 }
 
 const salesListeners = new Set<() => void>();
@@ -196,9 +216,17 @@ function persistLiveSession(): void {
 
 export function updateSaleDocRef(saleId: string, docRef: string): void {
   const num = Number(docRef.replace(/\D/g, "").slice(-7)) || 0;
-  sales = sales.map((sale) =>
-    sale.id === saleId ? { ...sale, docRef, docNumber: num || sale.docNumber } : sale,
-  );
+  let docType: SaleDocType | null = null;
+  sales = sales.map((sale) => {
+    if (sale.id !== saleId) return sale;
+    docType = sale.docType;
+    return { ...sale, docRef, docNumber: num || sale.docNumber };
+  });
+  if (num > 0) {
+    if (docType === "factura") facturaSeq = Math.max(facturaSeq, num + 1);
+    else if (docType === "nota") notaSeq = Math.max(notaSeq, num + 1);
+    else boletaSeq = Math.max(boletaSeq, num + 1);
+  }
   persistLiveSession();
 }
 
