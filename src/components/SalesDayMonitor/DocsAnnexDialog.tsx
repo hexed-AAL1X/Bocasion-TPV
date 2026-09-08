@@ -17,6 +17,8 @@ import type { DocsAnnexPrintData } from "../../utils/buildDocsAnnexPrintPreview"
 import { useAppDialogClose } from "../AppDialog/useAppDialogClose";
 import { toggleWithWindowAnimation } from "../../utils/windowMaximizeAnimation";
 import styles from "./DocsAnnexDialog.module.css";
+import { TitleMaximizeIcon } from "../shared/dialogIcons";
+
 
 const PaymentDialog = lazy(() =>
   import("../PaymentDialog/PaymentDialog").then((m) => ({ default: m.PaymentDialog })),
@@ -26,23 +28,6 @@ const PrintPropertiesDialog = lazy(() =>
     default: m.PrintPropertiesDialog,
   })),
 );
-
-function TitleMaximizeIcon({ restore }: { restore?: boolean }) {
-  if (restore) {
-    return (
-      <svg viewBox="0 0 10 10" width={10} height={10} aria-hidden>
-        <rect x="0.5" y="2.5" width="6" height="6" fill="#9ab8d0" stroke="#1a1a1a" strokeWidth="0.9" />
-        <rect x="3.5" y="0.5" width="6" height="6" fill="#d8e8f8" stroke="#1a1a1a" strokeWidth="0.9" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg viewBox="0 0 10 10" width={10} height={10} aria-hidden>
-      <rect x="1.25" y="1.25" width="7.5" height="7.5" fill="none" stroke="#1a1a1a" strokeWidth="1.25" />
-    </svg>
-  );
-}
 
 export type DocsAnnexMode = "default" | "payment-edit";
 
